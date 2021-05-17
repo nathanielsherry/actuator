@@ -8,13 +8,13 @@ def parse(action_string):
     action = None
     if name == "systemd":
         config = util.read_args_kv(config)
-        action = SystemdToggle(config['service'])
+        action = SystemdToggle(config)
     elif name == "shell":
         config = util.read_args_list(config)
-        action = ShellRunner(config[0], config[1:])
+        action = ShellRunner(config)
     elif name == "echo":
         config = util.read_args_kv(config)
-        action = EchoToggle(true_msg=config['true'], false_msg=config['false'])
+        action = EchoToggle(config)
     
     return action
     
@@ -25,38 +25,42 @@ class Action(util.BaseClass):
         raise Exception("Unimplemented")
 
 class Toggle(Action):
-    def perform(self, state):
+    def perform(self, **kwargs):
+        return self.toggle(kwargs['state'])
+    def toggle(self, state):
         raise Exception("Unimplemented")
 
 class Runner(Action):
-    def perform(self):
+    def perform(self, **kwargs):
+        self.run()
+    def run(self):
         raise Exception("Unimplemented")
 
 
 
 #Runs an arbitrary shell command on activation
 class ShellRunner(Runner):
-    def __init__(self, execpath, args):
-        self._exec = execpath
-        self._args = args
+    def __init__(self, config):
+        self._exec = config[0]
+        self._args = config[1:]
 
-    def perform(self):
+    def run(self):
         import subprocess
-        subprocess.run([execpath] + args)
+        subprocess.run([self._exec] + self._args)
         
         
 class SystemdToggle(Toggle):
-    def __init__(self, service):
-        self._service = service
+    def __init__(self, config):
+        self._service = config['service']
         
-    def perform(self, state):
+    def toggle(self, state):
         subprocess.run(["systemctl", "start" if boolean else "stop", self._service])
         
         
 class EchoToggle(Toggle):
-    def __init__(self, true_msg, false_msg):
-        self._true_msg = true_msg
-        self._false_msg = false_msg
+    def __init__(self, config):
+        self._true_msg = config['true']
+        self._false_msg = config['false']
         
-    def perform(self, state):
+    def toggle(self, state):
         log.info(self._true_msg if state else self._false_msg)
