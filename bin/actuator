@@ -9,23 +9,24 @@ from actuator import tester, monitor, action
 
 if __name__ == "__main__":
         
-    if len(sys.argv) <= 2:
-        log.error("Expected: <action>[:key=value,... | value,...] <command>[:key=value,... | value,...] ...")
+    if len(sys.argv) <= 3:
+        log.error("Expected: <monitor>[:key=value,... | value,...] <action>[:key=value,... | value,...] <test>[:key=value,... | value,...] ...")
         sys.exit(1)
 
+
     #parse action string
-    act = action.parse(sys.argv[1])
+    act = action.parse(sys.argv[2])
     if not act:
         log.error("Action not recognised")
     
     #parse test string(s)
-    tests = [tester.parse(a) for a in sys.argv[2:]]
+    tests = [tester.parse(a) for a in sys.argv[3:]]
     if not tests:
         log.error("Command not recognised")
         sys.exit(2)
     test = tester.AllTester(tests)
 
-    #construct monitor    
-    lockmon = monitor.PollMonitor(test, act, always=True)
-    lockmon.start()
+    #construct monitor
+    mon = monitor.parse(test, act, sys.argv[1])
+    mon.start()
 

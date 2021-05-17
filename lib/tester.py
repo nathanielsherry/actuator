@@ -7,7 +7,7 @@ from actuator import log, util
 
 
 def parse(arg):
-    command, config = arg.split(":")
+    command, config = arg.split(":", maxsplit=1)
     test = None
     if command == "hourly":
         config = util.read_args_kv(config)

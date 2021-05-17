@@ -21,6 +21,11 @@ def get_url(url):
         raise Exception("Received status {}".format(rc))
     return result.text
 
+def parse_bool(s):
+    if s.lower() in ['true', 'yes', 'on']: return True
+    if s.lower() in ['false', 'no', 'off']: return False
+    raise Exception("Could not parse {} as boolean".format(s))
+
 class BaseClass:
     
     @property
