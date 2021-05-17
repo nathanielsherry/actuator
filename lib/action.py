@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import log, util
+from actuator import log, util
 
 def parse(action_string):
     name, config = action_string.split(':', maxsplit=1)

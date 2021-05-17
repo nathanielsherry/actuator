@@ -1,6 +1,6 @@
 import time
 import subprocess
-import log, util
+from actuator import log, util
 
 
 
@@ -9,7 +9,7 @@ import log, util
 def parse(arg):
     command, config = arg.split(":")
     test = None
-    if command == "nighttime":
+    if command == "hourly":
         config = util.read_args_kv(config)
         test = TimeTester(config)
     elif command == "locked":
@@ -31,6 +31,7 @@ def parse(arg):
     return test
 
 
+
 #interface
 class Tester(util.BaseClass):
     def __init__(self):
@@ -47,7 +48,7 @@ class Tester(util.BaseClass):
     
         
 
-class AndTester(Tester):
+class AllTester(Tester):
     def __init__(self, tests):
         if any([t == None for t in tests]): 
             raise Exception("Test cannot be None")
@@ -61,7 +62,23 @@ class AndTester(Tester):
     @property
     def value(self):
         return all([t.value for t in self._tests])
+
+
+class AnyTester(Tester):
+    def __init__(self, tests):
+        if any([t == None for t in tests]): 
+            raise Exception("Test cannot be None")
+        self._tests = tests
+        
+    @property
+    def delay(self): 
+        return min([t.delay for t in self._tests])
     
+    #return a boolean
+    @property
+    def value(self):
+        return any([t.value for t in self._tests])
+
 
 #Simple tester that takes a function and params
 class FnTester(Tester):
@@ -109,6 +126,8 @@ class JitterlessTester(Tester):
 
 class CachedTester(Tester):
     def __init__(self, inner):
+        if not inner:
+            raise Exception("Inner cannot be None")
         self._inner = inner
         self._last_time = 0
         self._last_value = None

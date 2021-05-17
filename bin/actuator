@@ -4,7 +4,7 @@ import subprocess
 import time
 import sys
 
-import tester, monitor, action
+from actuator import tester, monitor, action
 
 
 if __name__ == "__main__":
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     if not tests:
         log.error("Command not recognised")
         sys.exit(2)
-    test = tester.AndTester(tests)
+    test = tester.AllTester(tests)
 
     #construct monitor    
     lockmon = monitor.PollMonitor(test, act, always=True)

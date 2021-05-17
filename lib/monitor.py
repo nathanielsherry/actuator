@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import time
-import log, util
+from actuator import log, util
 
 class Monitor(util.BaseClass):
     def start(self):
