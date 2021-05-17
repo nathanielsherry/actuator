@@ -63,6 +63,9 @@ class AllTester(Tester):
     def value(self):
         return all([t.value for t in self._tests])
 
+    @property
+    def name(self): return "All:[{}]".format(",".join([t.name for t in self._tests]))
+
 
 class AnyTester(Tester):
     def __init__(self, tests):
@@ -78,6 +81,9 @@ class AnyTester(Tester):
     @property
     def value(self):
         return any([t.value for t in self._tests])
+        
+    @property
+    def name(self): return "Any:[{}]".format(",".join([t.name for t in self._tests]))
 
 
 #Simple tester that takes a function and params
@@ -123,6 +129,8 @@ class JitterlessTester(Tester):
             
         return self._state
 
+    @property
+    def name(self): return "Jitterless:{}".format(self._inner.name)
 
 class CachedTester(Tester):
     def __init__(self, inner):
@@ -145,6 +153,9 @@ class CachedTester(Tester):
             self._last_value = self._inner.value
             
         return self._last_value
+    
+    @property
+    def name(self): return "Cached:{}".format(self._inner.name)
 
 
 
@@ -268,5 +279,4 @@ class WeatherTester(Tester):
             
         return True
         
-            
 

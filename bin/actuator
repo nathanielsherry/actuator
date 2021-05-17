@@ -24,7 +24,10 @@ if __name__ == "__main__":
     if not tests:
         log.error("Command not recognised")
         sys.exit(2)
-    test = tester.AllTester(tests)
+    if len(tests) > 1:
+        test = tester.AllTester(tests)
+    else:
+        test = tests[0]
 
     #construct monitor
     mon = monitor.parse(test, act, sys.argv[1])
