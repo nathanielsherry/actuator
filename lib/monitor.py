@@ -5,7 +5,11 @@ from actuator import log, util
 
 
 def parse(tester, action, arg):
-    name, config = arg.split(":", maxsplit=1)
+    parts = arg.split(":", maxsplit=1)
+    name = parts[0]
+    config = None
+    if len(parts) >= 2:
+        config = parts[1]
     
     mon = None
     if name == "poll":
@@ -26,16 +30,16 @@ class PollMonitor(Monitor):
     def __init__(self, tester, action, config):
         self._tester = tester
         self._action = action
-        self._always_change = util.parse_bool(config['always'])
+        self._always_change = util.parse_bool(config.get('always', 'false'))
         
     def start(self):
         log.info("Starting {name} with test {test} and action {action}".format(name=self.name, test=self._tester, action=self._action))
         last_state = None
-        new_state = False
+        new_state = None
         while True:
             new_state = self._tester.value
             if new_state != last_state or self._always_change == True:
-                log.info("{name} yields {state}, running action.".format(name=self.name, state=new_state))
+                log.info("{name} yields '{state}' ({result}), running action.".format(name=self.name, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
                 self._action.perform(state=new_state)
                 last_state = new_state
             time.sleep(min(10, self._tester.delay))

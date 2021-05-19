@@ -25,6 +25,9 @@ def parse(arg):
     elif command == "weather":
         config = util.read_args_kv(config)
         test = WeatherTester(config)
+    elif command == "url":
+        config = util.read_args_kv(config)
+        test = URLTester(config)
     
     test = CachedTester(test)
     
@@ -280,3 +283,36 @@ class WeatherTester(Tester):
         return True
         
 
+class URLTester(Tester):
+    def __init__(self, config):
+        self._url = config['url']
+        self._text_only = util.parse_bool(config.get('text-only', 'false'))
+        
+    @property
+    def delay(self): return 20
+    
+    @property
+    def value(self):
+        from html2text import html2text
+        result = util.get_url(self._url)
+        if self._text_only:
+            result = html2text(result)
+        
+        
+
+class ChangeTester(Tester):
+    def __init__(self, config):
+        self._inner = config['inner']
+        self._state = None
+        
+    @property
+    def delay(self): self._inner.delay
+    
+    @property
+    def value(self):
+        old_state = self._state
+        new_state = self._inner.value
+        result = old_state == new_state
+        self._state = new_state
+        return result
+        

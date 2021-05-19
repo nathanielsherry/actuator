@@ -4,7 +4,7 @@ import subprocess
 import time
 import sys
 
-from actuator import tester, monitor, action
+from actuator import tester, monitor, action, log
 
 
 if __name__ == "__main__":

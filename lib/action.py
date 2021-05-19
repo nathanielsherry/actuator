@@ -3,7 +3,11 @@
 from actuator import log, util
 
 def parse(action_string):
-    name, config = action_string.split(':', maxsplit=1)
+    parts = action_string.split(':', maxsplit=1)
+    name = parts[0]
+    config = None
+    if len(parts) >= 2:
+        config = parts[1]
     
     action = None
     if name == "systemd":
@@ -15,6 +19,12 @@ def parse(action_string):
     elif name == "echo":
         config = util.read_args_kv(config)
         action = EchoToggle(config)
+    elif name == "printmsg":
+        config = util.read_args_kv(config)
+        action = PrintMessageRunner(config)
+    elif name == "printstate":
+        config = util.read_args_kv(config)
+        action = PrintStateToggle(config)
     
     return action
     
@@ -54,7 +64,8 @@ class SystemdToggle(Toggle):
         self._service = config['service']
         
     def toggle(self, state):
-        subprocess.run(["systemctl", "start" if boolean else "stop", self._service])
+        import subprocess
+        subprocess.run(["systemctl", "start" if state == True else "stop", self._service])
         
         
 class EchoToggle(Toggle):
@@ -64,3 +75,16 @@ class EchoToggle(Toggle):
         
     def toggle(self, state):
         log.info(self._true_msg if state else self._false_msg)
+        
+
+class PrintMessageRunner(Runner):
+    def __init__(self, config):
+        self._msg = config.get('msg', 'message')
+    def run(self):
+        print(self._msg, flush=True)
+        
+class PrintStateToggle(Toggle):
+    def __init__(self, config):
+        pass
+    def toggle(self, state):
+        log.info(state)
