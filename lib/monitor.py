@@ -5,14 +5,10 @@ from actuator import log, util
 
 
 def parse(tester, action, arg):
-    parts = arg.split(":", maxsplit=1)
-    name = parts[0]
-    config = None
-    if len(parts) >= 2:
-        config = parts[1]
+    instruction, config = util.twosplit(arg, common.PARAM_SEPARATOR)
     
     mon = None
-    if name == "poll":
+    if instruction == "poll":
         config = util.read_args_kv(config)
         mon = PollMonitor(tester, action, config)
         

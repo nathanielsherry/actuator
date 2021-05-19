@@ -1,28 +1,24 @@
 #!/usr/bin/python3
 
-from actuator import log, util
+from actuator import log, util, common
 
 def parse(action_string):
-    parts = action_string.split(':', maxsplit=1)
-    name = parts[0]
-    config = None
-    if len(parts) >= 2:
-        config = parts[1]
+    instruction, config = util.twosplit(action_string, common.PARAM_SEPARATOR)
     
     action = None
-    if name == "systemd":
+    if instruction == "systemd":
         config = util.read_args_kv(config)
         action = SystemdToggle(config)
-    elif name == "shell":
+    elif instruction == "shell":
         config = util.read_args_list(config)
         action = ShellRunner(config)
-    elif name == "echo":
+    elif instruction == "echo":
         config = util.read_args_kv(config)
         action = EchoToggle(config)
-    elif name == "printmsg":
+    elif instruction == "printmsg":
         config = util.read_args_kv(config)
         action = PrintMessageRunner(config)
-    elif name == "printstate":
+    elif instruction == "printstate":
         config = util.read_args_kv(config)
         action = PrintStateToggle(config)
     

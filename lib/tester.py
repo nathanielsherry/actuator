@@ -1,48 +1,52 @@
 import time
 import subprocess
-from actuator import log, util
+from actuator import log, util, common
 
 
-
+DELAY_SHORT = 10
+DELAY_MEDIUM = 120
+DELAY_LONG = 3600
 
 
 def parse(arg):
-    command, config = arg.split(":", maxsplit=1)
-    test = None
-    if command == "hourly":
-        config = util.read_args_kv(config)
-        test = TimeTester(config)
-    elif command == "locked":
-        config = util.read_args_kv(config)
-        test = GDMLockTester(config)
-        test = JitterlessTester(test, {True: 30, False: 1})
-    elif command == "process":
-        config = util.read_args_list(config)
-        test = ProcessConflictTester(config)
-    elif command == "temp":
-        config = util.read_args_kv(config)
-        test = TemperatureTester(config)
-    elif command == "weather":
-        config = util.read_args_kv(config)
-        test = WeatherTester(config)
-    elif command == "url":
-        config = util.read_args_kv(config)
-        test = URLTester(config)
+    chain = arg.split(common.INSTRUCTION_SEPARATOR)
     
-    test = CachedTester(test)
+    inner = None
+    if len(chain) > 1:
+        inner = parse(common.INSTRUCTION_SEPARATOR.join(chain[:-1]))
+        arg = chain[-1]
     
-    return test
+    instruction, config = util.twosplit(arg, common.PARAM_SEPARATOR)
+    config = util.read_args_kv(config)
+    if inner: config['inner'] = inner
+    
+    return maketest(instruction, config)
+    
+    
+def maketest(name, config):
+    if name == "hourly": return TimeTester(config)
+    elif name == "locked": return GDMLockTester(config)
+    elif name == "process": return ProcessConflictTester(config)
+    elif name == "temp": return TemperatureTester(config)
+    elif name == "weather": return WeatherTester(config)
+    elif name == "url": return URLTester(config)
+    elif name == "cached": return CachedTester(config)
+    elif name == "try": return TryTester(config)
+    elif name == "smooth": return SmoothTester(config)
+    return None
 
 
 
 #interface
 class Tester(util.BaseClass):
-    def __init__(self):
-        pass
+    def __init__(self, config=None):
+        if config:
+            self._delay = config.get('delay', None)
+            if self._delay: self._delay = float(self._delay)
     
     @property
-    def delay(self): 
-        return 5
+    def delay(self):
+        return self._delay or DELAY_MEDIUM
     
     #return a boolean
     @property
@@ -91,9 +95,9 @@ class AnyTester(Tester):
 
 #Simple tester that takes a function and params
 class FnTester(Tester):
-    def __init__(self, value_function, **kwargs):
-        self._fn = value_function
-        self._parameters = kwargs
+    def __init__(self, config):
+        self._fn = config['fn']
+        self._parameters = config['args']
     
     #return a boolean
     @property
@@ -101,13 +105,37 @@ class FnTester(Tester):
         return self._fn(**self._parameters)
 
 
+class DelegatingTester(Tester):
+    def __init__(self, config):
+        super().__init__(config)
+        self._inner = config['inner']
+        if not self.inner:
+            raise Exception("Inner cannot be None")
+
+    @property
+    def inner(self):
+        return self._inner
+    
+    @property
+    def delay(self):
+        return self._delay or self.inner.delay
+
+    @property
+    def name(self): 
+        return "{}:{}".format(type(self).__name__, self.inner.name)
+
+
 #Eliminates jitter from a value flapping a bit. The state starts as False and
 #will switch when consistently the opposite for `delay[state]` seconds.
 #delay is a dict with integer values for keys True and False
-class JitterlessTester(Tester):
-    def __init__(self, inner, delay):
-        self._inner = inner
-        self._delay = delay
+class SmoothTester(DelegatingTester):
+    def __init__(self, config):
+        super().__init__(config)
+        
+        delay = float(config.get('delay', '30'))
+        delay_true = float(config.get('delay-true', delay))
+        delay_false = float(config.get('delay-false', delay))
+        self._lag = {True: delay_true, False: delay_false}
         
         self._last_time = time.time()
         self._last = False
@@ -118,7 +146,7 @@ class JitterlessTester(Tester):
     def value(self):
 
         #get the result from the wrapped tester
-        new_result = self._inner.value
+        new_result = self.inner.value
         
         if new_result != self._last:
             #reset the last change time last known status
@@ -127,48 +155,72 @@ class JitterlessTester(Tester):
         
         #If the state doesn't match the last `delay` seconds, flip it
         time_delta = time.time() - self._last_time
-        if self._last != self._state and self._delay[self._last] >= time_delta:
+        if self._last != self._state and self._lag[self._last] >= time_delta:
             self._state = self._last
             
         return self._state
 
-    @property
-    def name(self): return "Jitterless:{}".format(self._inner.name)
 
-class CachedTester(Tester):
-    def __init__(self, inner):
-        if not inner:
-            raise Exception("Inner cannot be None")
-        self._inner = inner
+class CachedTester(DelegatingTester):
+    def __init__(self, config):
+        super().__init__(config)
         self._last_time = 0
         self._last_value = None
-        
+
     @property
-    def delay(self): return self._inner.delay
-    
+    def delay(self):
+        return self._delay or DELAY_MEDIUM
+
     @property
     def value(self):
         #if it has been more than `delay` seconds since
         #the last poll of the inner tester, poll it now
         if time.time() > self._last_time + self.delay or self._last_value == None:
-            log.debug("{name} checking inner value from {inner}".format(name=self.name, inner=self._inner.name))
+            log.debug("{name} checking inner value".format(name=self.name))
             self._last_time = time.time()
-            self._last_value = self._inner.value
+            self._last_value = self.inner.value
             
         return self._last_value
-    
+
+
+class ChangeTester(DelegatingTester):
+    def __init__(self, config):
+        super().__init__(config)
+        self._state = None
+
     @property
-    def name(self): return "Cached:{}".format(self._inner.name)
+    def value(self):
+        old_state = self._state
+        new_state = self.inner.value
+        result = old_state == new_state
+        self._state = new_state
+        return result
+        
+        
+class TryTester(DelegatingTester):
+    def __init__(self, config):
+        super().__init__(config)
+        self._default = config.get('default', 'false')
+
+    @property
+    def value(self):
+        try:
+            return self.inner.value
+        except:
+            log.warn("{} threw an error, returning default value {}".format(self.inner.name, self._default))
+            return self._default
 
 
 
 
 class GDMLockTester(Tester):
     def __init__(self, config):
+        super().__init__(config)
         self._session = config['session']
     
     @property
-    def delay(self): return 10
+    def delay(self): 
+        return self._delay or DELAY_SHORT
     
     #return a boolean
     @property
@@ -181,11 +233,13 @@ class GDMLockTester(Tester):
 
 class TimeTester(Tester):
     def __init__(self, config):
+        super().__init__(config)
         self._start = int(config['start'])
         self._end = int(config['end'])
     
     @property
-    def delay(self): return 60
+    def delay(self): 
+        return self._delay or DELAY_SHORT
     
     #return a boolean
     @property
@@ -204,10 +258,12 @@ class TimeTester(Tester):
 
 class ProcessConflictTester(Tester):
     def __init__(self, config):
-        self._names = config
+        super().__init__(config)
+        self._names = util.read_args_list(config['names'])
     
     @property
-    def delay(self): return 60
+    def delay(self): 
+        return self._delay or 60
     
     #return a boolean
     @property
@@ -224,10 +280,12 @@ class ProcessConflictTester(Tester):
 
 class TemperatureTester(Tester):
     def __init__(self, config):
+        super().__init__(config)
         self._cutoff = float(config['cutoff'])
     
     @property
-    def delay(self): return 600
+    def delay(self): 
+        return self._delay or 600
     
     @property
     def value(self):
@@ -241,6 +299,7 @@ class TemperatureTester(Tester):
 
 class WeatherTester(Tester):
     def __init__(self, config):
+        super().__init__(config)
         self._province = config['province']
         self._citycode = config['citycode']
         self._current = config.get('current', None)
@@ -254,7 +313,8 @@ class WeatherTester(Tester):
         
         
     @property
-    def delay(self): return 900
+    def delay(self): 
+        return self._delay or 900
     
     @property
     def value(self):
@@ -285,11 +345,13 @@ class WeatherTester(Tester):
 
 class URLTester(Tester):
     def __init__(self, config):
+        super().__init__(config)
         self._url = config['url']
         self._text_only = util.parse_bool(config.get('text-only', 'false'))
         
     @property
-    def delay(self): return 20
+    def delay(self): 
+        return self._delay or 20
     
     @property
     def value(self):
@@ -297,22 +359,4 @@ class URLTester(Tester):
         result = util.get_url(self._url)
         if self._text_only:
             result = html2text(result)
-        
-        
-
-class ChangeTester(Tester):
-    def __init__(self, config):
-        self._inner = config['inner']
-        self._state = None
-        
-    @property
-    def delay(self): self._inner.delay
-    
-    @property
-    def value(self):
-        old_state = self._state
-        new_state = self._inner.value
-        result = old_state == new_state
-        self._state = new_state
-        return result
         
