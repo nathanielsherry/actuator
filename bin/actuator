@@ -4,7 +4,7 @@ import subprocess
 import time
 import sys
 
-from actuator import tester, monitor, action, log
+from actuator import log, parser
 
 
 if __name__ == "__main__":
@@ -14,22 +14,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
 
-    #parse action string
-    act = action.parse(sys.argv[2])
-    if not act:
-        log.error("Action not recognised")
-    
-    #parse test string(s)
-    tests = [tester.parse(a) for a in sys.argv[3:]]
-    if not tests:
-        log.error("Command not recognised")
-        sys.exit(2)
-    if len(tests) > 1:
-        test = tester.AllTester(tests)
-    else:
-        test = tests[0]
-
-    #construct monitor
-    mon = monitor.parse(test, act, sys.argv[1])
+    mon = parser.parse_actuator_expression_shell(sys.argv[1:])
     mon.start()
 

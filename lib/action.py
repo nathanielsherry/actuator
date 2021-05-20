@@ -1,26 +1,29 @@
 #!/usr/bin/python3
 
-from actuator import log, util, common
+from actuator import log, util, parser
 
 def parse(action_string):
-    instruction, config = util.twosplit(action_string, common.PARAM_SEPARATOR)
+    instruction, config = parser.twosplit(action_string, parser.PARAM_SEPARATOR)
     
     action = None
     if instruction == "systemd":
-        config = util.read_args_kv(config)
+        config = parser.parse_args_kv(config)
         action = SystemdToggle(config)
     elif instruction == "shell":
-        config = util.read_args_list(config)
+        config = parser.parse_args_list(config)
         action = ShellRunner(config)
     elif instruction == "echo":
-        config = util.read_args_kv(config)
+        config = parser.parse_args_kv(config)
         action = EchoToggle(config)
     elif instruction == "printmsg":
-        config = util.read_args_kv(config)
-        action = PrintMessageRunner(config)
+        config = parser.parse_args_kv(config)
+        action = PrintRunner(config)
     elif instruction == "printstate":
-        config = util.read_args_kv(config)
-        action = PrintStateToggle(config)
+        config = parser.parse_args_kv(config)
+        action = PrintToggle(config)
+    elif instruction == "print":
+        config = parser.parse_args_kv(config)
+        action = PrintAction(config)
     
     return action
     
@@ -73,14 +76,24 @@ class EchoToggle(Toggle):
         log.info(self._true_msg if state else self._false_msg)
         
 
-class PrintMessageRunner(Runner):
+
+
+class PrintAction(Action):
+    def __init__(self, config):
+        pass
+    def perform(self, **kwargs):
+        import pprint
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(kwargs)
+       
+class PrintToggle(Toggle):
+    def __init__(self, config):
+        pass
+    def toggle(self, state):
+        print(state)
+        
+class PrintRunner(Runner):
     def __init__(self, config):
         self._msg = config.get('msg', 'message')
     def run(self):
         print(self._msg, flush=True)
-        
-class PrintStateToggle(Toggle):
-    def __init__(self, config):
-        pass
-    def toggle(self, state):
-        log.info(state)

@@ -1,6 +1,6 @@
 import time
 import subprocess
-from actuator import log, util, common
+from actuator import log, util, parser
 
 
 DELAY_SHORT = 10
@@ -9,34 +9,22 @@ DELAY_LONG = 3600
 
 
 def parse(arg):
-    chain = arg.split(common.INSTRUCTION_SEPARATOR)
+    lookup = {
+        'hourly': (TimeTester, 'kwargs'),
+        'locked': (GDMLockTester, 'kwargs'),
+        'process': (ProcessConflictTester, 'kwargs'),
+        'temp': (TemperatureTester, 'kwargs'),
+        'weather': (WeatherTester, 'kwargs'),
+        'url': (URLTester, 'kwargs'),
+        'cached': (CachedTester, 'kwargs'),
+        'try': (TryTester, 'kwargs'),
+        'smooth': (SmoothTester, 'kwargs'),
+        'epoch': (EpochTester, 'kwargs'),
+        'sh': (ShellTester, 'args'),
+    }
+    return parser.build_from_info(arg, lookup)
     
-    inner = None
-    if len(chain) > 1:
-        inner = parse(common.INSTRUCTION_SEPARATOR.join(chain[:-1]))
-        arg = chain[-1]
     
-    instruction, config = util.twosplit(arg, common.PARAM_SEPARATOR)
-    config = util.read_args_kv(config)
-    if inner: config['inner'] = inner
-    
-    return maketest(instruction, config)
-    
-    
-def maketest(name, config):
-    if name == "hourly": return TimeTester(config)
-    elif name == "locked": return GDMLockTester(config)
-    elif name == "process": return ProcessConflictTester(config)
-    elif name == "temp": return TemperatureTester(config)
-    elif name == "weather": return WeatherTester(config)
-    elif name == "url": return URLTester(config)
-    elif name == "cached": return CachedTester(config)
-    elif name == "try": return TryTester(config)
-    elif name == "smooth": return SmoothTester(config)
-    return None
-
-
-
 #interface
 class Tester(util.BaseClass):
     def __init__(self, config=None):
@@ -259,7 +247,7 @@ class TimeTester(Tester):
 class ProcessConflictTester(Tester):
     def __init__(self, config):
         super().__init__(config)
-        self._names = util.read_args_list(config['names'])
+        self._names = parser.parse_args_list(config['names'])
     
     @property
     def delay(self): 
@@ -359,4 +347,25 @@ class URLTester(Tester):
         result = util.get_url(self._url)
         if self._text_only:
             result = html2text(result)
+        
+        
+class EpochTester(Tester):
+    def __init__(self, config):
+        super().__init__(config)
+        
+    @property
+    def value(self):
+        return time.time()
+        
+
+class ShellTester(Tester):
+    def __init__(self, config):
+        super().__init__(config)
+        print(config)
+        self._args = config['args']
+        
+    @property
+    def value(self):
+        proc = subprocess.run(self._args, stdout=subprocess.PIPE)
+        return proc.stdout.decode()
         

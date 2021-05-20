@@ -1,31 +1,35 @@
 #!/usr/bin/python3
 
 import time
-from actuator import log, util
+from actuator import log, util, parser
 
 
 def parse(tester, action, arg):
-    instruction, config = util.twosplit(arg, common.PARAM_SEPARATOR)
+    instruction, config = parser.twosplit(arg, parser.PARAM_SEPARATOR)
+    config = parser.parse_args_kv(config)
     
     mon = None
-    if instruction == "poll":
-        config = util.read_args_kv(config)
-        mon = PollMonitor(tester, action, config)
+    if instruction == "change":
+        mon = ChangeMonitor(tester, action, config)
+    if instruction == "always":
+        mon = ChangeMonitor(tester, action, config)
         
     return mon
         
 
 class Monitor(util.BaseClass):
+    def __init__(self, tester, action, config):
+        self._tester = tester
+        self._action = action
     def start(self):
         raise Exception("Unimplemented")
         
 
 #Monitors the result of a Tester over time, triggering an event (callback) 
 #when the value changes, passing the new state as the single argument.
-class PollMonitor(Monitor):
+class ChangeMonitor(Monitor):
     def __init__(self, tester, action, config):
-        self._tester = tester
-        self._action = action
+        super().__init__(tester, action, config)
         self._always_change = util.parse_bool(config.get('always', 'false'))
         
     def start(self):
@@ -42,4 +46,6 @@ class PollMonitor(Monitor):
 
     
 
-
+class AlwaysMonitor(Monitor):
+    def __init__(self, tester, action, config):
+        super().__init__(tester, action, config)
