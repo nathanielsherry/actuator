@@ -21,7 +21,15 @@ def short_string(s, length=30):
     return s
 
 class BaseClass:
-    
+    def __init__(self, config):
+        #Run mixin init methods if this is the first superclass 
+        #and there are others after it
+        supers = self.__class__.mro()
+        supers = supers[supers.index(BaseClass)+1:]
+        while True:
+            if supers[0] == object: break
+            supers[0].__init__(self, config)
+            supers = supers[1:]
     @property
     def name(self): 
         return type(self).__name__

@@ -33,7 +33,9 @@ def build(instruction, kwargs):
     
 #interface
 class State(util.BaseClass):
-    def __init__(self, config=None):
+    def __init__(self, config):
+        super().__init__(config)
+        
         self._delay = None
         if config:
             self._delay = config.get('delay', None)

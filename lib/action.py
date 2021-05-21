@@ -19,6 +19,9 @@ def build(instruction, kwargs):
 
 
 class Action(util.BaseClass):
+    def __init__(self, config):
+        super().__init__(config)
+        
     def perform(self, **kwargs):
         raise Exception("Unimplemented")
 

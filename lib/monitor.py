@@ -20,25 +20,30 @@ def build(instruction, kwargs):
 
 class Monitor(util.BaseClass):
     def __init__(self, config):
+        super().__init__(config)
         self._state = None
         self._action = None
+        
     def start(self, state, action):
         raise Exception("Unimplemented")
         
 
-#Monitors the result of a State over time, triggering an event (callback) 
-#when the value changes, passing the new state as the single argument.
-class ChangeMonitor(Monitor):
+class MonitorDelayMixin:
     def __init__(self, config):
-        super().__init__(config)
         self._delay = config.get('delay', None)
         if self._delay: 
             self._delay = int(self._delay)
-    
+            
     @property
     def delay(self):
         return self._delay
     
+#Monitors the result of a State over time, triggering an event (callback) 
+#when the value changes, passing the new state as the single argument.
+class ChangeMonitor(Monitor, MonitorDelayMixin):
+    def __init__(self, config):
+        super().__init__(config)
+
     def start(self, state, action):
         log.info("Starting {name} with test {test} and action {action}".format(name=self.name, test=state, action=action))
         last_state = None
@@ -53,24 +58,24 @@ class ChangeMonitor(Monitor):
 
     
 
-class LoopMonitor(Monitor):
+class LoopMonitor(Monitor, MonitorDelayMixin):
     def __init__(self, config):
         super().__init__(config)
-        
+    
     def start(self, state, action):
         while True:
             action.perform(state=state.value)
-            time.sleep(state.delay)
+            time.sleep(self.delay or state.delay)
             
 
-class TrueStateMonitor(Monitor):
+class TrueStateMonitor(Monitor, MonitorDelayMixin):
     def __init__(self, config):
         super().__init__(config)
         
     def start(self, state, action):
         while True:
             if state.value == True: action.perform()
-            time.sleep(state.delay)
+            time.sleep(self.delay or state.delay)
 
 class StartMonitor(Monitor):
     def __init__(self, config):
