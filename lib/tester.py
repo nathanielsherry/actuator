@@ -16,11 +16,13 @@ def instructions():
         'temp': TemperatureTester,
         'weather': WeatherTester,
         'url': URLTester,
+        'file': FileTester,
         'cached': CachedTester,
         'try': TryTester,
         'smooth': SmoothTester,
         'epoch': EpochTester,
         'sh': ShellTester,
+        'hash': HashTester,
     }
 
 def build(instruction, kwargs):
@@ -200,6 +202,21 @@ class TryTester(DelegatingTester):
             log.warn("{} threw an error, returning default value {}".format(self.inner.name, self._default))
             return self._default
 
+class HashTester(DelegatingTester):
+    def __init__(self, config):
+        super().__init__(config)
+        self._algo = config.get('algo', 'md5')
+        
+    @property
+    def value(self):
+        import hashlib
+        m = hashlib.md5()
+        value = self.inner.value
+        if isinstance(value, dict):
+            value = value['state']
+        m.update(str(value).encode())
+        return m.hexdigest()
+        
 
 
 
@@ -336,20 +353,41 @@ class WeatherTester(Tester):
 class URLTester(Tester):
     def __init__(self, config):
         super().__init__(config)
-        self._url = config['url']
-        self._text_only = util.parse_bool(config.get('text-only', 'false'))
+        self._url = config['args'][0]
+        self._text_only = util.parse_bool(config.get('html-to-text', 'false'))
         
     @property
     def delay(self): 
-        return self._delay or 20
+        return self._delay or DELAY_MEDIUM
     
     @property
     def value(self):
-        from html2text import html2text
         result = util.get_url(self._url)
         if self._text_only:
+            from html2text import html2text
             result = html2text(result)
+        return result
         
+
+class FileTester(Tester):
+    def __init__(self, config):
+        super().__init__(config)
+        self._filename = config['args'][0]
+        self._binary = util.parse_bool(config.get('binary', 'false'))
+
+    @property
+    def delay(self): 
+        return self._delay or DELAY_MEDIUM
+    
+    @property
+    def value(self):
+        read_string = 'r'
+        if self._binary: read_string = 'rb'
+        fh = open(self._filename, read_string)
+        contents = fh.read()
+        fh.close()
+        return contents
+
         
 class EpochTester(Tester):
     def __init__(self, config):
@@ -370,3 +408,5 @@ class ShellTester(Tester):
         proc = subprocess.run(self._args, stdout=subprocess.PIPE)
         return proc.stdout.decode()
         
+        
+

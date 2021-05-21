@@ -7,7 +7,8 @@ from actuator import log, util, parser
 def instructions():
     return {
         "change": ChangeMonitor,
-        "all": AlwaysMonitor,
+        "loop": LoopMonitor,
+        "start": StartMonitor,
     }
     
 
@@ -29,7 +30,6 @@ class Monitor(util.BaseClass):
 class ChangeMonitor(Monitor):
     def __init__(self, config):
         super().__init__(config)
-        self._always_change = util.parse_bool(config.get('always', 'false'))
         
     def start(self, tester, action):
         log.info("Starting {name} with test {test} and action {action}".format(name=self.name, test=tester, action=action))
@@ -37,7 +37,7 @@ class ChangeMonitor(Monitor):
         new_state = None
         while True:
             new_state = tester.value
-            if new_state != last_state or self._always_change == True:
+            if new_state != last_state:
                 log.info("{name} yields '{state}' ({result}), running action.".format(name=self.name, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
                 action.perform(state=new_state)
                 last_state = new_state
@@ -45,7 +45,7 @@ class ChangeMonitor(Monitor):
 
     
 
-class AlwaysMonitor(Monitor):
+class LoopMonitor(Monitor):
     def __init__(self, config):
         super().__init__(config)
         
@@ -53,3 +53,11 @@ class AlwaysMonitor(Monitor):
         while True:
             action.perform(state=tester.value)
             time.sleep(tester.delay)
+            
+
+class StartMonitor(Monitor):
+    def __init__(self, config):
+        super().__init__(config)
+        
+    def start(self, tester, action):
+        action.perform(state=tester.value)

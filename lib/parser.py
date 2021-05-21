@@ -96,6 +96,7 @@ class ActuatorExpressionMixin:
                 pass
     
     def parse_instruction(self, key, valid_instruction, build, inner=None):
+        from actuator.flexer import Symbol
         if key: key = self.flexer.pop(key)
         instruction = self.parse_value()
         if not valid_instruction(instruction):
@@ -108,6 +109,10 @@ class ActuatorExpressionMixin:
                 continue
             if self.flexer.peek() == '(':
                 kwargs = self.parse_keyvalue()
+                for key in kwargs.keys():
+                    value = kwargs[key]
+                    if isinstance(value, Symbol):
+                        kwargs[key] = value.name
                 continue
             break
         
@@ -180,6 +185,9 @@ def parse_actuator_expression(exp):
             result['monitor'] = part
         else:
             raise Exception("Found unrecognised component")
+    
+    if not 'monitor' in result:
+        result['monitor'] = mod_monitor.StartMonitor({})
     
     return result
     
