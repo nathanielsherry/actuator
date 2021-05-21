@@ -41,7 +41,7 @@ class ChangeMonitor(Monitor):
                 log.info("{name} yields '{state}' ({result}), running action.".format(name=self.name, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
                 action.perform(state=new_state)
                 last_state = new_state
-            time.sleep(min(10, tester.delay))
+            time.sleep(tester.delay)
 
     
 
@@ -50,4 +50,6 @@ class AlwaysMonitor(Monitor):
         super().__init__(config)
         
     def start(self, tester, action):
-        action.perform(state=tester.value)
+        while True:
+            action.perform(state=tester.value)
+            time.sleep(tester.delay)
