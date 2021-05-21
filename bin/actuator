@@ -10,7 +10,7 @@ from actuator import log, parser
 if __name__ == "__main__":
     
     components = parser.parse_actuator_expression_shell(sys.argv[1:])
-    tester = components['tester']
+    tester = components['state']
     action = components['action']
     monitor = components['monitor']
     monitor.start(tester, action)

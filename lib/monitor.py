@@ -20,29 +20,29 @@ def build(instruction, kwargs):
 
 class Monitor(util.BaseClass):
     def __init__(self, config):
-        self._tester = None
+        self._state = None
         self._action = None
-    def start(self, tester, action):
+    def start(self, state, action):
         raise Exception("Unimplemented")
         
 
-#Monitors the result of a Tester over time, triggering an event (callback) 
+#Monitors the result of a State over time, triggering an event (callback) 
 #when the value changes, passing the new state as the single argument.
 class ChangeMonitor(Monitor):
     def __init__(self, config):
         super().__init__(config)
         
-    def start(self, tester, action):
-        log.info("Starting {name} with test {test} and action {action}".format(name=self.name, test=tester, action=action))
+    def start(self, state, action):
+        log.info("Starting {name} with test {test} and action {action}".format(name=self.name, test=state, action=action))
         last_state = None
         new_state = None
         while True:
-            new_state = tester.value
+            new_state = state.value
             if new_state != last_state:
                 log.info("{name} yields '{state}' ({result}), running action.".format(name=self.name, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
                 action.perform(state=new_state)
                 last_state = new_state
-            time.sleep(tester.delay)
+            time.sleep(state.delay)
 
     
 
@@ -50,25 +50,24 @@ class LoopMonitor(Monitor):
     def __init__(self, config):
         super().__init__(config)
         
-    def start(self, tester, action):
+    def start(self, state, action):
         while True:
-            action.perform(state=tester.value)
-            time.sleep(tester.delay)
+            action.perform(state=state.value)
+            time.sleep(state.delay)
             
 
 class TrueStateMonitor(Monitor):
     def __init__(self, config):
         super().__init__(config)
         
-    def start(self, tester, action):
+    def start(self, state, action):
         while True:
-            state=tester.value
-            if state == True: action.perform()
-            time.sleep(tester.delay)
+            if state.value == True: action.perform()
+            time.sleep(state.delay)
 
 class StartMonitor(Monitor):
     def __init__(self, config):
         super().__init__(config)
         
-    def start(self, tester, action):
-        action.perform(state=tester.value)
+    def start(self, state, action):
+        action.perform(state=state.value)

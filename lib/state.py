@@ -10,21 +10,21 @@ DELAY_LONG = 3600
 
 def instructions():
     return {
-        'during': DuringTester,
-        'time': TimeTester,
-        'locked': GDMLockTester,
-        'process': ProcessConflictTester,
-        'temp': TemperatureTester,
-        'weather': WeatherTester,
-        'url': URLTester,
-        'file': FileTester,
-        'cached': CachedTester,
-        'try': TryTester,
-        'smooth': SmoothTester,
-        'epoch': EpochTester,
-        'sh': ShellTester,
-        'hash': HashTester,
-        'change': ChangeTester,
+        'during': DuringState,
+        'time': TimeState,
+        'locked': GDMLockState,
+        'process': ProcessConflictState,
+        'temp': TemperatureState,
+        'weather': WeatherState,
+        'url': URLState,
+        'file': FileState,
+        'cached': CachedState,
+        'try': TryState,
+        'smooth': SmoothState,
+        'epoch': EpochState,
+        'sh': ShellState,
+        'hash': HashState,
+        'change': ChangeState,
     }
 
 def build(instruction, kwargs):
@@ -32,7 +32,7 @@ def build(instruction, kwargs):
         
     
 #interface
-class Tester(util.BaseClass):
+class State(util.BaseClass):
     def __init__(self, config=None):
         if config:
             self._delay = config.get('delay', None)
@@ -49,7 +49,7 @@ class Tester(util.BaseClass):
     
         
 
-class AllTester(Tester):
+class AllState(State):
     def __init__(self, tests):
         if any([t == None for t in tests]): 
             raise Exception("Test cannot be None")
@@ -68,7 +68,7 @@ class AllTester(Tester):
     def name(self): return "[{}]|All".format(",".join([t.name for t in self._tests]))
 
 
-class AnyTester(Tester):
+class AnyState(State):
     def __init__(self, tests):
         if any([t == None for t in tests]): 
             raise Exception("Test cannot be None")
@@ -87,8 +87,8 @@ class AnyTester(Tester):
     def name(self): return "[{}]|Any".format(",".join([t.name for t in self._tests]))
 
 
-#Simple tester that takes a function and params
-class FnTester(Tester):
+#Simple State that takes a function and params
+class FnState(State):
     def __init__(self, config):
         self._fn = config['fn']
         self._parameters = config['args']
@@ -99,7 +99,7 @@ class FnTester(Tester):
         return self._fn(**self._parameters)
 
 
-class DelegatingTester(Tester):
+class DelegatingState(State):
     def __init__(self, config):
         super().__init__(config)
         self._inner = config['inner']
@@ -122,7 +122,7 @@ class DelegatingTester(Tester):
 #Eliminates jitter from a value flapping a bit. The state starts as False and
 #will switch when consistently the opposite for `delay[state]` seconds.
 #delay is a dict with integer values for keys True and False
-class SmoothTester(DelegatingTester):
+class SmoothState(DelegatingState):
     def __init__(self, config):
         super().__init__(config)
         
@@ -139,7 +139,7 @@ class SmoothTester(DelegatingTester):
     @property
     def value(self):
 
-        #get the result from the wrapped tester
+        #get the result from the wrapped state
         new_result = self.inner.value
         
         if new_result != self._last:
@@ -155,7 +155,7 @@ class SmoothTester(DelegatingTester):
         return self._state
 
 
-class CachedTester(DelegatingTester):
+class CachedState(DelegatingState):
     def __init__(self, config):
         super().__init__(config)
         self._last_time = 0
@@ -168,7 +168,7 @@ class CachedTester(DelegatingTester):
     @property
     def value(self):
         #if it has been more than `delay` seconds since
-        #the last poll of the inner tester, poll it now
+        #the last poll of the inner state, poll it now
         if time.time() > self._last_time + self.delay or self._last_value == None:
             log.debug("{name} checking inner value".format(name=self.name))
             self._last_time = time.time()
@@ -177,7 +177,7 @@ class CachedTester(DelegatingTester):
         return self._last_value
 
 
-class ChangeTester(DelegatingTester):
+class ChangeState(DelegatingState):
     def __init__(self, config):
         super().__init__(config)
         self._state = None
@@ -191,7 +191,7 @@ class ChangeTester(DelegatingTester):
         return change
         
         
-class TryTester(DelegatingTester):
+class TryState(DelegatingState):
     def __init__(self, config):
         super().__init__(config)
         self._default = config.get('default', 'false')
@@ -204,7 +204,7 @@ class TryTester(DelegatingTester):
             log.warn("{} threw an error, returning default value {}".format(self.inner.name, self._default))
             return self._default
 
-class HashTester(DelegatingTester):
+class HashState(DelegatingState):
     def __init__(self, config):
         super().__init__(config)
         self._algo = config.get('algo', 'md5')
@@ -222,7 +222,7 @@ class HashTester(DelegatingTester):
 
 
 
-class GDMLockTester(Tester):
+class GDMLockState(State):
     def __init__(self, config):
         super().__init__(config)
         self._session = config['session']
@@ -239,7 +239,7 @@ class GDMLockTester(Tester):
         return stdout == "yes"  
           
 
-class TimeTester(Tester):
+class TimeState(State):
     def __init__(self, config):
         super().__init__(config)
         self._format = config.get('format', '%H:%M:%S')
@@ -256,11 +256,11 @@ class TimeTester(Tester):
         now = datetime.datetime.now().time()
         return now.strftime(self._format)
 
-class DuringTester(Tester):
+class DuringState(State):
     def __init__(self, config):
         super().__init__(config)
-        self._start = TimeTester.parse(config['start'])
-        self._end = TimeTester.parse(config['end'])
+        self._start = TimeState.parse(config['start'])
+        self._end = TimeState.parse(config['end'])
     
     @staticmethod
     def parse(s):
@@ -285,7 +285,7 @@ class DuringTester(Tester):
             return self._start <= now and now < self._end
         
 
-class ProcessConflictTester(Tester):
+class ProcessConflictState(State):
     def __init__(self, config):
         super().__init__(config)
         self._names = parser.parse_args_list(config['names'])
@@ -307,7 +307,7 @@ class ProcessConflictTester(Tester):
         return True
     
 
-class TemperatureTester(Tester):
+class TemperatureState(State):
     def __init__(self, config):
         super().__init__(config)
         self._cutoff = float(config['cutoff'])
@@ -326,7 +326,7 @@ class TemperatureTester(Tester):
         #    return True
 
 
-class WeatherTester(Tester):
+class WeatherState(State):
     def __init__(self, config):
         super().__init__(config)
         self._province = config['province']
@@ -372,7 +372,7 @@ class WeatherTester(Tester):
         return True
         
 
-class URLTester(Tester):
+class URLState(State):
     def __init__(self, config):
         super().__init__(config)
         self._url = config['args'][0]
@@ -391,7 +391,7 @@ class URLTester(Tester):
         return result
         
 
-class FileTester(Tester):
+class FileState(State):
     def __init__(self, config):
         super().__init__(config)
         self._filename = config['args'][0]
@@ -411,7 +411,7 @@ class FileTester(Tester):
         return contents
 
         
-class EpochTester(Tester):
+class EpochState(State):
     def __init__(self, config):
         super().__init__(config)
         
@@ -420,7 +420,7 @@ class EpochTester(Tester):
         return time.time()
         
 
-class ShellTester(Tester):
+class ShellState(State):
     def __init__(self, config):
         super().__init__(config)
         self._args = config['args']

@@ -31,7 +31,7 @@ def parse_actuator_expression_shell(args):
     
 def parse_actuator_expression_old(exp):
     from actuator import action as mod_action
-    from actuator import tester as mod_tester
+    from actuator import state as mod_state
     from actuator import monitor as mod_monitor
     
     parts = exp.split(" ")
@@ -54,7 +54,7 @@ def parse_actuator_expression_old(exp):
 
     
     if mon == None: mon = "all"
-    test = mod_tester.parse(test)
+    test = mod_state.parse(test)
     action = mod_action.parse(action)
     mon = mod_monitor.parse(test, action, mon)
     
@@ -66,12 +66,12 @@ from actuator.flexer import FlexParser, SequenceParserMixin, PrimitivesParserMix
 #A Sequence PARSER for reading values or sequences of values
 class ActuatorExpressionMixin:
     def __init__(self):
-        self._add_token_hook("act.tester", lambda t: t == "with", lambda: self.parse_tester())
+        self._add_token_hook("act.state", lambda t: t == "with", lambda: self.parse_state())
         self._add_token_hook("act.action", lambda t: t == "do", lambda: self.parse_action())
         self._add_token_hook("act.monitor", lambda t: t == "on", lambda: self.parse_monitor())
         
-        from actuator import tester
-        self.add_instruction_hooks(tester.instructions().keys())
+        from actuator import state
+        self.add_instruction_hooks(state.instructions().keys())
         
         from actuator import action
         self.add_instruction_hooks(action.instructions().keys())
@@ -135,9 +135,9 @@ class ActuatorExpressionMixin:
         
 
     #Parses a list of items.
-    def parse_tester(self):
-        from actuator import tester
-        return self.parse_instruction('with', lambda t: t in tester.instructions().keys(), tester.build)
+    def parse_state(self):
+        from actuator import state
+        return self.parse_instruction('with', lambda t: t in state.instructions().keys(), state.build)
     
     def parse_action(self):
         from actuator import action
@@ -163,7 +163,7 @@ class ActuatorParser(FlexParser, SequenceParserMixin, PrimitivesParserMixin, Act
 
 
 def parse_actuator_expression(exp): 
-    from actuator import tester as mod_tester
+    from actuator import state as mod_state
     from actuator import action as mod_action
     from actuator import monitor as mod_monitor
 
@@ -171,10 +171,10 @@ def parse_actuator_expression(exp):
     parts = f.parse()
     result = {}
     for part in parts:
-        if isinstance(part, mod_tester.Tester):
-            if 'tester' in result:
-                raise Exception("Found more than one tester")
-            result['tester'] = part
+        if isinstance(part, mod_state.State):
+            if 'state' in result:
+                raise Exception("Found more than one state")
+            result['state'] = part
         elif isinstance(part, mod_action.Action):
             if 'action' in result:
                 raise Exception("Found more than one action")
