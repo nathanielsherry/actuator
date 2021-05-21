@@ -2,30 +2,19 @@
 
 from actuator import log, util, parser
 
-def parse(action_string):
-    instruction, config = parser.twosplit(action_string, parser.PARAM_SEPARATOR)
+def instructions():
+    return {
+        "systemd": SystemdToggle,
+        "sh": ShellRunner,
+        "printif": PrintIf,
+        "printmsg": PrintRunner,
+        "printstate": PrintToggle,
+        "print": PrintAction,
+    }
     
-    action = None
-    if instruction == "systemd":
-        config = parser.parse_args_kv(config)
-        action = SystemdToggle(config)
-    elif instruction == "shell":
-        config = parser.parse_args_list(config)
-        action = ShellRunner(config)
-    elif instruction == "echo":
-        config = parser.parse_args_kv(config)
-        action = EchoToggle(config)
-    elif instruction == "printmsg":
-        config = parser.parse_args_kv(config)
-        action = PrintRunner(config)
-    elif instruction == "printstate":
-        config = parser.parse_args_kv(config)
-        action = PrintToggle(config)
-    elif instruction == "print":
-        config = parser.parse_args_kv(config)
-        action = PrintAction(config)
     
-    return action
+def build(instruction, kwargs):
+    return instructions()[instruction](kwargs)    
     
 
 
@@ -67,17 +56,7 @@ class SystemdToggle(Toggle):
         subprocess.run(["systemctl", "start" if state == True else "stop", self._service])
         
         
-class EchoToggle(Toggle):
-    def __init__(self, config):
-        self._true_msg = config['true']
-        self._false_msg = config['false']
-        
-    def toggle(self, state):
-        log.info(self._true_msg if state else self._false_msg)
-        
-
-
-
+       
 class PrintAction(Action):
     def __init__(self, config):
         pass
@@ -85,7 +64,15 @@ class PrintAction(Action):
         import pprint
         pp = pprint.PrettyPrinter(indent=4)
         pp.pprint(kwargs)
-       
+
+class PrintIf(Toggle):
+    def __init__(self, config):
+        self._true_msg = config['true']
+        self._false_msg = config['false']
+        
+    def toggle(self, state):
+        print(self._true_msg if state else self._false_msg)
+
 class PrintToggle(Toggle):
     def __init__(self, config):
         pass

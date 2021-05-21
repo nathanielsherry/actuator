@@ -8,22 +8,24 @@ DELAY_MEDIUM = 120
 DELAY_LONG = 3600
 
 
-def parse(arg):
-    lookup = {
-        'hourly': (TimeTester, 'kwargs'),
-        'locked': (GDMLockTester, 'kwargs'),
-        'process': (ProcessConflictTester, 'kwargs'),
-        'temp': (TemperatureTester, 'kwargs'),
-        'weather': (WeatherTester, 'kwargs'),
-        'url': (URLTester, 'kwargs'),
-        'cached': (CachedTester, 'kwargs'),
-        'try': (TryTester, 'kwargs'),
-        'smooth': (SmoothTester, 'kwargs'),
-        'epoch': (EpochTester, 'kwargs'),
-        'sh': (ShellTester, 'args'),
+def instructions():
+    return {
+        'hourly': TimeTester,
+        'locked': GDMLockTester,
+        'process': ProcessConflictTester,
+        'temp': TemperatureTester,
+        'weather': WeatherTester,
+        'url': URLTester,
+        'cached': CachedTester,
+        'try': TryTester,
+        'smooth': SmoothTester,
+        'epoch': EpochTester,
+        'sh': ShellTester,
     }
-    return parser.build_from_info(arg, lookup)
-    
+
+def build(instruction, kwargs):
+    return instructions()[instruction](kwargs)
+        
     
 #interface
 class Tester(util.BaseClass):
@@ -59,7 +61,7 @@ class AllTester(Tester):
         return all([t.value for t in self._tests])
 
     @property
-    def name(self): return "All:[{}]".format(",".join([t.name for t in self._tests]))
+    def name(self): return "[{}]|All".format(",".join([t.name for t in self._tests]))
 
 
 class AnyTester(Tester):
@@ -78,7 +80,7 @@ class AnyTester(Tester):
         return any([t.value for t in self._tests])
         
     @property
-    def name(self): return "Any:[{}]".format(",".join([t.name for t in self._tests]))
+    def name(self): return "[{}]|Any".format(",".join([t.name for t in self._tests]))
 
 
 #Simple tester that takes a function and params
@@ -110,7 +112,7 @@ class DelegatingTester(Tester):
 
     @property
     def name(self): 
-        return "{}:{}".format(type(self).__name__, self.inner.name)
+        return "{}|{}".format(self.inner.name, type(self).__name__)
 
 
 #Eliminates jitter from a value flapping a bit. The state starts as False and
@@ -361,7 +363,6 @@ class EpochTester(Tester):
 class ShellTester(Tester):
     def __init__(self, config):
         super().__init__(config)
-        print(config)
         self._args = config['args']
         
     @property

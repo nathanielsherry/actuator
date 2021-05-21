@@ -8,12 +8,10 @@ from actuator import log, parser
 
 
 if __name__ == "__main__":
-        
-    if len(sys.argv) <= 3:
-        log.error("Expected: <monitor>[:key=value,... | value,...] <action>[:key=value,... | value,...] <test>[:key=value,... | value,...] ...")
-        sys.exit(1)
-
-
-    mon = parser.parse_actuator_expression_shell(sys.argv[1:])
-    mon.start()
+    
+    components = parser.parse_actuator_expression_shell(sys.argv[1:])
+    tester = components['tester']
+    action = components['action']
+    monitor = components['monitor']
+    monitor.start(tester, action)
 
