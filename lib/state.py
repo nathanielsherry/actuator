@@ -34,6 +34,7 @@ def build(instruction, kwargs):
 #interface
 class State(util.BaseClass):
     def __init__(self, config=None):
+        self._delay = None
         if config:
             self._delay = config.get('delay', None)
             if self._delay: self._delay = float(self._delay)
@@ -424,11 +425,15 @@ class ShellState(State):
     def __init__(self, config):
         super().__init__(config)
         self._args = config['args']
+        self._shell = False
+        if len(self._args) == 1 and ' ' in self._args[0]:
+            self._shell = True
         
     @property
     def value(self):
-        proc = subprocess.run(self._args, stdout=subprocess.PIPE)
+        proc = subprocess.run(self._args, stdout=subprocess.PIPE, shell=self._shell)
         return proc.stdout.decode()
         
         
+
 

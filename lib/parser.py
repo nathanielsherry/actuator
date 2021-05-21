@@ -3,6 +3,10 @@ from actuator import util
 INSTRUCTION_SEPARATOR = '::'
 PARAM_SEPARATOR = ','
 
+KW_ACTION = "do"
+KW_MONITOR = "on"
+KW_STATE = "for"
+
 def twosplit(s, delim):
     parts = s.split(delim, maxsplit=1)
     first = parts[0]
@@ -29,46 +33,15 @@ def parse_args_list(arg):
 def parse_actuator_expression_shell(args):
     return parse_actuator_expression(" ".join(args))
     
-def parse_actuator_expression_old(exp):
-    from actuator import action as mod_action
-    from actuator import state as mod_state
-    from actuator import monitor as mod_monitor
-    
-    parts = exp.split(" ")
-    
-    mon = None
-    test = None
-    action = None
-    
-    while len(parts) >= 2:
-        kw = parts[0]
-        info = parts[1]
-        parts = parts[2:]
-        
-        if kw == "on": mon = info
-        if kw == "do": action = info
-        if kw == "with": test = info
-
-        if len(parts) == 1:
-            raise Exception("unknown argument {}".format(parts[0]))
-
-    
-    if mon == None: mon = "all"
-    test = mod_state.parse(test)
-    action = mod_action.parse(action)
-    mon = mod_monitor.parse(test, action, mon)
-    
-    return mon
-
 
 from actuator.flexer import FlexParser, SequenceParserMixin, PrimitivesParserMixin
 
 #A Sequence PARSER for reading values or sequences of values
 class ActuatorExpressionMixin:
     def __init__(self):
-        self._add_token_hook("act.state", lambda t: t == "with", lambda: self.parse_state())
-        self._add_token_hook("act.action", lambda t: t == "do", lambda: self.parse_action())
-        self._add_token_hook("act.monitor", lambda t: t == "on", lambda: self.parse_monitor())
+        self._add_token_hook("act.state", lambda t: t == KW_STATE, lambda: self.parse_state())
+        self._add_token_hook("act.action", lambda t: t == KW_ACTION, lambda: self.parse_action())
+        self._add_token_hook("act.monitor", lambda t: t == KW_MONITOR, lambda: self.parse_monitor())
         
         from actuator import state
         self.add_instruction_hooks(state.instructions().keys())
@@ -137,15 +110,15 @@ class ActuatorExpressionMixin:
     #Parses a list of items.
     def parse_state(self):
         from actuator import state
-        return self.parse_instruction('with', lambda t: t in state.instructions().keys(), state.build)
+        return self.parse_instruction(KW_STATE, lambda t: t in state.instructions().keys(), state.build)
     
     def parse_action(self):
         from actuator import action
-        return self.parse_instruction('do', lambda t: t in action.instructions().keys(), action.build)
+        return self.parse_instruction(KW_ACTION, lambda t: t in action.instructions().keys(), action.build)
     
     def parse_monitor(self):
         from actuator import monitor
-        return self.parse_instruction('on', lambda t: t in monitor.instructions().keys(), monitor.build)
+        return self.parse_instruction(KW_MONITOR, lambda t: t in monitor.instructions().keys(), monitor.build)
         
             
         
@@ -188,6 +161,8 @@ def parse_actuator_expression(exp):
     
     if not 'monitor' in result:
         result['monitor'] = mod_monitor.StartMonitor({})
+    if not 'action' in result:
+        result['action'] = mod_action.PrintState({})
     
     return result
     

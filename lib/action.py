@@ -8,7 +8,7 @@ def instructions():
         "sh": ShellRunner,
         "printif": PrintIf,
         "printmsg": PrintRunner,
-        "printstate": PrintToggle,
+        "printstate": PrintState,
         "print": PrintAction,
     }
     
@@ -74,7 +74,7 @@ class PrintIf(Toggle):
         msg = self._true_msg if state else self._false_msg
         if msg: print(msg)
 
-class PrintToggle(Toggle):
+class PrintState(Toggle):
     def __init__(self, config):
         pass
     def toggle(self, state):

@@ -31,7 +31,14 @@ class Monitor(util.BaseClass):
 class ChangeMonitor(Monitor):
     def __init__(self, config):
         super().__init__(config)
-        
+        self._delay = config.get('delay', None)
+        if self._delay: 
+            self._delay = int(self._delay)
+    
+    @property
+    def delay(self):
+        return self._delay
+    
     def start(self, state, action):
         log.info("Starting {name} with test {test} and action {action}".format(name=self.name, test=state, action=action))
         last_state = None
@@ -42,7 +49,7 @@ class ChangeMonitor(Monitor):
                 log.info("{name} yields '{state}' ({result}), running action.".format(name=self.name, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
                 action.perform(state=new_state)
                 last_state = new_state
-            time.sleep(state.delay)
+            time.sleep(self.delay or state.delay)
 
     
 
