@@ -10,7 +10,8 @@ DELAY_LONG = 3600
 
 def instructions():
     return {
-        'hourly': TimeTester,
+        'during': DuringTester,
+        'time': TimeTester,
         'locked': GDMLockTester,
         'process': ProcessConflictTester,
         'temp': TemperatureTester,
@@ -23,6 +24,7 @@ def instructions():
         'epoch': EpochTester,
         'sh': ShellTester,
         'hash': HashTester,
+        'change': ChangeTester,
     }
 
 def build(instruction, kwargs):
@@ -184,9 +186,9 @@ class ChangeTester(DelegatingTester):
     def value(self):
         old_state = self._state
         new_state = self.inner.value
-        result = old_state == new_state
+        change = not (old_state == new_state)
         self._state = new_state
-        return result
+        return change
         
         
 class TryTester(DelegatingTester):
@@ -237,12 +239,33 @@ class GDMLockTester(Tester):
         return stdout == "yes"  
           
 
-
 class TimeTester(Tester):
     def __init__(self, config):
         super().__init__(config)
-        self._start = int(config['start'])
-        self._end = int(config['end'])
+        self._format = config.get('format', '%H:%M:%S')
+        
+    @property
+    def delay(self): 
+        return self._delay or DELAY_SHORT
+        
+
+    #return a boolean
+    @property
+    def value(self):
+        import datetime
+        now = datetime.datetime.now().time()
+        return now.strftime(self._format)
+
+class DuringTester(Tester):
+    def __init__(self, config):
+        super().__init__(config)
+        self._start = TimeTester.parse(config['start'])
+        self._end = TimeTester.parse(config['end'])
+    
+    @staticmethod
+    def parse(s):
+        from dateutil import parser
+        return parser.parse(s).time()
     
     @property
     def delay(self): 
@@ -252,15 +275,14 @@ class TimeTester(Tester):
     @property
     def value(self):
         import datetime
-        now = datetime.datetime.now()
-        h = now.hour
+        now = datetime.datetime.now().time()
         
         if self._end < self._start:
             #end time is tomorrow
-            return self._start <= h or h < self._end
+            return self._start <= now or now < self._end
         else:
             #end time is today
-            return self._start <= h and h < self._end
+            return self._start <= now and now < self._end
         
 
 class ProcessConflictTester(Tester):

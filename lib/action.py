@@ -71,7 +71,8 @@ class PrintIf(Toggle):
         self._false_msg = config['false']
         
     def toggle(self, state):
-        print(self._true_msg if state else self._false_msg)
+        msg = self._true_msg if state else self._false_msg
+        if msg: print(msg)
 
 class PrintToggle(Toggle):
     def __init__(self, config):

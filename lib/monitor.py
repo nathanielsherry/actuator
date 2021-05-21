@@ -9,6 +9,7 @@ def instructions():
         "change": ChangeMonitor,
         "loop": LoopMonitor,
         "start": StartMonitor,
+        "true": TrueStateMonitor,
     }
     
 
@@ -54,6 +55,16 @@ class LoopMonitor(Monitor):
             action.perform(state=tester.value)
             time.sleep(tester.delay)
             
+
+class TrueStateMonitor(Monitor):
+    def __init__(self, config):
+        super().__init__(config)
+        
+    def start(self, tester, action):
+        while True:
+            state=tester.value
+            if state == True: action.perform()
+            time.sleep(tester.delay)
 
 class StartMonitor(Monitor):
     def __init__(self, config):

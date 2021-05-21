@@ -7,7 +7,7 @@ LEVEL_DEBUG = 700
 LEVEL_TRACE = 900
 
 
-level = LEVEL_INFO
+level = LEVEL_WARN
 
 def error(msg):
     if level < LEVEL_ERROR: return
