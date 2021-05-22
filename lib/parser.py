@@ -143,7 +143,7 @@ def parse_actuator_expression(exp):
             raise Exception("Found unrecognised component")
     
     if not 'monitor' in result:
-        result['monitor'] = mod_monitor.StartMonitor({})
+        result['monitor'] = mod_monitor.LoopMonitor({'delay': '2'})
     if not 'action' in result:
         result['action'] = mod_action.PrintState({})
     
