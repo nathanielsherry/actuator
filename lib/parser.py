@@ -15,24 +15,6 @@ def twosplit(s, delim):
         second = parts[1]
     return first, second
 
-#Reads an arg as comma separated k=v pairs 
-def parse_args_kv(arg):
-    if arg == None: return {}
-    params = parse_args_list(arg)
-    parameters = {}
-    for param in params:
-        key, value = twosplit(param, "=")
-        parameters[key] = value
-    return parameters
-
-#Reads an arg as comma separated list 
-def parse_args_list(arg):
-    if arg == None: return []
-    return arg.split(",")
-
-def parse_actuator_expression_shell(args):
-    return parse_actuator_expression(" ".join(args))
-    
 
 from actuator.flexer import FlexParser, SequenceParserMixin, PrimitivesParserMixin
 
@@ -133,7 +115,8 @@ class ActuatorParser(FlexParser, SequenceParserMixin, PrimitivesParserMixin, Act
         
 
 
-
+def parse_actuator_expression_shell(args):
+    return parse_actuator_expression(" ".join(args))
 
 def parse_actuator_expression(exp): 
     from actuator import state as mod_state
@@ -142,7 +125,7 @@ def parse_actuator_expression(exp):
 
     f = ActuatorParser(exp)
     parts = f.parse()
-    result = {}
+    result = {'expression': exp}
     for part in parts:
         if isinstance(part, mod_state.State):
             if 'state' in result:
@@ -166,23 +149,4 @@ def parse_actuator_expression(exp):
     
     return result
     
-
-def build_from_info(arg, lookup):
-    chain = arg.split(INSTRUCTION_SEPARATOR)
-    
-    inner = None
-    if len(chain) > 1:
-        inner = build_from_info(INSTRUCTION_SEPARATOR.join(chain[:-1]), lookup)
-        arg = chain[-1]
-    
-    instruction, config = twosplit(arg, PARAM_SEPARATOR)
-    mode = lookup[instruction][1]
-    if mode == 'args':
-        config = {'args': parse_args_list(config)}
-    elif mode == 'kwargs':
-        config = parse_args_kv(config)
-    if inner: config['inner'] = inner
-    
-    return lookup[instruction][0](config)
-
 

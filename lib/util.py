@@ -38,3 +38,21 @@ class BaseClass:
         return "<{name}>".format(name=self.name)
     def __str__(self):
         return self.name
+    
+    
+__shutdown_hooks = []
+def add_shutdown_hook(hook):
+    global __shutdown_hooks
+    __shutdown_hooks.append(hook)
+    
+def run_shutdown_hooks():
+    for hook in __shutdown_hooks:
+        hook()
+        
+__globals = {}
+def set_global(k, v):
+    global __globals
+    __globals[k] = v
+    
+def get_global(k, default=None):
+    return __globals.get(k, default)

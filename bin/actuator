@@ -4,7 +4,7 @@ import subprocess
 import time
 import sys
 
-from actuator import log, parser
+from actuator import log, parser, util
 
 
 if __name__ == "__main__":
@@ -13,5 +13,12 @@ if __name__ == "__main__":
     tester = components['state']
     action = components['action']
     monitor = components['monitor']
-    monitor.start(tester, action)
+    util.set_global('expression', components['expression'])
+    
+    try:
+        monitor.start(tester, action)
+    except KeyboardInterrupt:
+        pass
+    
+    util.run_shutdown_hooks()
 
