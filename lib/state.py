@@ -3,8 +3,8 @@ import subprocess
 from actuator import log, util, parser
 
 
-DELAY_SHORT = 10
-DELAY_MEDIUM = 120
+DELAY_SHORT = 2
+DELAY_MEDIUM = 60
 DELAY_LONG = 3600
 
 
