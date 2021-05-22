@@ -8,7 +8,6 @@ def instructions():
         "sh": ShellRunner,
         "printif": PrintIf,
         "printmsg": PrintRunner,
-        "printstate": PrintState,
         "print": PrintAction,
         "curses": NCursesAction,
     }
@@ -68,9 +67,15 @@ class PrintAction(Action):
     def __init__(self, config):
         super().__init__(config)
     def perform(self, **kwargs):
-        import pprint
-        pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(kwargs)
+        if len(kwargs) == 1 and 'state' in kwargs:
+            kwargs = kwargs['state']
+            
+        if isinstance(kwargs, str):
+            print(kwargs)
+        else:
+            import pprint
+            pp = pprint.PrettyPrinter(indent=4)
+            pp.pprint(kwargs)
 
 class PrintIf(Toggle):
     def __init__(self, config):
@@ -80,13 +85,7 @@ class PrintIf(Toggle):
     def toggle(self, state):
         msg = self._true_msg if state else self._false_msg
         if msg: print(msg)
-
-class PrintState(Toggle):
-    def __init__(self, config):
-        super().__init__(config)
-    def toggle(self, state):
-        print(state)
-        
+      
 class PrintRunner(Runner):
     def __init__(self, config):
         super().__init__(config)
