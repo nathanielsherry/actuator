@@ -8,6 +8,7 @@ from actuator import log, parser, util
 
 
 if __name__ == "__main__":
+    log.level = log.LEVEL_INFO
     
     components = parser.parse_actuator_expression_shell(sys.argv[1:])
     tester = components['state']
@@ -19,6 +20,7 @@ if __name__ == "__main__":
         monitor.start(tester, action)
     except KeyboardInterrupt:
         pass
+    
     
     util.run_shutdown_hooks()
 

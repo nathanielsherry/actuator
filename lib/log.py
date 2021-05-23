@@ -10,17 +10,17 @@ LEVEL_TRACE = 900
 level = LEVEL_WARN
 
 def error(msg):
-    if level < LEVEL_ERROR: return
+    if level <= LEVEL_ERROR: return
     print(msg, flush=True)
 
 def warn(msg):
-    if level < LEVEL_WARN: return
+    if level <= LEVEL_WARN: return
     print(msg, flush=True)
 
 def info(msg):
-    if level < LEVEL_INFO: return
+    if level <= LEVEL_INFO: return
     print(msg, flush=True)
     
 def debug(msg):
-    if level < LEVEL_INFO: return
+    if level <= LEVEL_DEBUG: return
     print(msg, flush=True)
