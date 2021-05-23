@@ -1,4 +1,3 @@
-from actuator import state, action
 from . import sources, sinks
 
 def load():

@@ -8,8 +8,8 @@ def instructions():
         "sh": ShellRunner,
         "printif": PrintIf,
         "printmsg": PrintRunner,
-        "print": PrintAction,
-        "curses": NCursesAction,
+        "print": Print,
+        "curses": NCurses,
     }
     
     
@@ -18,20 +18,20 @@ def build(instruction, kwargs):
     
 
 
-class Action(util.BaseClass):
+class Sink(util.BaseClass):
     def __init__(self, config):
         super().__init__(config)
         
     def perform(self, **kwargs):
         raise Exception("Unimplemented")
 
-class Toggle(Action):
+class ToggleSink(Sink):
     def perform(self, **kwargs):
         return self.toggle(kwargs['state'])
     def toggle(self, state):
         raise Exception("Unimplemented")
 
-class Runner(Action):
+class RunnerSink(Sink):
     def perform(self, **kwargs):
         self.run()
     def run(self):
@@ -40,7 +40,7 @@ class Runner(Action):
 
 
 #Runs an arbitrary shell command on activation
-class ShellRunner(Runner):
+class ShellRunner(RunnerSink):
     def __init__(self, config):
         super().__init__(config)
         self._args = config['args']
@@ -53,7 +53,7 @@ class ShellRunner(Runner):
         subprocess.run(self._args, shell=self._shell)
         
         
-class SystemdToggle(Toggle):
+class SystemdToggle(ToggleSink):
     def __init__(self, config):
         self._service = config['service']
         
@@ -63,7 +63,7 @@ class SystemdToggle(Toggle):
         
         
        
-class PrintAction(Action):
+class Print(Sink):
     def __init__(self, config):
         super().__init__(config)
     def perform(self, **kwargs):
@@ -77,7 +77,7 @@ class PrintAction(Action):
             pp = pprint.PrettyPrinter(indent=4)
             pp.pprint(kwargs)
 
-class PrintIf(Toggle):
+class PrintIf(ToggleSink):
     def __init__(self, config):
         self._true_msg = config['true']
         self._false_msg = config['false']
@@ -86,7 +86,7 @@ class PrintIf(Toggle):
         msg = self._true_msg if state else self._false_msg
         if msg: print(msg)
       
-class PrintRunner(Runner):
+class PrintRunner(RunnerSink):
     def __init__(self, config):
         super().__init__(config)
         self._msg = config.get('msg', 'message')
@@ -99,7 +99,7 @@ class PrintRunner(Runner):
 
 
 import threading
-class DedicatedThreadAction(Action):
+class DedicatedThreadSink(Sink):
     def __init__(self, config):
         super().__init__(config)
         self._dedicated = None
@@ -136,12 +136,12 @@ class DedicatedThread(threading.Thread):
 
 
 
-class NCursesAction(DedicatedThreadAction):
+class NCurses(DedicatedThreadSink):
     def __init__(self, config):
         super().__init__(config)
    
     def makededicated(self): 
-        return NCursesAction.ScreenThread()
+        return NCurses.ScreenThread()
     
     def setdedicatedstate(self, kwargs): 
         self._dedicated.set_buffer(kwargs)

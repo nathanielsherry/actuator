@@ -1,8 +1,8 @@
-from actuator import action
+from actuator import sink
 import socketserver
 import http.server
 
-class WebServerSink(action.DedicatedThreadAction):
+class WebServerSink(sink.DedicatedThreadSink):
     
     def __init__(self, config):
         super().__init__(config)
@@ -15,7 +15,7 @@ class WebServerSink(action.DedicatedThreadAction):
     def setdedicatedstate(self, kwargs): 
         self._dedicated.set_state(kwargs)
             
-    class HTTPServerThread(action.DedicatedThread):
+    class HTTPServerThread(sink.DedicatedThread):
         def __init__(self, port=8080, address=''):
             super().__init__()
             self._port = port
@@ -25,7 +25,7 @@ class WebServerSink(action.DedicatedThreadAction):
         #Called when the thread starts, by the thread itself
         def run(self):
             import socketserver
-            self._server = WebServerSink.ActionRequestServer((self._address, self._port), WebServerSink.ActionRequestHandler)
+            self._server = WebServerSink.SinkRequestServer((self._address, self._port), WebServerSink.SinkRequestHandler)
             self._server.serve_forever(poll_interval=0.25)
             self._server.server_close()
             self._terminated.set()
@@ -38,22 +38,22 @@ class WebServerSink(action.DedicatedThreadAction):
         def set_state(self, contents):
             import time
             if not self._server: time.sleep(1)
-            self._server.set_action_payload(contents)
+            self._server.set_sink_payload(contents)
 
         
-    #Extend TCPServer to act as intermediary between the action and the request handler
-    class ActionRequestServer(socketserver.TCPServer):
+    #Extend TCPServer to act as intermediary between the sink and the request handler
+    class SinkRequestServer(socketserver.TCPServer):
         
-        def set_action_payload(self, payload):
-            setattr(self, 'action_payload', payload)
+        def set_sink_payload(self, payload):
+            setattr(self, 'sink_payload', payload)
             
-        def get_action_payload(self):
-            return getattr(self, 'action_payload')
+        def get_sink_payload(self):
+            return getattr(self, 'sink_payload')
         
 
-    class ActionRequestHandler(http.server.BaseHTTPRequestHandler):
+    class SinkRequestHandler(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
-            contents = self.server.get_action_payload()
+            contents = self.server.get_sink_payload()
             self.send_response(200)
             self.send_header("Content-type", "text")
             self.end_headers()

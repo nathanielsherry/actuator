@@ -185,8 +185,8 @@ class LegacyLoader(Loader):
     def scan(self):
         p = Package(None)
         
-        from actuator import action as mod_action
-        for k, v in mod_action.instructions().items():
+        from actuator import sink as mod_sink
+        for k, v in mod_sink.instructions().items():
             p.sinks.register_item(k, v)
         
         from actuator import state as mod_state

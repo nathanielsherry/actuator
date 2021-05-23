@@ -12,12 +12,12 @@ if __name__ == "__main__":
     
     components = parser.parse_actuator_expression_shell(sys.argv[1:])
     tester = components['state']
-    action = components['action']
+    sink = components['sink']
     monitor = components['monitor']
     util.set_global('expression', components['expression'])
     
     try:
-        monitor.start(tester, action)
+        monitor.start(tester, sink)
     except KeyboardInterrupt:
         pass
     

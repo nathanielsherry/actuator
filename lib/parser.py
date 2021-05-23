@@ -4,7 +4,7 @@ from actuator.package import REGISTRY
 INSTRUCTION_SEPARATOR = '::'
 PARAM_SEPARATOR = ','
 
-KW_ACTION = "do"
+KW_SINK = "do"
 KW_MONITOR = "on"
 KW_STATE = "for"
 
@@ -25,7 +25,7 @@ from actuator.flexer import FlexParser, SequenceParserMixin, PrimitivesParserMix
 class ActuatorExpressionMixin:
     def __init__(self):
         self._add_token_hook("act.state", lambda t: t == KW_STATE, lambda: self.parse_state())
-        self._add_token_hook("act.action", lambda t: t == KW_ACTION, lambda: self.parse_action())
+        self._add_token_hook("act.sink", lambda t: t == KW_SINK, lambda: self.parse_sink())
         self._add_token_hook("act.monitor", lambda t: t == KW_MONITOR, lambda: self.parse_monitor())
         
         #self.add_instruction_hooks(REGISTRY.source_names)
@@ -98,8 +98,8 @@ class ActuatorExpressionMixin:
     def parse_state(self):
         return self.parse_instruction(KW_STATE, lambda t: t in REGISTRY.source_names, REGISTRY.build_source)
     
-    def parse_action(self):
-        return self.parse_instruction(KW_ACTION, lambda t: t in REGISTRY.sink_names, REGISTRY.build_sink)
+    def parse_sink(self):
+        return self.parse_instruction(KW_SINK, lambda t: t in REGISTRY.sink_names, REGISTRY.build_sink)
     
     def parse_monitor(self):
         return self.parse_instruction(KW_MONITOR, lambda t: t in REGISTRY.monitor_names, REGISTRY.build_monitor)
@@ -122,7 +122,7 @@ def parse_actuator_expression_shell(args):
 
 def parse_actuator_expression(exp): 
     from actuator import state as mod_state
-    from actuator import action as mod_action
+    from actuator import sink as mod_sink
     from actuator import monitor as mod_monitor
 
     f = ActuatorParser(exp)
@@ -133,10 +133,10 @@ def parse_actuator_expression(exp):
             if 'state' in result:
                 raise Exception("Found more than one state")
             result['state'] = part
-        elif isinstance(part, mod_action.Action):
-            if 'action' in result:
-                raise Exception("Found more than one action")
-            result['action'] = part
+        elif isinstance(part, mod_sink.Sink):
+            if 'sink' in result:
+                raise Exception("Found more than one sink")
+            result['sink'] = part
         elif isinstance(part, mod_monitor.Monitor):
             if 'monitor' in result:
                 raise Exception("Found more than one monitor")
@@ -146,8 +146,8 @@ def parse_actuator_expression(exp):
     
     if not 'monitor' in result:
         result['monitor'] = mod_monitor.LoopMonitor({'delay': '2'})
-    if not 'action' in result:
-        result['action'] = mod_action.PrintState({})
+    if not 'sink' in result:
+        result['sink'] = mod_sink.Print({})
     
     return result
     

@@ -22,9 +22,9 @@ class Monitor(util.BaseClass):
     def __init__(self, config):
         super().__init__(config)
         self._state = None
-        self._action = None
+        self._sink = None
         
-    def start(self, state, action):
+    def start(self, state, sink):
         raise Exception("Unimplemented")
         
 
@@ -44,15 +44,15 @@ class ChangeMonitor(Monitor, MonitorDelayMixin):
     def __init__(self, config):
         super().__init__(config)
 
-    def start(self, state, action):
-        log.info("Starting {name} with test {test} and action {action}".format(name=self.name, test=state, action=action))
+    def start(self, state, sink):
+        log.info("Starting {name} with test {test} and sink {sink}".format(name=self.name, test=state, sink=sink))
         last_state = None
         new_state = None
         while True:
             new_state = state.value
             if new_state != last_state:
-                log.info("{name} yields '{state}' ({result}), running action.".format(name=self.name, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
-                action.perform(state=new_state)
+                log.info("{name} yields '{state}' ({result}), running sink.".format(name=self.name, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
+                sink.perform(state=new_state)
                 last_state = new_state
             time.sleep(self.delay or state.delay)
 
@@ -62,9 +62,9 @@ class LoopMonitor(Monitor, MonitorDelayMixin):
     def __init__(self, config):
         super().__init__(config)
     
-    def start(self, state, action):
+    def start(self, state, sink):
         while True:
-            action.perform(state=state.value)
+            sink.perform(state=state.value)
             time.sleep(self.delay or state.delay)
             
 
@@ -72,14 +72,14 @@ class TrueStateMonitor(Monitor, MonitorDelayMixin):
     def __init__(self, config):
         super().__init__(config)
         
-    def start(self, state, action):
+    def start(self, state, sink):
         while True:
-            if state.value == True: action.perform()
+            if state.value == True: sink.perform()
             time.sleep(self.delay or state.delay)
 
 class StartMonitor(Monitor):
     def __init__(self, config):
         super().__init__(config)
         
-    def start(self, state, action):
-        action.perform(state=state.value)
+    def start(self, state, sink):
+        sink.perform(state=state.value)
