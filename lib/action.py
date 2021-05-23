@@ -226,23 +226,25 @@ class WebServerAction(DedicatedThreadAction):
     def __init__(self, config):
         super().__init__(config)
         self._port = int(config.get('port', '8080'))
+        self._address = config.get('address', '')
         
     def makededicated(self): 
-        return WebServerAction.HTTPServerThread(self._port)
+        return WebServerAction.HTTPServerThread(self._port, self._address)
         
     def setdedicatedstate(self, kwargs): 
         self._dedicated.set_state(kwargs)
         
     class HTTPServerThread(DedicatedThread):
-        def __init__(self, port=8080):
+        def __init__(self, port=8080, address=''):
             super().__init__()
             self._port = port
+            self._address = address
             self._server = None
 
         #Called when the thread starts, by the thread itself
         def run(self):
             import socketserver
-            self._server = WebServerAction.ActionRequestServer(('', self._port), WebServerAction.ActionRequestHandler)
+            self._server = WebServerAction.ActionRequestServer((self._address, self._port), WebServerAction.ActionRequestHandler)
             self._server.serve_forever(poll_interval=0.25)
             self._server.server_close()
             self._terminated.set()
