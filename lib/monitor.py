@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import time
-from actuator import log, util, parser
+from actuator import log, util
 
 
 def instructions():

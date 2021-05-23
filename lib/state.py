@@ -1,6 +1,6 @@
 import time
 import subprocess
-from actuator import log, util, parser
+from actuator import log, util
 
 
 DELAY_SHORT = 2
@@ -16,7 +16,6 @@ def instructions():
         'process': ProcessConflictState,
         'temp': TemperatureState,
         'weather': WeatherState,
-        'url': URLState,
         'file': FileState,
         'cached': CachedState,
         'try': TryState,
@@ -291,7 +290,7 @@ class DuringState(State):
 class ProcessConflictState(State):
     def __init__(self, config):
         super().__init__(config)
-        self._names = parser.parse_args_list(config['names'])
+        self._names = config['args']
     
     @property
     def delay(self): 
@@ -421,23 +420,7 @@ class WeatherState(State):
         return True
 
 
-class URLState(State):
-    def __init__(self, config):
-        super().__init__(config)
-        self._url = config['args'][0]
-        self._text_only = util.parse_bool(config.get('html-to-text', 'false'))
-        
-    @property
-    def delay(self): 
-        return self._delay or DELAY_MEDIUM
-    
-    @property
-    def value(self):
-        result = util.get_url(self._url)
-        if self._text_only:
-            from html2text import html2text
-            result = html2text(result)
-        return result
+
         
 
 class FileState(State):

@@ -1,4 +1,5 @@
 from actuator import util
+from actuator.package import REGISTRY
 
 INSTRUCTION_SEPARATOR = '::'
 PARAM_SEPARATOR = ','
@@ -6,6 +7,8 @@ PARAM_SEPARATOR = ','
 KW_ACTION = "do"
 KW_MONITOR = "on"
 KW_STATE = "for"
+
+PKG_SEP = '.' 
 
 def twosplit(s, delim):
     parts = s.split(delim, maxsplit=1)
@@ -25,14 +28,9 @@ class ActuatorExpressionMixin:
         self._add_token_hook("act.action", lambda t: t == KW_ACTION, lambda: self.parse_action())
         self._add_token_hook("act.monitor", lambda t: t == KW_MONITOR, lambda: self.parse_monitor())
         
-        from actuator import state
-        self.add_instruction_hooks(state.instructions().keys())
-        
-        from actuator import action
-        self.add_instruction_hooks(action.instructions().keys())
-        
-        from actuator import monitor
-        self.add_instruction_hooks(monitor.instructions().keys())
+        #self.add_instruction_hooks(REGISTRY.source_names)
+        #self.add_instruction_hooks(REGISTRY.sink_names)
+        #self.add_instruction_hooks(REGISTRY.monitor_names)
         
     def add_instruction_hooks(self, instructions):
         for instruction in instructions:
@@ -53,7 +51,7 @@ class ActuatorExpressionMixin:
     def parse_instruction(self, key, valid_instruction, build, inner=None):
         from actuator.flexer import Symbol
         if key: key = self.flexer.pop(key)
-        instruction = self.parse_value()
+        instruction = self.parse_packagename()
         if not valid_instruction(instruction):
             raise Exception("Invalid: '{}'".format(instruction))
         args = None
@@ -87,20 +85,24 @@ class ActuatorExpressionMixin:
         else:
             return finished
         #return finished
-        
+    
+    def parse_packagename(self):
+        topname = self.parse_value().name
+        if self.flexer.pop_if('.') == PKG_SEP:
+            subname = self.parse_value().name
+            return topname + PKG_SEP + subname
+        else:
+            return topname
 
     #Parses a list of items.
     def parse_state(self):
-        from actuator import state
-        return self.parse_instruction(KW_STATE, lambda t: t in state.instructions().keys(), state.build)
+        return self.parse_instruction(KW_STATE, lambda t: t in REGISTRY.source_names, REGISTRY.build_source)
     
     def parse_action(self):
-        from actuator import action
-        return self.parse_instruction(KW_ACTION, lambda t: t in action.instructions().keys(), action.build)
+        return self.parse_instruction(KW_ACTION, lambda t: t in REGISTRY.sink_names, REGISTRY.build_sink)
     
     def parse_monitor(self):
-        from actuator import monitor
-        return self.parse_instruction(KW_MONITOR, lambda t: t in monitor.instructions().keys(), monitor.build)
+        return self.parse_instruction(KW_MONITOR, lambda t: t in REGISTRY.monitor_names, REGISTRY.build_monitor)
         
             
         
