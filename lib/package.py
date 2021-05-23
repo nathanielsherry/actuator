@@ -201,6 +201,11 @@ class HardCodedLoader(Loader):
         p = sh.load()
         self.packages.register_item(p.name, p)
         
+        from actuator.packages import print as mod_print
+        p = mod_print.load()
+        self.packages.register_item(p.name, p)
+        
+        
 class LegacyLoader(Loader):
     def scan(self):
         p = Package(None)

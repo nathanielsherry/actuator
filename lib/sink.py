@@ -5,9 +5,6 @@ from actuator import log, util
 def instructions():
     return {
         "systemd": SystemdToggle,
-        "printif": PrintIf,
-        "printmsg": PrintRunner,
-        "print": Print,
     }
     
     
@@ -49,39 +46,6 @@ class SystemdToggle(ToggleSink):
         subprocess.run(["systemctl", "start" if state == True else "stop", self._service])
         
         
-       
-class Print(Sink):
-    def __init__(self, config):
-        super().__init__(config)
-    def perform(self, **kwargs):
-        if len(kwargs) == 1 and 'state' in kwargs:
-            kwargs = kwargs['state']
-            
-        if isinstance(kwargs, str):
-            print(kwargs)
-        else:
-            import pprint
-            pp = pprint.PrettyPrinter(indent=4)
-            pp.pprint(kwargs)
-
-class PrintIf(ToggleSink):
-    def __init__(self, config):
-        self._true_msg = config['true']
-        self._false_msg = config['false']
-        
-    def toggle(self, state):
-        msg = self._true_msg if state else self._false_msg
-        if msg: print(msg)
-      
-class PrintRunner(RunnerSink):
-    def __init__(self, config):
-        super().__init__(config)
-        self._msg = config.get('msg', 'message')
-    def run(self):
-        print(self._msg, flush=True)
-        
-
-
 
 
 
