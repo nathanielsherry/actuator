@@ -90,24 +90,40 @@ class Registry:
             for packagename, package in loader.packages.contents.items():
                 for itemname, item in get_archive(package).contents.items():
                     name = ""
-                    if packagename: name += packagename + SEP
-                    name += itemname
+                    if packagename: name += packagename
+                    if packagename and itemname: name += SEP
+                    if itemname: name += itemname
                     names.append(name)
         return names
 
 
     def lookup_item(self, name, get_archive):
         if not SEP in name:
-            pkgname = None
-            itemname = name
+            #This could be one of two things. This could be a packageless 
+            #builtin or this could be a default item in a package. We
+            #try to resolve the packageless builtin first
+            
+            #Try to find this as a built-in
+            for loader in loaders:
+                package = loader.packages.get(None)
+                if package:
+                    source = get_archive(package).get(name)
+                    if source: return source
+                    
+            #Then try to find a matching package with a default item
+            for loader in loaders:
+                package = loader.packages.get(name)
+                if package:
+                    source = get_archive(package).get(None)
+                    if source: return source
+                    
         else:
             pkgname, itemname = name.split(SEP)
-        
-        for loader in loaders:
-            package = loader.packages.get(pkgname)
-            if package:
-                source = get_archive(package).get(itemname)
-                if source: return source
+            for loader in loaders:
+                package = loader.packages.get(pkgname)
+                if package:
+                    source = get_archive(package).get(itemname)
+                    if source: return source
                 
     def lookup_source(self, name):
         return self.lookup_item(name, lambda p: p.sources)
@@ -179,6 +195,10 @@ class HardCodedLoader(Loader):
     def scan(self):
         from actuator.packages import net
         p = net.load()
+        self.packages.register_item(p.name, p)
+        
+        from actuator.packages import sh
+        p = sh.load()
         self.packages.register_item(p.name, p)
         
 class LegacyLoader(Loader):
