@@ -10,6 +10,7 @@ def instructions():
         "printmsg": PrintRunner,
         "print": PrintAction,
         "curses": NCursesAction,
+        "webserver": WebServerAction,
     }
     
     
@@ -94,30 +95,78 @@ class PrintRunner(Runner):
         print(self._msg, flush=True)
         
 
+
+
+
+
 import threading
-class NCursesAction(Toggle):
-    
+class DedicatedThreadAction(Action):
     def __init__(self, config):
         super().__init__(config)
-        self._screen = None
+        self._dedicated = None
 
-    def toggle(self, state):
-        if not self._screen:
-            self._screen = NCursesAction.ScreenThread()
-            self._screen.start()
-            util.add_shutdown_hook(lambda: self._screen.terminate())
-            
-        self._screen.set_buffer(str(state))
-        
+    def perform(self, **kwargs):
+        if not self._dedicated:
+            self._dedicated = self.makededicated()
+            self._dedicated.start()
+            util.add_shutdown_hook(lambda: self._dedicated.terminate())
+        if len(kwargs) == 1 and 'state' in kwargs: kwargs = kwargs['state']
+        self.setdedicatedstate(kwargs)
+
+    def makededicated(self): raise Exception("Unimplemented")
+    def setdedicatedstate(self, kwargs): raise Exception("Unimplemented")
+
+
+
+class DedicatedThread(threading.Thread):
+    def __init__(self):
+        super().__init__()
+        self._terminated = threading.Event()
     
-    class ScreenThread(threading.Thread):
+    #Called when the thread starts by the thread itself
+    #the method should call self._terminated.set() at the end to signal
+    #that it has completed
+    def run(self): raise Exception("Unimplemented")
+    
+    #Called when the thread is asked to end, not by the thread itself.
+    #Should call self._terminated.wait() 
+    def terminate(self): raise Exception("Unimplemented")
+
+
+
+
+
+
+class NCursesAction(DedicatedThreadAction):
+    def __init__(self, config):
+        super().__init__(config)
+   
+    def makededicated(self): 
+        return NCursesAction.ScreenThread()
+    
+    def setdedicatedstate(self, kwargs): 
+        self._dedicated.set_buffer(kwargs)
+    
+    class ScreenThread(DedicatedThread):
         def __init__(self):
             super().__init__()
             self._buffer = ""
             self._event = threading.Event()
             self._screen = None
             self._terminating = False
-            self._terminated = threading.Event()
+
+        #Called when the thread starts
+        def run(self):
+            import curses
+            curses.wrapper(lambda scr: self.runscreen(scr))
+            self._terminated.set()
+        
+        #Called when the thread is asked to end
+        def terminate(self):
+            self._terminating = True
+            self._event.set()
+            self._terminated.wait()
+
         
         @property
         def screen(self): return self._screen
@@ -129,17 +178,6 @@ class NCursesAction(Toggle):
             self._buffer = text 
             self._event.set()
         
-        def terminate(self):
-            self._terminating = True
-            self._event.set()
-            self._terminated.wait()
-
-        
-        #Called when the thread starts
-        def run(self):
-            import curses
-            curses.wrapper(lambda scr: self.runscreen(scr))
-            self._terminated.set()
             
         #Called by curses.wrapper once the thread starts and the screen is initialised
         def runscreen(self, scr):
@@ -179,3 +217,63 @@ class NCursesAction(Toggle):
     
 
 
+        
+
+class WebServerAction(DedicatedThreadAction):
+    import http.server
+    import socketserver
+    
+    def __init__(self, config):
+        super().__init__(config)
+        self._port = int(config.get('port', '8080'))
+        
+    def makededicated(self): 
+        return WebServerAction.HTTPServerThread(self._port)
+        
+    def setdedicatedstate(self, kwargs): 
+        self._dedicated.set_state(kwargs)
+        
+    class HTTPServerThread(DedicatedThread):
+        def __init__(self, port=8080):
+            super().__init__()
+            self._port = port
+            self._server = None
+
+        #Called when the thread starts, by the thread itself
+        def run(self):
+            import socketserver
+            self._server = WebServerAction.ActionRequestServer(('', self._port), WebServerAction.ActionRequestHandler)
+            self._server.serve_forever(poll_interval=0.25)
+            self._server.server_close()
+            self._terminated.set()
+            
+        #Called when the thread is asked to end by some other thread
+        def terminate(self):
+            self._server.shutdown()
+            self._terminated.wait()
+        
+        def set_state(self, contents):
+            import time
+            if not self._server: time.sleep(1)
+            self._server.set_action_payload(contents)
+
+    
+    #Extend TCPServer to act as intermediary between the action and the request handler
+    class ActionRequestServer(socketserver.TCPServer):
+        
+        def set_action_payload(self, payload):
+            setattr(self, 'action_payload', payload)
+            
+        def get_action_payload(self):
+            return getattr(self, 'action_payload')
+        
+    
+    class ActionRequestHandler(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            contents = self.server.get_action_payload()
+            self.send_response(200)
+            self.send_header("Content-type", "text")
+            self.end_headers()
+            self.wfile.write(contents.encode())
+            
+            
