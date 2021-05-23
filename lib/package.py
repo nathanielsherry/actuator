@@ -194,17 +194,20 @@ class BuiltinLoader(Loader):
 class HardCodedLoader(Loader):
     def scan(self):
         from actuator.packages import net
-        p = net.load()
-        self.packages.register_item(p.name, p)
+        self.loadmod(net)
         
         from actuator.packages import sh
-        p = sh.load()
-        self.packages.register_item(p.name, p)
+        self.loadmod(sh)
         
         from actuator.packages import print as mod_print
-        p = mod_print.load()
-        self.packages.register_item(p.name, p)
+        self.loadmod(mod_print)
         
+        from actuator.packages import time as mod_time
+        self.loadmod(mod_time)
+        
+    def loadmod(self, module):
+        p = module.load()
+        self.packages.register_item(p.name, p)
         
 class LegacyLoader(Loader):
     def scan(self):

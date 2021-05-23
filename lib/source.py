@@ -10,19 +10,17 @@ DELAY_LONG = 3600
 
 def instructions():
     return {
-        'during': DuringSource,
-        'time': TimeSource,
+        'hash': HashSource,
+        'change': ChangeSource,
+        'cached': CachedSource,
+        'try': TrySource,
+        'smooth': SmoothSource,
         'locked': GDMLockSource,
         'process': ProcessConflictSource,
         'temp': TemperatureSource,
         'weather': WeatherSource,
         'file': FileSource,
-        'cached': CachedSource,
-        'try': TrySource,
-        'smooth': SmoothSource,
-        'epoch': EpochSource,
-        'hash': HashSource,
-        'change': ChangeSource,
+
     }
 
 def build(instruction, kwargs):
@@ -240,51 +238,6 @@ class GDMLockSource(Source):
         return stdout == "yes"  
           
 
-class TimeSource(Source):
-    def __init__(self, config):
-        super().__init__(config)
-        self._format = config.get('format', '%H:%M:%S')
-        
-    @property
-    def delay(self): 
-        return self._delay or DELAY_SHORT
-        
-
-    #return a boolean
-    @property
-    def value(self):
-        import datetime
-        now = datetime.datetime.now().time()
-        return now.strftime(self._format)
-
-class DuringSource(Source):
-    def __init__(self, config):
-        super().__init__(config)
-        self._start = TimeSource.parse(config['start'])
-        self._end = TimeSource.parse(config['end'])
-    
-    @staticmethod
-    def parse(s):
-        from dateutil import parser
-        return parser.parse(s).time()
-    
-    @property
-    def delay(self): 
-        return self._delay or DELAY_SHORT
-    
-    #return a boolean
-    @property
-    def value(self):
-        import datetime
-        now = datetime.datetime.now().time()
-        
-        if self._end < self._start:
-            #end time is tomorrow
-            return self._start <= now or now < self._end
-        else:
-            #end time is today
-            return self._start <= now and now < self._end
-        
 
 class ProcessConflictSource(Source):
     def __init__(self, config):
@@ -442,13 +395,7 @@ class FileSource(Source):
         return contents
 
         
-class EpochSource(Source):
-    def __init__(self, config):
-        super().__init__(config)
-        
-    @property
-    def value(self):
-        return time.time()
+
         
 
 
