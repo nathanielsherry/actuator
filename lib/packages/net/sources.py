@@ -1,7 +1,6 @@
-from actuator.state import State
-from actuator import util, state
+from actuator import util, source
 
-class URLSource(State):
+class URLSource(source.Source):
     def __init__(self, config):
         super().__init__(config)
         self._url = config['args'][0]
@@ -9,7 +8,7 @@ class URLSource(State):
         
     @property
     def delay(self): 
-        return self._delay or state.DELAY_MEDIUM
+        return self._delay or source.DELAY_MEDIUM
     
     @property
     def value(self):

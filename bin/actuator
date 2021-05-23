@@ -11,13 +11,13 @@ if __name__ == "__main__":
     log.level = log.LEVEL_INFO
     
     components = parser.parse_actuator_expression_shell(sys.argv[1:])
-    tester = components['state']
+    source = components['source']
     sink = components['sink']
     monitor = components['monitor']
     util.set_global('expression', components['expression'])
     
     try:
-        monitor.start(tester, sink)
+        monitor.start(source, sink)
     except KeyboardInterrupt:
         pass
     

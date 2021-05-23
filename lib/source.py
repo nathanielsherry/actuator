@@ -10,20 +10,20 @@ DELAY_LONG = 3600
 
 def instructions():
     return {
-        'during': DuringState,
-        'time': TimeState,
-        'locked': GDMLockState,
-        'process': ProcessConflictState,
-        'temp': TemperatureState,
-        'weather': WeatherState,
-        'file': FileState,
-        'cached': CachedState,
-        'try': TryState,
-        'smooth': SmoothState,
-        'epoch': EpochState,
-        'sh': ShellState,
-        'hash': HashState,
-        'change': ChangeState,
+        'during': DuringSource,
+        'time': TimeSource,
+        'locked': GDMLockSource,
+        'process': ProcessConflictSource,
+        'temp': TemperatureSource,
+        'weather': WeatherSource,
+        'file': FileSource,
+        'cached': CachedSource,
+        'try': TrySource,
+        'smooth': SmoothSource,
+        'epoch': EpochSource,
+        'sh': ShellSource,
+        'hash': HashSource,
+        'change': ChangeSource,
     }
 
 def build(instruction, kwargs):
@@ -31,7 +31,7 @@ def build(instruction, kwargs):
         
     
 #interface
-class State(util.BaseClass):
+class Source(util.BaseClass):
     def __init__(self, config):
         super().__init__(config)
         
@@ -51,7 +51,7 @@ class State(util.BaseClass):
     
         
 
-class AllState(State):
+class AllSource(Source):
     def __init__(self, tests):
         if any([t == None for t in tests]): 
             raise Exception("Test cannot be None")
@@ -70,7 +70,7 @@ class AllState(State):
     def name(self): return "[{}]|All".format(",".join([t.name for t in self._tests]))
 
 
-class AnyState(State):
+class AnySource(Source):
     def __init__(self, tests):
         if any([t == None for t in tests]): 
             raise Exception("Test cannot be None")
@@ -89,8 +89,8 @@ class AnyState(State):
     def name(self): return "[{}]|Any".format(",".join([t.name for t in self._tests]))
 
 
-#Simple State that takes a function and params
-class FnState(State):
+#Simple Source that takes a function and params
+class FnSource(Source):
     def __init__(self, config):
         self._fn = config['fn']
         self._parameters = config['args']
@@ -101,7 +101,7 @@ class FnState(State):
         return self._fn(**self._parameters)
 
 
-class DelegatingState(State):
+class DelegatingSource(Source):
     def __init__(self, config):
         super().__init__(config)
         self._inner = config['inner']
@@ -124,7 +124,7 @@ class DelegatingState(State):
 #Eliminates jitter from a value flapping a bit. The state starts as False and
 #will switch when consistently the opposite for `delay[state]` seconds.
 #delay is a dict with integer values for keys True and False
-class SmoothState(DelegatingState):
+class SmoothSource(DelegatingSource):
     def __init__(self, config):
         super().__init__(config)
         
@@ -157,7 +157,7 @@ class SmoothState(DelegatingState):
         return self._state
 
 
-class CachedState(DelegatingState):
+class CachedSource(DelegatingSource):
     def __init__(self, config):
         super().__init__(config)
         self._last_time = 0
@@ -170,7 +170,7 @@ class CachedState(DelegatingState):
     @property
     def value(self):
         #if it has been more than `delay` seconds since
-        #the last poll of the inner state, poll it now
+        #the last poll of the inner source, poll it now
         if time.time() > self._last_time + self.delay or self._last_value == None:
             log.debug("{name} checking inner value".format(name=self.name))
             self._last_time = time.time()
@@ -179,7 +179,7 @@ class CachedState(DelegatingState):
         return self._last_value
 
 
-class ChangeState(DelegatingState):
+class ChangeSource(DelegatingSource):
     def __init__(self, config):
         super().__init__(config)
         self._state = None
@@ -193,7 +193,7 @@ class ChangeState(DelegatingState):
         return change
         
         
-class TryState(DelegatingState):
+class TrySource(DelegatingSource):
     def __init__(self, config):
         super().__init__(config)
         self._default = config.get('default', 'false')
@@ -206,7 +206,7 @@ class TryState(DelegatingState):
             log.warn("{} threw an error, returning default value {}".format(self.inner.name, self._default))
             return self._default
 
-class HashState(DelegatingState):
+class HashSource(DelegatingSource):
     def __init__(self, config):
         super().__init__(config)
         self._algo = config.get('algo', 'md5')
@@ -224,7 +224,7 @@ class HashState(DelegatingState):
 
 
 
-class GDMLockState(State):
+class GDMLockSource(Source):
     def __init__(self, config):
         super().__init__(config)
         self._session = config['session']
@@ -241,7 +241,7 @@ class GDMLockState(State):
         return stdout == "yes"  
           
 
-class TimeState(State):
+class TimeSource(Source):
     def __init__(self, config):
         super().__init__(config)
         self._format = config.get('format', '%H:%M:%S')
@@ -258,11 +258,11 @@ class TimeState(State):
         now = datetime.datetime.now().time()
         return now.strftime(self._format)
 
-class DuringState(State):
+class DuringSource(Source):
     def __init__(self, config):
         super().__init__(config)
-        self._start = TimeState.parse(config['start'])
-        self._end = TimeState.parse(config['end'])
+        self._start = TimeSource.parse(config['start'])
+        self._end = TimeSource.parse(config['end'])
     
     @staticmethod
     def parse(s):
@@ -287,7 +287,7 @@ class DuringState(State):
             return self._start <= now and now < self._end
         
 
-class ProcessConflictState(State):
+class ProcessConflictSource(Source):
     def __init__(self, config):
         super().__init__(config)
         self._names = config['args']
@@ -309,7 +309,7 @@ class ProcessConflictState(State):
         return True
     
 
-class TemperatureState(State):
+class TemperatureSource(Source):
     def __init__(self, config):
         super().__init__(config)
         self._cutoff = float(config['cutoff'])
@@ -328,7 +328,7 @@ class TemperatureState(State):
         #    return True
 
 
-class WeatherCanadaState(State):
+class WeatherCanadaSource(Source):
     def __init__(self, config):
         super().__init__(config)
         self._province = config['province']
@@ -373,14 +373,14 @@ class WeatherCanadaState(State):
             
         return True
 
-class WeatherState(State):
+class WeatherSource(Source):
     def __init__(self, config):
         super().__init__(config)
         coords = config['coords']
         lat, lon = coords.split(',')
         lat = float(lat)
         lon = float(lon)
-        self._id = WeatherState.lookup_coords(lat, lon)
+        self._id = WeatherSource.lookup_coords(lat, lon)
         self._days = int(config.get('days', '3'))
         self._low = config.get('low', None)
         self._high = config.get('high', None)
@@ -393,7 +393,7 @@ class WeatherState(State):
     def lookup_coords(lat, lon):
         import json
         url = "https://www.metaweather.com/api/location/search/?lattlong={},{}".format(lat, lon)
-        log.debug("WeatherState looking up weather data from {}".format(url))
+        log.debug("WeatherSource looking up weather data from {}".format(url))
         doc = util.get_url(url)
         data = json.loads(doc)
         return int(data[0]['woeid'])
@@ -423,7 +423,7 @@ class WeatherState(State):
 
         
 
-class FileState(State):
+class FileSource(Source):
     def __init__(self, config):
         super().__init__(config)
         self._filename = config['args'][0]
@@ -443,7 +443,7 @@ class FileState(State):
         return contents
 
         
-class EpochState(State):
+class EpochSource(Source):
     def __init__(self, config):
         super().__init__(config)
         
@@ -452,7 +452,7 @@ class EpochState(State):
         return time.time()
         
 
-class ShellState(State):
+class ShellSource(Source):
     def __init__(self, config):
         super().__init__(config)
         self._args = config['args']

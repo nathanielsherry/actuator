@@ -6,7 +6,7 @@ PARAM_SEPARATOR = ','
 
 KW_SINK = "do"
 KW_MONITOR = "on"
-KW_STATE = "for"
+KW_SOURCE = "for"
 
 PKG_SEP = '.' 
 
@@ -24,7 +24,7 @@ from actuator.flexer import FlexParser, SequenceParserMixin, PrimitivesParserMix
 #A Sequence PARSER for reading values or sequences of values
 class ActuatorExpressionMixin:
     def __init__(self):
-        self._add_token_hook("act.state", lambda t: t == KW_STATE, lambda: self.parse_state())
+        self._add_token_hook("act.source", lambda t: t == KW_SOURCE, lambda: self.parse_source())
         self._add_token_hook("act.sink", lambda t: t == KW_SINK, lambda: self.parse_sink())
         self._add_token_hook("act.monitor", lambda t: t == KW_MONITOR, lambda: self.parse_monitor())
         
@@ -95,8 +95,8 @@ class ActuatorExpressionMixin:
             return topname
 
     #Parses a list of items.
-    def parse_state(self):
-        return self.parse_instruction(KW_STATE, lambda t: t in REGISTRY.source_names, REGISTRY.build_source)
+    def parse_source(self):
+        return self.parse_instruction(KW_SOURCE, lambda t: t in REGISTRY.source_names, REGISTRY.build_source)
     
     def parse_sink(self):
         return self.parse_instruction(KW_SINK, lambda t: t in REGISTRY.sink_names, REGISTRY.build_sink)
@@ -121,7 +121,7 @@ def parse_actuator_expression_shell(args):
     return parse_actuator_expression(" ".join(args))
 
 def parse_actuator_expression(exp): 
-    from actuator import state as mod_state
+    from actuator import source as mod_source
     from actuator import sink as mod_sink
     from actuator import monitor as mod_monitor
 
@@ -129,10 +129,10 @@ def parse_actuator_expression(exp):
     parts = f.parse()
     result = {'expression': exp}
     for part in parts:
-        if isinstance(part, mod_state.State):
-            if 'state' in result:
-                raise Exception("Found more than one state")
-            result['state'] = part
+        if isinstance(part, mod_source.Source):
+            if 'source' in result:
+                raise Exception("Found more than one source")
+            result['source'] = part
         elif isinstance(part, mod_sink.Sink):
             if 'sink' in result:
                 raise Exception("Found more than one sink")

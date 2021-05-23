@@ -189,8 +189,8 @@ class LegacyLoader(Loader):
         for k, v in mod_sink.instructions().items():
             p.sinks.register_item(k, v)
         
-        from actuator import state as mod_state
-        for k, v in mod_state.instructions().items():
+        from actuator import source as mod_source
+        for k, v in mod_source.instructions().items():
             p.sources.register_item(k, v)
             
         from actuator import monitor as mod_monitor
