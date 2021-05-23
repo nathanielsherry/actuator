@@ -143,11 +143,16 @@ def parse_actuator_expression(exp):
             result['monitor'] = part
         else:
             raise Exception("Found unrecognised component")
-    
-    if not 'monitor' in result:
-        result['monitor'] = mod_monitor.LoopMonitor({'delay': '2'})
+
     if not 'sink' in result:
-        result['sink'] = mod_sink.Print({})
+        result['sink'] = mod_sink.Print({})    
+    if not 'monitor' in result:
+        #First see if the sink has a preferred monitor
+        sinkmon = result['sink'].custom_monitor()
+        if sinkmon:
+            result['monitor'] = sinkmon
+        else:
+            result['monitor'] = mod_monitor.LoopMonitor({'delay': '2'})
     
     return result
     

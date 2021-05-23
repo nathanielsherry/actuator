@@ -19,6 +19,12 @@ class Sink(util.BaseClass):
         
     def perform(self, **kwargs):
         raise Exception("Unimplemented")
+    
+    #There are cases where the sink may want to provide
+    #its own monitor so that pull-based sink implementations
+    #such as a web server may fetch data more effectively
+    def custom_monitor(self):
+        return None
 
 class ToggleSink(Sink):
     def perform(self, **kwargs):

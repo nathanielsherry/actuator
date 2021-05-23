@@ -57,6 +57,23 @@ class ChangeMonitor(Monitor, MonitorDelayMixin):
             time.sleep(self.delay or source.delay)
 
     
+class OnDemandMonitor(Monitor):
+    def __init__(self, config):
+        super().__init__(config)
+        
+        
+    def start(self, source, sink):
+        self._source = source
+        self._sink = sink
+        #Call sink.perform once in case there's any one-time setup needed
+        self._sink.perform(state=self.demand())
+        #Block the monitor thread as if we were doing something important
+        import time
+        while True: time.sleep(1)
+        
+    def demand(self):
+        return self._source.value
+        
 
 class LoopMonitor(Monitor, MonitorDelayMixin):
     def __init__(self, config):
