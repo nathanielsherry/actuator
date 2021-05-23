@@ -4,9 +4,9 @@ from actuator.package import REGISTRY
 INSTRUCTION_SEPARATOR = '::'
 PARAM_SEPARATOR = ','
 
-KW_SINK = "do"
+KW_SINK = "to"
 KW_MONITOR = "on"
-KW_SOURCE = "for"
+KW_SOURCE = "from"
 
 PKG_SEP = '.' 
 
