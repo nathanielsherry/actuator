@@ -147,8 +147,22 @@ def parse_actuator_expression(exp, default_source=None, default_sink=None):
 
     if not 'source' in result:
         result['source'] = default_source or REGISTRY.build_source('sh.stdin', {'split': 'false'})
+    
+    start_source = result['source']
+    while mod_source.is_delegate(start_source):
+        if start_source.inner == None:
+            if default_source and not mod_source.is_delegate(default_source):
+                start_source._inner = default_source
+            else:
+                start_source._inner = REGISTRY.build_source('sh.stdin', {'split': 'false'})
+        start_source = start_source.inner
+    
+    
+
+            
     if not 'sink' in result:
         result['sink'] = default_sink or REGISTRY.build_sink('sh.stdout', {})  
+        
     if not 'monitor' in result:
         #First see if the sink has a preferred monitor
         sinkmon = result['sink'].custom_monitor()

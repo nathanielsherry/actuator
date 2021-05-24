@@ -23,6 +23,11 @@ def instructions():
         'split': SplitSource,
         'forever': ForeverSource,
         'once': OnceSource,
+        'counter': CounterSource,
+        'true': TrueSource,
+        'false': FalseSource,
+        'string': StringSource,
+        'int': IntegerSource,
     }
 
 def build(instruction, kwargs):
@@ -95,6 +100,9 @@ class DelegatingSource(Source):
     @property
     def name(self): 
         return "{}|{}".format(self.inner.name, type(self).__name__)
+
+def is_delegate(source):
+    return isinstance(source, DelegatingSource)
 
 
 #Eliminates jitter from a value flapping a bit. The state starts as False and
@@ -244,6 +252,52 @@ class HashSource(DelegatingSource):
         
 
 
+class TrueSource(Source):
+    def __init__(self, config):
+        super().__init__(config)
+        
+    @property
+    def value(self):
+        return True
+    
+class FalseSource(Source):
+    def __init__(self, config):
+        super().__init__(config)
+        
+    @property
+    def value(self):
+        return False
+    
+    
+class StringSource(Source):
+    def __init__(self, config):
+        super().__init__(config)
+        self._value = config.get('value', 'yes')
+        
+    @property
+    def value(self):
+        return self._value
+
+class IntegerSource(Source):
+    def __init__(self, config):
+        super().__init__(config)
+        self._value = int(config.get('value', '1'))
+        
+    @property
+    def value(self):
+        return self._value
+
+
+class CounterSource(Source):
+    def __init__(self, config):
+        super().__init__(config)
+        self._value = 0
+        
+    @property
+    def value(self):
+        value = self._value
+        value += 1
+        return value
 
 class GDMLockSource(Source):
     def __init__(self, config):

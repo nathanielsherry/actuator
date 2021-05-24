@@ -13,13 +13,17 @@ import sys
 args = sys.argv[1:]
 
 monitor = None
+sink = None
+source = None
+
+
 if len(args) == 1 and args[0].split(' ')[0] in parser.KEYWORDS:
     #full expression
     components = parser.parse_actuator_expression_shell(sys.argv[1:])
     source = components['source']
     sink = components['sink']
     monitor = components['monitor']
-    util.set_global('expression', components['expression'])
+    expression = components['expression']
 
 else:
 
@@ -43,7 +47,7 @@ else:
 
     #make the expression out of stdin
     expression = " ".join(args)
-    util.set_global('expression', expression)
+    
     component = parser.parse_act_expression(expression)
 
     if not component:
@@ -68,6 +72,10 @@ else:
     monitor = package.REGISTRY.build_monitor('interval', {'sleep': monitor_sleep})
 
 
+import yaml
+print(yaml.dump(source))
+
+util.set_global('expression', expression)
 
 try:
     monitor.start(source, sink)

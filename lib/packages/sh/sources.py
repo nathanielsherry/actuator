@@ -54,3 +54,6 @@ class JsonSource(source.Source):
             line = sys.stdin.readline()
             if not line: return None
             return json.loads(line.strip())
+            
+            
+

@@ -29,6 +29,7 @@ class Stdout(sink.Sink):
 
 class StdoutIf(sink.ToggleSink):
     def __init__(self, config):
+        super().__init__(config)
         self._true_msg = config['true']
         self._false_msg = config['false']
         
@@ -36,12 +37,21 @@ class StdoutIf(sink.ToggleSink):
         msg = self._true_msg if state else self._false_msg
         if msg: print(msg, flush=True)
       
+     
 class StdoutMsg(sink.RunnerSink):
     def __init__(self, config):
         super().__init__(config)
         self._msg = config.get('msg', 'message')
     def run(self):
         print(self._msg, flush=True)
+
+
+class Null(sink.Sink):
+    def __init__(self, config):
+        super().__init__(config)
+
+    def perform(self, payload):
+        pass
 
 
 class JsonSink(sink.Sink):
