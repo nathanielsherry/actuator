@@ -7,9 +7,8 @@ from actuator import log, util
 def instructions():
     return {
         "change": ChangeMonitor,
-        "loop": LoopMonitor,
-        "start": StartMonitor,
-        "true": TrueStateMonitor,
+        "interval": IntervalMonitor,
+        "once": OnceMonitor,
     }
     
 
@@ -38,6 +37,59 @@ class MonitorDelayMixin:
     def delay(self):
         return self._delay
     
+class ExitOnNoneMixin:
+    def __init__(self, config):
+        self._exit_on_none = util.parse_bool(config.get('exit', 'true'))
+        self._bool = util.parse_bool(config.get('bool', 'true'))
+            
+    @property
+    def exit_on_none(self): 
+        return self._exit_on_none
+    
+    def value_is_none(self, value):
+        if value == None: return True
+        if self._bool and value == False: return True
+
+
+#Just runs once and exits. Good starter Monitor.
+class OnceMonitor(Monitor):
+    def __init__(self, config):
+        super().__init__(config)
+        
+    def start(self, source, sink):
+        sink.perform(state=source.value)
+
+
+
+#The interval monitor runs repeatedly with a delay, optionally exiting on a 
+#None or, also optionally, False
+class IntervalMonitor(Monitor, MonitorDelayMixin, ExitOnNoneMixin):
+    def __init__(self, config):
+        super().__init__(config)
+    
+    def start(self, source, sink):
+        while True:
+            #Get the value from the source
+            value = source.value
+            
+            #if we exit on a None value, and this is one, return
+            if self.value_is_none(value) and self.exit_on_none:
+                return
+            
+            #Pass the value to the sink
+            sink.perform(state=value)
+            
+            #If this monitor has a delay defined, prefer it to the source's
+            if self.delay != None:
+                time.sleep(self.delay)
+            else:
+                time.sleep(source.delay)
+
+    def value_is_none(self, value): 
+        return value == None
+            
+
+
 #Monitors the result of a Source over time, triggering an event (callback) 
 #when the value changes, passing the new state as the single argument.
 class ChangeMonitor(Monitor, MonitorDelayMixin):
@@ -56,7 +108,9 @@ class ChangeMonitor(Monitor, MonitorDelayMixin):
                 last_state = new_state
             time.sleep(self.delay or source.delay)
 
-    
+#NOTE: This monitor is never created through the expression explicitly. Instead
+#this monitor can be returned by a sink when no monitor is specified, effectively
+#allowing the sink to override the default, not the user
 class OnDemandMonitor(Monitor):
     def __init__(self, config):
         super().__init__(config)
@@ -75,28 +129,6 @@ class OnDemandMonitor(Monitor):
         return self._source.value
         
 
-class LoopMonitor(Monitor, MonitorDelayMixin):
-    def __init__(self, config):
-        super().__init__(config)
-    
-    def start(self, source, sink):
-        while True:
-            sink.perform(state=source.value)
-            time.sleep(self.delay or source.delay)
-            
 
-class TrueStateMonitor(Monitor, MonitorDelayMixin):
-    def __init__(self, config):
-        super().__init__(config)
-        
-    def start(self, source, sink):
-        while True:
-            if source.value == True: sink.perform()
-            time.sleep(self.delay or source.delay)
 
-class StartMonitor(Monitor):
-    def __init__(self, config):
-        super().__init__(config)
-        
-    def start(self, source, sink):
-        sink.perform(state=source.value)
+

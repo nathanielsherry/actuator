@@ -152,7 +152,7 @@ def parse_actuator_expression(exp):
         if sinkmon:
             result['monitor'] = sinkmon
         else:
-            result['monitor'] = mod_monitor.LoopMonitor({'delay': '2'})
+            result['monitor'] = mod_monitor.IntervalMonitor({})
     
     return result
     
