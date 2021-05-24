@@ -61,4 +61,14 @@ class DuringSource(source.Source):
             return self._start <= now and now < self._end
         
         
+class DelaySource(source.DelegatingSource):
+    def __init__(self, config):
+        super().__init__(config)
+        
+    @property
+    def value(self):
+        import time
+        time.sleep(self.delay)
+        return self.inner.value
+    
 
