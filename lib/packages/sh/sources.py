@@ -1,5 +1,5 @@
 import subprocess
-from actuator import source
+from actuator import source, util
 
 class ShellSource(source.Source):
     def __init__(self, config):
@@ -13,3 +13,30 @@ class ShellSource(source.Source):
     def value(self):
         proc = subprocess.run(self._args, stdout=subprocess.PIPE, shell=self._shell)
         return proc.stdout.decode()
+        
+        
+class StdinSource(source.Source):
+    def __init__(self, config):
+        super().__init__(config)
+        self._all = util.parse_bool(config.get('all', 'false'))
+
+        
+    @property
+    def value(self):
+        import sys
+
+        if sys.stdin.closed: 
+            return None
+        
+        if self._all:
+            lines = []
+            for line in sys.stdin:
+                if not line: break 
+                lines.append(line.strip())
+            return "\n".join(lines)
+        else:
+            line = sys.stdin.readline()
+            if not line: return None
+            return line.strip()
+            
+            
