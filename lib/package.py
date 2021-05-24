@@ -199,9 +199,6 @@ class HardCodedLoader(Loader):
         from actuator.packages import sh
         self.loadmod(sh)
         
-        from actuator.packages import print as mod_print
-        self.loadmod(mod_print)
-        
         from actuator.packages import time as mod_time
         self.loadmod(mod_time)
         
