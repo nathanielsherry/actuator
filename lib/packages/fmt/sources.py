@@ -33,7 +33,6 @@ class ToYaml(source.DelegatingSource):
     
     @property
     def value(self):
-        print("ASDF", flush=True)
         import yaml
         if self._pretty:
             return yaml.dump(self.inner.value)

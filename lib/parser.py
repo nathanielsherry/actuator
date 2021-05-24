@@ -169,7 +169,7 @@ def parse_actuator_expression(exp, default_source=None, default_sink=None):
         if sinkmon:
             result['monitor'] = sinkmon
         else:
-            result['monitor'] = mod_monitor.IntervalMonitor({})
+            result['monitor'] = mod_monitor.OnceMonitor({})
     
     return result
     
