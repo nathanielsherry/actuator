@@ -27,15 +27,13 @@ class Monitor(util.BaseClass):
         raise Exception("Unimplemented")
         
 
-class MonitorDelayMixin:
+class MonitorSleepMixin:
     def __init__(self, config):
-        self._delay = config.get('delay', None)
-        if self._delay: 
-            self._delay = int(self._delay)
+        self._sleep = float(config.get('sleep', '1'))
             
-    @property
-    def delay(self):
-        return self._delay
+    def sleep(self):
+        import time
+        time.sleep(self._sleep)
     
 class ExitOnNoneMixin:
     def __init__(self, config):
@@ -63,7 +61,7 @@ class OnceMonitor(Monitor):
 
 #The interval monitor runs repeatedly with a delay, optionally exiting on a 
 #None or, also optionally, False
-class IntervalMonitor(Monitor, MonitorDelayMixin, ExitOnNoneMixin):
+class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
     def __init__(self, config):
         super().__init__(config)
     
@@ -79,11 +77,8 @@ class IntervalMonitor(Monitor, MonitorDelayMixin, ExitOnNoneMixin):
             #Pass the value to the sink
             sink.perform(state=value)
             
-            #If this monitor has a delay defined, prefer it to the source's
-            if self.delay != None:
-                time.sleep(self.delay)
-            else:
-                time.sleep(source.delay)
+            #sleep for the specified interval
+            self.sleep()
 
     def value_is_none(self, value): 
         return value == None
@@ -92,7 +87,7 @@ class IntervalMonitor(Monitor, MonitorDelayMixin, ExitOnNoneMixin):
 
 #Monitors the result of a Source over time, triggering an event (callback) 
 #when the value changes, passing the new state as the single argument.
-class ChangeMonitor(Monitor, MonitorDelayMixin):
+class ChangeMonitor(Monitor, MonitorSleepMixin):
     def __init__(self, config):
         super().__init__(config)
 
@@ -106,7 +101,7 @@ class ChangeMonitor(Monitor, MonitorDelayMixin):
                 log.info("{name} yields '{state}' ({result}), running sink.".format(name=self.name, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
                 sink.perform(state=new_state)
                 last_state = new_state
-            time.sleep(self.delay or source.delay)
+            self.sleep()
 
 #NOTE: This monitor is never created through the expression explicitly. Instead
 #this monitor can be returned by a sink when no monitor is specified, effectively

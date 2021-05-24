@@ -3,9 +3,9 @@ import subprocess
 from actuator import log, util
 
 
-DELAY_SHORT = 2
-DELAY_MEDIUM = 60
-DELAY_LONG = 3600
+#DELAY_SHORT = 2
+#DELAY_MEDIUM = 60
+#DELAY_LONG = 3600
 
 
 def instructions():
@@ -31,16 +31,7 @@ def build(instruction, kwargs):
 class Source(util.BaseClass):
     def __init__(self, config):
         super().__init__(config)
-        
-        self._delay = None
-        if config:
-            self._delay = config.get('delay', None)
-            if self._delay: self._delay = float(self._delay)
-    
-    @property
-    def delay(self):
-        return self._delay or DELAY_MEDIUM
-    
+           
     #return a boolean
     @property
     def value(self):
@@ -53,11 +44,7 @@ class AllSource(Source):
         if any([t == None for t in tests]): 
             raise Exception("Test cannot be None")
         self._tests = tests
-        
-    @property
-    def delay(self): 
-        return min([t.delay for t in self._tests])
-    
+            
     #return a boolean
     @property
     def value(self):
@@ -73,10 +60,6 @@ class AnySource(Source):
             raise Exception("Test cannot be None")
         self._tests = tests
         
-    @property
-    def delay(self): 
-        return min([t.delay for t in self._tests])
-    
     #return a boolean
     @property
     def value(self):
@@ -108,10 +91,6 @@ class DelegatingSource(Source):
     @property
     def inner(self):
         return self._inner
-    
-    @property
-    def delay(self):
-        return self._delay or self.inner.delay
 
     @property
     def name(self): 
@@ -125,7 +104,7 @@ class SmoothSource(DelegatingSource):
     def __init__(self, config):
         super().__init__(config)
         
-        delay = float(config.get('delay', '30'))
+        delay = float(config.get('delay', '10'))
         delay_true = float(config.get('delay-true', delay))
         delay_false = float(config.get('delay-false', delay))
         self._lag = {True: delay_true, False: delay_false}
@@ -159,10 +138,11 @@ class CachedSource(DelegatingSource):
         super().__init__(config)
         self._last_time = 0
         self._last_value = None
+        self._delay = config.get('delay', '10')
 
     @property
     def delay(self):
-        return self._delay or DELAY_MEDIUM
+        return self._delay
 
     @property
     def value(self):
@@ -226,10 +206,6 @@ class GDMLockSource(Source):
         super().__init__(config)
         self._session = config['session']
     
-    @property
-    def delay(self): 
-        return self._delay or DELAY_SHORT
-    
     #return a boolean
     @property
     def value(self):
@@ -243,11 +219,7 @@ class ProcessConflictSource(Source):
     def __init__(self, config):
         super().__init__(config)
         self._names = config['args']
-    
-    @property
-    def delay(self): 
-        return self._delay or 60
-    
+
     #return a boolean
     @property
     def value(self):
@@ -265,11 +237,7 @@ class TemperatureSource(Source):
     def __init__(self, config):
         super().__init__(config)
         self._cutoff = float(config['cutoff'])
-    
-    @property
-    def delay(self): 
-        return self._delay or 600
-    
+
     @property
     def value(self):
         #try:
@@ -293,11 +261,6 @@ class WeatherCanadaSource(Source):
         if self._high: self._high = float(self._high)
         
         log.info("{name} received initial config {config}".format(name=self.name, config=config))
-        
-        
-    @property
-    def delay(self): 
-        return self._delay or 900
     
     @property
     def value(self):
@@ -350,9 +313,6 @@ class WeatherSource(Source):
         data = json.loads(doc)
         return int(data[0]['woeid'])
 
-    @property
-    def delay(self): 
-        return self._delay or 3600
 
     @property
     def value(self):
@@ -381,10 +341,6 @@ class FileSource(Source):
         self._filename = config['args'][0]
         self._binary = util.parse_bool(config.get('binary', 'false'))
 
-    @property
-    def delay(self): 
-        return self._delay or DELAY_MEDIUM
-    
     @property
     def value(self):
         read_string = 'r'

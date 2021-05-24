@@ -7,10 +7,6 @@ class URLSource(source.Source):
         self._text_only = util.parse_bool(config.get('html-to-text', 'false'))
         
     @property
-    def delay(self): 
-        return self._delay or source.DELAY_MEDIUM
-    
-    @property
     def value(self):
         result = util.get_url(self._url)
         if self._text_only:
