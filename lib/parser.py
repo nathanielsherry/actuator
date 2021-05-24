@@ -118,10 +118,10 @@ class ActuatorParser(FlexParser, SequenceParserMixin, PrimitivesParserMixin, Act
         
 
 
-def parse_actuator_expression_shell(args):
-    return parse_actuator_expression(" ".join(args))
+def parse_actuator_expression_shell(args, default_source=None, default_sink=None):
+    return parse_actuator_expression(" ".join(args), default_source, default_sink)
 
-def parse_actuator_expression(exp): 
+def parse_actuator_expression(exp, default_source=None, default_sink=None): 
     from actuator import source as mod_source
     from actuator import sink as mod_sink
     from actuator import monitor as mod_monitor
@@ -145,8 +145,10 @@ def parse_actuator_expression(exp):
         else:
             raise Exception("Found unrecognised component")
 
+    if not 'source' in result:
+        result['source'] = default_source or REGISTRY.build_source('sh.stdin', {'split': 'false'})
     if not 'sink' in result:
-        result['sink'] = mod_sink.Print({})    
+        result['sink'] = default_sink or REGISTRY.build_sink('sh.stdout', {})  
     if not 'monitor' in result:
         #First see if the sink has a preferred monitor
         sinkmon = result['sink'].custom_monitor()
