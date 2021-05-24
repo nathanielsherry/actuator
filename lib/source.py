@@ -1,28 +1,14 @@
 import time
 import subprocess
-from actuator import log, util
-
-
-#DELAY_SHORT = 2
-#DELAY_MEDIUM = 60
-#DELAY_LONG = 3600
-
+from actuator import log, util, operator
 
 def instructions():
     return {
-        'hash': HashSource,
-        'change': ChangeSource,
-        'cached': CachedSource,
-        'try': TrySource,
-        'smooth': SmoothSource,
         'locked': GDMLockSource,
         'process': ProcessConflictSource,
         'temp': TemperatureSource,
         'weather': WeatherSource,
         'file': FileSource,
-        'split': SplitSource,
-        'forever': ForeverSource,
-        'once': OnceSource,
         'counter': CounterSource,
         'true': TrueSource,
         'false': FalseSource,
@@ -35,10 +21,13 @@ def build(instruction, kwargs):
         
     
 #interface
-class Source(util.BaseClass):
+class Source(operator.Operator):
     def __init__(self, config):
         super().__init__(config)
-           
+    
+    def set_upstream(self, upstream):
+        raise Exception("Source cannot have an upstream operator")
+
     #return a boolean
     @property
     def value(self):
@@ -101,156 +90,6 @@ class DelegatingSource(Source):
     def name(self): 
         return "{}|{}".format(self.inner.name, type(self).__name__)
 
-def is_delegate(source):
-    return isinstance(source, DelegatingSource)
-
-
-#Eliminates jitter from a value flapping a bit. The state starts as False and
-#will switch when consistently the opposite for `delay[state]` seconds.
-#delay is a dict with integer values for keys True and False
-class SmoothSource(DelegatingSource):
-    def __init__(self, config):
-        super().__init__(config)
-        
-        delay = float(config.get('delay', '10'))
-        delay_true = float(config.get('delay-true', delay))
-        delay_false = float(config.get('delay-false', delay))
-        self._lag = {True: delay_true, False: delay_false}
-        
-        self._last_time = time.time()
-        self._last = False
-        self._state = False
-
-
-    @property
-    def value(self):
-
-        #get the result from the wrapped state
-        new_result = self.inner.value
-        
-        if new_result != self._last:
-            #reset the last change time last known status
-            self._last_time = time.time()
-            self._last = new_result
-        
-        #If the state doesn't match the last `delay` seconds, flip it
-        time_delta = time.time() - self._last_time
-        if self._last != self._state and self._lag[self._last] >= time_delta:
-            self._state = self._last
-            
-        return self._state
-
-
-class CachedSource(DelegatingSource):
-    def __init__(self, config):
-        super().__init__(config)
-        self._last_time = 0
-        self._last_value = None
-        self._delay = float(config.get('delay', '10'))
-
-    @property
-    def delay(self):
-        return self._delay
-
-    @property
-    def value(self):
-        #if it has been more than `delay` seconds since
-        #the last poll of the inner source, poll it now
-        if time.time() > self._last_time + self.delay or self._last_value == None:
-            log.debug("{name} checking inner value".format(name=self.name))
-            self._last_time = time.time()
-            self._last_value = self.inner.value
-            
-        return self._last_value
-
-
-class ForeverSource(DelegatingSource):
-    def __init__(self, config):
-        super().__init__(config)
-        self._value = None
-
-    @property
-    def value(self):
-        if self._value == None:
-            self._value = self.inner.value            
-        return self._value
-
-
-class OnceSource(DelegatingSource):
-    def __init__(self, config):
-        super().__init__(config)
-        self._done = False
-
-    @property
-    def value(self):
-        if self._done: return None
-        self._done = True
-        return self.inner.value
-
-
-class ChangeSource(DelegatingSource):
-    def __init__(self, config):
-        super().__init__(config)
-        self._state = None
-
-    @property
-    def value(self):
-        old_state = self._state
-        new_state = self.inner.value
-        change = not (old_state == new_state)
-        self._state = new_state
-        return change
-
-
-class SplitSource(DelegatingSource):
-    def __init__(self, config):
-        super().__init__(config)
-        self._delim = config.get('delim', '\n')
-        self._parts = []
-
-    @property
-    def value(self):
-        while not self._parts:
-            inner_value = self.inner.value
-            if inner_value == None: return None
-            self._parts = inner_value.split(self._delim)
-        value = self._parts[0]
-        self._parts = self._parts[1:]
-        return value
-        
-        
-        
-
-        
-class TrySource(DelegatingSource):
-    def __init__(self, config):
-        super().__init__(config)
-        self._default = config.get('default', 'false')
-
-    @property
-    def value(self):
-        try:
-            return self.inner.value
-        except:
-            log.warn("{} threw an error, returning default value {}".format(self.inner.name, self._default))
-            return self._default
-
-class HashSource(DelegatingSource):
-    def __init__(self, config):
-        super().__init__(config)
-        self._algo = config.get('algo', 'md5')
-        
-    @property
-    def value(self):
-        import hashlib
-        m = hashlib.md5()
-        value = self.inner.value
-        if isinstance(value, dict):
-            value = value['state']
-        m.update(str(value).encode())
-        return m.hexdigest()
-        
-
 
 class TrueSource(Source):
     def __init__(self, config):
@@ -298,6 +137,8 @@ class CounterSource(Source):
         value = self._value
         value += 1
         return value
+
+
 
 class GDMLockSource(Source):
     def __init__(self, config):

@@ -4,6 +4,20 @@ import subprocess, threading
 
 
 #Runs an arbitrary shell command on activation
+class Shell(sink.Sink):
+    def __init__(self, config):
+        super().__init__(config)
+        self._args = config['args']
+        self._shell = False
+        if len(self._args) == 1 and ' ' in self._args[0]:
+            self._shell = True
+            
+    def perform(self, payload):
+        import subprocess
+        payload = str(payload)
+        subprocess.run(self._args, text=True, input=payload, shell=self._shell)
+
+#Runs an arbitrary shell command on activation
 class ShellRunner(sink.RunnerSink):
     def __init__(self, config):
         super().__init__(config)

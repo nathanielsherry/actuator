@@ -15,13 +15,14 @@ args = sys.argv[1:]
 monitor = None
 sink = None
 source = None
-
+operator = None
 
 if len(args) == 1 and args[0].split(' ')[0] in parser.KEYWORDS:
     #full expression
     components = parser.parse_actuator_expression_shell(sys.argv[1:])
     source = components['source']
     sink = components['sink']
+    operator = components['operator']
     monitor = components['monitor']
     expression = components['expression']
 
@@ -30,7 +31,7 @@ else:
     monitor_sleep = '1'
     default_source = package.REGISTRY.build_source('sh.jsonin', {})
     default_sink = package.REGISTRY.build_sink('sh.jsonout', {})
-
+    operator = package.REGISTRY.build_operator('noop')
 
     flags = ["--fast", "--in", "--out"]
     while args[0] in flags:
@@ -49,6 +50,7 @@ else:
     expression = " ".join(args)
     
     component = parser.parse_act_expression(expression)
+    
 
     if not component:
         print("Expected: expression")
@@ -58,7 +60,7 @@ else:
     if isinstance(component, mod_source.Source):
         source = component
         if isinstance(source, mod_source.DelegatingSource):
-            source._inner = default_source
+            source._upstream = default_source
     else:
         source = default_source
         
@@ -72,13 +74,13 @@ else:
     monitor = package.REGISTRY.build_monitor('interval', {'sleep': monitor_sleep})
 
 
-import yaml
-print(yaml.dump(source))
+#import yaml
+#print(yaml.dump(operator))
 
 util.set_global('expression', expression)
 
 try:
-    monitor.start(source, sink)
+    monitor.start(operator, sink)
 except KeyboardInterrupt:
     pass
 except BrokenPipeError:

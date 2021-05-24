@@ -43,6 +43,7 @@ class Package:
         self._sources = Archive(name)
         self._sinks = Archive(name)
         self._monitors = Archive(name)
+        self._operators = Archive(name)
     
     @property
     def name(self): return self._name
@@ -55,6 +56,9 @@ class Package:
     
     @property
     def monitors(self): return self._monitors
+    
+    @property
+    def operators(self): return self._operators
         
 
 
@@ -83,6 +87,10 @@ class Registry:
     @property
     def monitor_names(self):
        return self.item_names(lambda p: p.monitors)
+
+    @property
+    def operator_names(self):
+        return self.item_names(lambda p: p.operators)
 
     def item_names(self, get_archive):
         names = [] 
@@ -134,6 +142,8 @@ class Registry:
     def lookup_monitor(self, name):
         return self.lookup_item(name, lambda p: p.monitors)
         
+    def lookup_operator(self, name):
+        return self.lookup_item(name, lambda p: p.operators)
         
     def build_item(self, name, config, get_archive):
         item = self.lookup_item(name, get_archive)
@@ -148,6 +158,9 @@ class Registry:
         
     def build_monitor(self, name, config):
         return self.build_item(name, config, lambda p: p.monitors)
+        
+    def build_operator(self, name, config):
+        return self.build_item(name, config, lambda p: p.operators)
         
         
 
@@ -224,6 +237,10 @@ class LegacyLoader(Loader):
         from actuator import monitor as mod_monitor
         for k, v in mod_monitor.instructions().items():
             p.monitors.register_item(k, v)
+            
+        from actuator import operator as mod_operator
+        for k, v in mod_operator.instructions().items():
+            p.operators.register_item(k, v)
         
         self.packages.register_item(p.name, p)
     

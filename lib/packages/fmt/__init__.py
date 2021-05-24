@@ -1,11 +1,12 @@
-from . import sources
+from . import sources, operators
 
 def load():
     from actuator import package
     pkg = package.Package('fmt')
-    pkg.sources.register_item('tojson', sources.ToJson)
-    pkg.sources.register_item('fromjson', sources.FromJson)
-    pkg.sources.register_item('toyaml', sources.ToYaml)
-    pkg.sources.register_item('fromyaml', sources.FromYaml)
-    #pkg.sinks.register_item('serve', sinks.WebServerSink)
+
+    pkg.operators.register_item('tojson', operators.ToJson)
+    pkg.operators.register_item('fromjson', operators.FromJson)
+    pkg.operators.register_item('toyaml', operators.ToYaml)
+    pkg.operators.register_item('fromyaml', operators.FromYaml)
+
     return pkg
