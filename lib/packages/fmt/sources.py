@@ -8,10 +8,12 @@ class ToJson(source.DelegatingSource):
     @property
     def value(self):
         import json
+        value = self.inner.value
+        if value == None: return None
         if self._pretty:
-            return json.dumps(self.inner.value, indent=4)
+            return json.dumps(value, indent=4)
         else:
-            return json.dumps(self.inner.value)
+            return json.dumps(value)
 
 
 class FromJson(source.DelegatingSource):
@@ -21,7 +23,9 @@ class FromJson(source.DelegatingSource):
     @property
     def value(self):
         import json
-        value = json.loads(self.inner.value)
+        value = self.inner.value
+        if value == None: return None
+        value = json.loads(value)
         return value
         
         
@@ -34,10 +38,12 @@ class ToYaml(source.DelegatingSource):
     @property
     def value(self):
         import yaml
+        value = self.inner.value
+        if value == None: return None
         if self._pretty:
-            return yaml.dump(self.inner.value)
+            return yaml.dump(value)
         else:
-            return yaml.dump(self.inner.value)
+            return yaml.dump(value)
 
 
 class FromYaml(source.DelegatingSource):
@@ -47,4 +53,6 @@ class FromYaml(source.DelegatingSource):
     @property
     def value(self):
         import yaml
-        return yaml.load(self.inner.value)
+        value = self.inner.value
+        if value == None: return None
+        return yaml.load(value)
