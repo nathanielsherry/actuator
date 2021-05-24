@@ -8,7 +8,7 @@ def instructions():
     return {
         "change": ChangeMonitor,
         "interval": IntervalMonitor,
-        "once": OnceMonitor,
+        "start": OnceMonitor,
     }
     
 
@@ -39,6 +39,7 @@ class ExitOnNoneMixin:
     def __init__(self, config):
         self._exit_on_none = util.parse_bool(config.get('exit', 'true'))
         self._bool = util.parse_bool(config.get('bool', 'true'))
+        self._blank = util.parse_bool(config.get('blank', 'true'))
             
     @property
     def exit_on_none(self): 
@@ -47,6 +48,8 @@ class ExitOnNoneMixin:
     def value_is_none(self, value):
         if value == None: return True
         if self._bool and value == False: return True
+        if self._blank and value == '': return True
+        return False
 
 
 #Just runs once and exits. Good starter Monitor.
@@ -55,7 +58,7 @@ class OnceMonitor(Monitor):
         super().__init__(config)
         
     def start(self, source, sink):
-        sink.perform(state=source.value)
+        sink.perform(source.value)
 
 
 
@@ -69,19 +72,17 @@ class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
         while True:
             #Get the value from the source
             value = source.value
-            
+                        
             #if we exit on a None value, and this is one, return
             if self.value_is_none(value) and self.exit_on_none:
                 return
             
             #Pass the value to the sink
-            sink.perform(state=value)
+            sink.perform(value)
             
             #sleep for the specified interval
             self.sleep()
 
-    def value_is_none(self, value): 
-        return value == None
             
 
 
@@ -99,7 +100,7 @@ class ChangeMonitor(Monitor, MonitorSleepMixin):
             new_state = source.value
             if new_state != last_state:
                 log.info("{name} yields '{state}' ({result}), running sink.".format(name=self.name, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
-                sink.perform(state=new_state)
+                sink.perform(new_state)
                 last_state = new_state
             self.sleep()
 
@@ -115,7 +116,7 @@ class OnDemandMonitor(Monitor):
         self._source = source
         self._sink = sink
         #Call sink.perform once in case there's any one-time setup needed
-        self._sink.perform(state=self.demand())
+        self._sink.perform(self.demand())
         #Block the monitor thread as if we were doing something important
         import time
         while True: time.sleep(1)

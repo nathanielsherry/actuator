@@ -18,7 +18,7 @@ class ShellSource(source.Source):
 class StdinSource(source.Source):
     def __init__(self, config):
         super().__init__(config)
-        self._all = util.parse_bool(config.get('all', 'false'))
+        self._split = util.parse_bool(config.get('split', 'true'))
 
         
     @property
@@ -28,7 +28,7 @@ class StdinSource(source.Source):
         if sys.stdin.closed: 
             return None
         
-        if self._all:
+        if not self._split:
             lines = []
             for line in sys.stdin:
                 if not line: break 
@@ -39,4 +39,18 @@ class StdinSource(source.Source):
             if not line: return None
             return line.strip()
             
-            
+
+class JsonSource(source.Source):
+    def __init__(self, config):
+        super().__init__(config)
+        
+    @property
+    def value(self):
+        import sys, json
+
+        if sys.stdin.closed:
+            return None
+        else:
+            line = sys.stdin.readline()
+            if not line: return None
+            return json.loads(line.strip())

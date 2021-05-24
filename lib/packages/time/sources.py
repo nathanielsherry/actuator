@@ -61,14 +61,19 @@ class DuringSource(source.Source):
             return self._start <= now and now < self._end
         
         
-class DelaySource(source.DelegatingSource):
+class IntervalSource(source.DelegatingSource):
     def __init__(self, config):
         super().__init__(config)
-        
+        self._sleep_interval = float(config.get('sleep', '1'))
+    
+    def sleep(self):
+        import time
+        time.sleep(self._sleep_interval)
+    
     @property
     def value(self):
         import time
-        time.sleep(self.delay)
+        self.sleep()
         return self.inner.value
     
 

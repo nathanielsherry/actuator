@@ -17,7 +17,7 @@ class Sink(util.BaseClass):
     def __init__(self, config):
         super().__init__(config)
         
-    def perform(self, **kwargs):
+    def perform(self, payload):
         raise Exception("Unimplemented")
     
     #There are cases where the sink may want to provide
@@ -27,13 +27,13 @@ class Sink(util.BaseClass):
         return None
 
 class ToggleSink(Sink):
-    def perform(self, **kwargs):
-        return self.toggle(kwargs['state'])
+    def perform(self, payload):
+        return self.toggle(payload)
     def toggle(self, state):
         raise Exception("Unimplemented")
 
 class RunnerSink(Sink):
-    def perform(self, **kwargs):
+    def perform(self, payload):
         self.run()
     def run(self):
         raise Exception("Unimplemented")
@@ -47,9 +47,9 @@ class SystemdToggle(ToggleSink):
     def __init__(self, config):
         self._service = config['service']
         
-    def toggle(self, state):
+    def toggle(self, payload):
         import subprocess
-        subprocess.run(["systemctl", "start" if state == True else "stop", self._service])
+        subprocess.run(["systemctl", "start" if payload == True else "stop", self._service])
         
         
 
@@ -61,13 +61,12 @@ class DedicatedThreadSink(Sink):
         super().__init__(config)
         self._dedicated = None
 
-    def perform(self, **kwargs):
+    def perform(self, payload):
         if not self._dedicated:
             self._dedicated = self.makededicated()
             self._dedicated.start()
             util.add_shutdown_hook(lambda: self._dedicated.terminate())
-        if len(kwargs) == 1 and 'state' in kwargs: kwargs = kwargs['state']
-        self.setdedicatedstate(kwargs)
+        self.setdedicatedstate(payload)
 
     def makededicated(self): raise Exception("Unimplemented")
     def setdedicatedstate(self, kwargs): raise Exception("Unimplemented")

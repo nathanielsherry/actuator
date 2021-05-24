@@ -1,0 +1,79 @@
+#!/usr/bin/python3
+
+# actuator accepts expressions that allow composing complex pipelines with a 
+# special syntax, but we can do at least some of that with the command line
+# directly, passing data through a pipe in some common wire protocol and get:
+#
+# from sh.stdin to sh.stdout on interval(sleep="0.1")
+# act sh.stdin | act time.interval(sleep=1) | act sh.stdout
+
+
+import sys
+args = sys.argv[1:]
+
+from actuator import parser, source as mod_source, sink as mod_sink, package, util
+
+monitor = None
+
+if len(args) == 1 and args[0].split(' ') in parser.KEYWORDS:
+    #full expression
+    components = parser.parse_actuator_expression_shell(sys.argv[1:])
+    source = components['source']
+    sink = components['sink']
+    monitor = components['monitor']
+    util.set_global('expression', components['expression'])
+
+else:
+
+    monitor_sleep = '1'
+    default_source = package.REGISTRY.build_source('sh.jsonin', {})
+    default_sink = package.REGISTRY.build_sink('sh.jsonout', {})
+
+
+    flags = ["--fast", "--in", "--out"]
+    while args[0] in flags:
+        if args[0] == "--fast":
+            monitor_sleep = '0'
+            args = args[1:]
+        if args[0] == "--in":
+            default_source = package.REGISTRY.build_source('sh.stdin', {'split': 'false'})
+            args = args[1:]
+        if args[0] == "--out":
+            default_sink = package.REGISTRY.build_sink('sh.stdout', {})
+            args = args[1:]
+
+
+    #make the expression out of stdin
+    expression = " ".join(args)
+    util.set_global('expression', expression)
+    component = parser.parse_act_expression(expression)
+
+    if not component:
+        print("Expected: expression")
+        sys.exit(1)
+
+    source = None
+    if isinstance(component, mod_source.Source):
+        source = component
+        if isinstance(source, mod_source.DelegatingSource):
+            source._inner = default_source
+    else:
+        source = default_source
+        
+    sink = None
+    if isinstance(component, mod_sink.Sink):
+        sink = component
+    else:
+        sink = default_sink
+
+
+    monitor = package.REGISTRY.build_monitor('interval', {'sleep': monitor_sleep})
+
+
+
+try:
+    monitor.start(source, sink)
+except KeyboardInterrupt:
+    pass   
+    
+util.run_shutdown_hooks()

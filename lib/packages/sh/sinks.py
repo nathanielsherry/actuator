@@ -1,5 +1,6 @@
-import subprocess
-from actuator import sink
+from actuator import sink, util
+
+import subprocess, threading
 
 
 #Runs an arbitrary shell command on activation
@@ -18,16 +19,13 @@ class ShellRunner(sink.RunnerSink):
 class Stdout(sink.Sink):
     def __init__(self, config):
         super().__init__(config)
-    def perform(self, **kwargs):
-        if len(kwargs) == 1 and 'state' in kwargs:
-            kwargs = kwargs['state']
-            
-        if isinstance(kwargs, str):
-            print(kwargs, flush=True)
+    def perform(self, payload):          
+        if isinstance(payload, str):
+            print(payload, flush=True)
         else:
             import pprint
             pp = pprint.PrettyPrinter(indent=4)
-            pp.pprint(kwargs)
+            pp.pprint(payload)
 
 class StdoutIf(sink.ToggleSink):
     def __init__(self, config):
@@ -44,17 +42,25 @@ class StdoutMsg(sink.RunnerSink):
         self._msg = config.get('msg', 'message')
     def run(self):
         print(self._msg, flush=True)
-        
 
-class Curses(sink.DedicatedThreadSink):
+
+class JsonSink(sink.Sink):
+    def __init__(self, config):
+        super().__init__(config)
+    def perform(self, payload):
+        import json
+        print(json.dumps(payload), flush=True)
+
+
+class Curses(sink.DedicatedThreadSink):   
     def __init__(self, config):
         super().__init__(config)
    
     def makededicated(self): 
         return Curses.ScreenThread()
     
-    def setdedicatedstate(self, kwargs): 
-        self._dedicated.set_buffer(kwargs)
+    def setdedicatedstate(self, payload): 
+        self._dedicated.set_buffer(payload)
     
     class ScreenThread(sink.DedicatedThread):
         def __init__(self):

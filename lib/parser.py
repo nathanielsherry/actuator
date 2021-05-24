@@ -7,6 +7,7 @@ PARAM_SEPARATOR = ','
 KW_SINK = "to"
 KW_MONITOR = "on"
 KW_SOURCE = "from"
+KEYWORDS = [KW_SINK, KW_MONITOR, KW_SOURCE]
 
 PKG_SEP = '.' 
 
@@ -156,4 +157,15 @@ def parse_actuator_expression(exp):
     
     return result
     
-
+def parse_act_expression(exp):
+    if not exp: return None
+    f = ActuatorParser(exp)
+    def valid(name):
+        if name in REGISTRY.sink_names: return True
+        if name in REGISTRY.source_names: return True
+        return False
+    def build(name, config):
+        if name in REGISTRY.sink_names: return REGISTRY.build_sink(name, config)
+        if name in REGISTRY.source_names: return REGISTRY.build_source(name, config)
+        return None
+    return f.parse_instruction(None, valid, build)

@@ -6,5 +6,5 @@ def load():
     pkg.sources.register_item(None, sources.TimeSource)
     pkg.sources.register_item('epoch', sources.EpochSource)
     pkg.sources.register_item('during', sources.DuringSource)
-    pkg.sources.register_item('delay', sources.DelaySource)
+    pkg.sources.register_item('interval', sources.IntervalSource)
     return pkg

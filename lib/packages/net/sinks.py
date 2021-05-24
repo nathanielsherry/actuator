@@ -14,8 +14,8 @@ class WebServerSink(sink.DedicatedThreadSink):
     def makededicated(self): 
         return WebServerSink.HTTPServerThread(self)
         
-    def setdedicatedstate(self, kwargs):
-        self._pushstate = kwargs
+    def setdedicatedstate(self, payload):
+        self._pushstate = payload
     
     def custom_monitor(self):
         if not self._monitor: 

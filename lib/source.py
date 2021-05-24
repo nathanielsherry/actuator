@@ -20,7 +20,9 @@ def instructions():
         'temp': TemperatureSource,
         'weather': WeatherSource,
         'file': FileSource,
-
+        'split': SplitSource,
+        'forever': ForeverSource,
+        'once': OnceSource,
     }
 
 def build(instruction, kwargs):
@@ -84,9 +86,7 @@ class FnSource(Source):
 class DelegatingSource(Source):
     def __init__(self, config):
         super().__init__(config)
-        self._inner = config['inner']
-        if not self.inner:
-            raise Exception("Inner cannot be None")
+        self._inner = config.get('inner', None)
 
     @property
     def inner(self):
@@ -138,7 +138,7 @@ class CachedSource(DelegatingSource):
         super().__init__(config)
         self._last_time = 0
         self._last_value = None
-        self._delay = config.get('delay', '10')
+        self._delay = float(config.get('delay', '10'))
 
     @property
     def delay(self):
@@ -156,6 +156,30 @@ class CachedSource(DelegatingSource):
         return self._last_value
 
 
+class ForeverSource(DelegatingSource):
+    def __init__(self, config):
+        super().__init__(config)
+        self._value = None
+
+    @property
+    def value(self):
+        if self._value == None:
+            self._value = self.inner.value            
+        return self._value
+
+
+class OnceSource(DelegatingSource):
+    def __init__(self, config):
+        super().__init__(config)
+        self._done = False
+
+    @property
+    def value(self):
+        if self._done: return None
+        self._done = True
+        return self.inner.value
+
+
 class ChangeSource(DelegatingSource):
     def __init__(self, config):
         super().__init__(config)
@@ -168,7 +192,27 @@ class ChangeSource(DelegatingSource):
         change = not (old_state == new_state)
         self._state = new_state
         return change
+
+
+class SplitSource(DelegatingSource):
+    def __init__(self, config):
+        super().__init__(config)
+        self._delim = config.get('delim', '\n')
+        self._parts = []
+
+    @property
+    def value(self):
+        while not self._parts:
+            inner_value = self.inner.value
+            if inner_value == None: return None
+            self._parts = inner_value.split(self._delim)
+        value = self._parts[0]
+        self._parts = self._parts[1:]
+        return value
         
+        
+        
+
         
 class TrySource(DelegatingSource):
     def __init__(self, config):
