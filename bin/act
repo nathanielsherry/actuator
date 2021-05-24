@@ -7,15 +7,14 @@
 # from sh.stdin to sh.stdout on interval(sleep="0.1")
 # act sh.stdin | act time.interval(sleep=1) | act sh.stdout
 
+from actuator import parser, source as mod_source, sink as mod_sink, package, util
 
 import sys
 args = sys.argv[1:]
 
-from actuator import parser, source as mod_source, sink as mod_sink, package, util
 
 monitor = None
-
-if len(args) == 1 and args[0].split(' ') in parser.KEYWORDS:
+if len(args) == 1 and args[0].split(' ')[0] in parser.KEYWORDS:
     #full expression
     components = parser.parse_actuator_expression_shell(sys.argv[1:])
     source = components['source']
@@ -74,6 +73,10 @@ else:
 try:
     monitor.start(source, sink)
 except KeyboardInterrupt:
-    pass   
+    pass
+except BrokenPipeError:
+    pass
     
 util.run_shutdown_hooks()
+
+sys.stderr.close()
