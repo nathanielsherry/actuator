@@ -12,6 +12,7 @@ def instructions():
         'once': Once,
         'split': Split,
         'noop': Noop,
+        'feed': Feed
     }
     
     
@@ -154,16 +155,31 @@ class Split(Operator):
 
     @property
     def value(self):
+        value = self.upstream.value
+        if value == None: return None
+        if not isinstance(value, str): value = str(value)
+        return value.split(self._delim)
+                
+
+#Accepts a list and produces one item from that list until done, then repeats
+#TODO: expand this to cover iterables, dict kv pairs, etc
+class Feed(Operator):
+    def __init__(self, config):
+        super().__init__(config)
+        self._parts = []
+
+    @property
+    def value(self):
+        #If we're not working on a previous list, fetch the next one now
         while not self._parts:
-            upstream_value = self.upstream.value
-            if upstream_value == None: return None
-            self._parts = upstream_value.split(self._delim)
+            value = self.upstream.value
+            if value == None: return None
+            if not isinstance(value, list): value = list(value)
+            self._parts = value
+        #Return the next item in the list
         value = self._parts[0]
         self._parts = self._parts[1:]
         return value
-        
-        
-        
 
         
 class Try(Operator):
