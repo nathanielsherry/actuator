@@ -26,7 +26,7 @@ If no monitor is specified, the Sink is given the opportunity to provide one. Th
 
 ## Examples
 
-Expose machine status via REST URL:
+Expose machine status in a YAML document via REST URL:
 
     act 'from `lscpu --json` via fmt.fromjson|fmt.toyaml to net.serve'
 
