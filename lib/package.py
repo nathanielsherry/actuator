@@ -221,6 +221,9 @@ class HardCodedLoader(Loader):
         from actuator.packages import bool as mod_bool
         self.loadmod(mod_bool)
         
+        from actuator.packages import file as mod_file
+        self.loadmod(mod_file)
+        
     def loadmod(self, module):
         p = module.load()
         self.packages.register_item(p.name, p)
