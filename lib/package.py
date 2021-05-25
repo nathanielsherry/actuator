@@ -218,6 +218,9 @@ class HardCodedLoader(Loader):
         from actuator.packages import fmt as mod_fmt
         self.loadmod(mod_fmt)
         
+        from actuator.packages import bool as mod_bool
+        self.loadmod(mod_bool)
+        
     def loadmod(self, module):
         p = module.load()
         self.packages.register_item(p.name, p)

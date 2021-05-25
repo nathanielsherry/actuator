@@ -31,7 +31,7 @@ else:
     monitor_sleep = '1'
     default_source = package.REGISTRY.build_source('sh.jsonin', {})
     default_sink = package.REGISTRY.build_sink('sh.jsonout', {})
-    operator = package.REGISTRY.build_operator('noop')
+    operator = package.REGISTRY.build_operator('noop', {})
 
     flags = ["--fast", "--in", "--out"]
     while args[0] in flags:

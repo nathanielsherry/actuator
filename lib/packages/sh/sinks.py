@@ -79,12 +79,19 @@ class JsonSink(sink.Sink):
 class Curses(sink.DedicatedThreadSink):   
     def __init__(self, config):
         super().__init__(config)
+        self._monitor = None
    
     def makededicated(self): 
         return Curses.ScreenThread()
     
     def setdedicatedstate(self, payload): 
         self._dedicated.set_buffer(payload)
+    
+    def custom_monitor(self):
+        from actuator import monitor
+        if not self._monitor: 
+            self._monitor = monitor.IntervalMonitor({}) 
+        return self._monitor
     
     class ScreenThread(sink.DedicatedThread):
         def __init__(self):

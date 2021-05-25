@@ -10,8 +10,6 @@ def instructions():
         'weather': WeatherSource,
         'file': FileSource,
         'counter': CounterSource,
-        'true': TrueSource,
-        'false': FalseSource,
         'string': StringSource,
         'int': IntegerSource,
     }
@@ -91,21 +89,7 @@ class DelegatingSource(Source):
         return "{}|{}".format(self.inner.name, type(self).__name__)
 
 
-class TrueSource(Source):
-    def __init__(self, config):
-        super().__init__(config)
-        
-    @property
-    def value(self):
-        return True
-    
-class FalseSource(Source):
-    def __init__(self, config):
-        super().__init__(config)
-        
-    @property
-    def value(self):
-        return False
+
     
     
 class StringSource(Source):
