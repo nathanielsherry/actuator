@@ -36,11 +36,11 @@ Reproduce `watch` functionality:
 
     act 'from `tail -n10 /var/log/messages` to sh.curses'
 
-As with the previous example, the sink provides the Monitor, this time an interval. No operators are specified in this example.
+As with the previous example, the Sink provides the Monitor, this time an Interval. No operators are specified in this example.
 
 Poll a URL and watch for changes, printing 'True' when detected:
 
     act 'from net.url["http://www.example.com"] via change on interval(sleep=120)'
     
-This example does not specify a Sink, so the default of writing to standard out will be used.
+This example does not specify a Sink, so the default of writing to standard out is used.
     
