@@ -1,8 +1,8 @@
-# actuator
+# Actuator
 
 Actuator attempts to go beyond the pipeline model of unix processes by using a source/sink model which allows features like polling and rich data manipulation.
 
-## Model
+## Expressions
 
 Actuator expressions take the form:
 
