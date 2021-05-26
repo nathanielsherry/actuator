@@ -2,6 +2,8 @@
 
 SEP = "."
 
+from actuator import log
+
 #Generic class for storing namespaced key value items
 #This class should be used/composed rather than extended
 class Archive():
@@ -179,56 +181,34 @@ class Loader:
     def load(self, name): raise Exception("Unimplemented")
     
     
-class DirLoader(Loader):
-    def __init__(self, name, path):
-        self._name = name
+
+
+class LocalPackageLoader(Loader):
+    
+    def scan(self): 
+        import os
+        from actuator import packages
+        spec = packages.__spec__
+        path = spec.submodule_search_locations[0]
+        for entry in os.scandir(path):
+            if not entry.is_dir(): continue
+            try:
+                self.load(entry.name)
+            except:
+                log.warn("Failed to load package " + entry.name)
     
     def load(self, name):
         import importlib
         try:
-            m = importlib.__import__("actuator.packages.{}.{}".format(self._name, name))
-            return m.load()
+            m = importlib.import_module("actuator.packages.{}".format(name))
+            package = m.load()
+            self.packages.register_item(package.name, package)
         except:
-            return None
-
+            import traceback
+            log.error(traceback.format_exc())
+            raise
 
 class BuiltinLoader(Loader):
-    
-    def scan(self): raise Exception("Unimplemented")
-    
-    def load(self, name):
-        import importlib
-        try:
-            m = importlib.__import__("actuator.packages.{}".format(name))
-            return m.load()
-        except:
-            return None
-
-class HardCodedLoader(Loader):
-    def scan(self):
-        from actuator.packages import net
-        self.loadmod(net)
-        
-        from actuator.packages import sh
-        self.loadmod(sh)
-        
-        from actuator.packages import time as mod_time
-        self.loadmod(mod_time)
-        
-        from actuator.packages import fmt as mod_fmt
-        self.loadmod(mod_fmt)
-        
-        from actuator.packages import bool as mod_bool
-        self.loadmod(mod_bool)
-        
-        from actuator.packages import file as mod_file
-        self.loadmod(mod_file)
-        
-    def loadmod(self, module):
-        p = module.load()
-        self.packages.register_item(p.name, p)
-        
-class LegacyLoader(Loader):
     def scan(self):
         p = Package(None)
         
@@ -250,7 +230,7 @@ class LegacyLoader(Loader):
         
         self.packages.register_item(p.name, p)
     
-loaders = [HardCodedLoader(), LegacyLoader()]
+loaders = [LocalPackageLoader(), BuiltinLoader()]
 
 REGISTRY = Registry()
 

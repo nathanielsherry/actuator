@@ -8,7 +8,6 @@ def instructions():
         'process': ProcessConflictSource,
         'temp': TemperatureSource,
         'weather': WeatherSource,
-        'file': FileSource,
         'counter': CounterSource,
         'string': StringSource,
         'int': IntegerSource,
