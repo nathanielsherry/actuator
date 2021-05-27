@@ -43,7 +43,7 @@ class Comparison(Fetch):
         data = super().value
         forecast = data['consolidated_weather'][:self._days]
         high = max([day['max_temp'] for day in forecast])
-        low = max([day['max_temp'] for day in forecast])
+        low = max([day['min_temp'] for day in forecast])
         log.debug("{name} received weather data: high={high}, low={low}".format(name=self.name, low=low, high=high))
         
         return high, low
@@ -52,23 +52,28 @@ class Below(Comparison):
     @property
     def value(self):
         high, low = super().value
-
+        if self._low == None and self._high == None:
+            return False
         if self._low != None:
             if self._low <= low: return False
         if self._high != None:
             if self._high <= high: return False
-            
-        return False
+        
+        #No failure conditions encountered
+        return True
+        
 
 
 class Above(Comparison):
     @property
     def value(self):
         high, low = super().value
-
+        if self._low == None and self._high == None:
+            return False
         if self._low != None:
             if self._low >= low: return False
         if self._high != None:
             if self._high >= high: return False
-            
-        return False
+
+        #No failure conditions encountered
+        return True
