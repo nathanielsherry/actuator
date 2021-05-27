@@ -28,7 +28,7 @@ If no monitor is specified, the Sink is given the opportunity to provide one. Th
 
 Individual components can accept both named and positional arguments. They are provided in the following way:
 
-    component(named=value)["positional"]
+    component(named="value")["positional"]
     
 Named arguments may be provided without quotes in some occations. Because of limitations of the parser, floats and negative numbers must be provided in quotes for the time being.
 
