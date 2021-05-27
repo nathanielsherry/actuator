@@ -10,7 +10,7 @@ class Info(Source):
     @property
     def value(self):
         import subprocess
-        result = subprocess.run(['logind', 'show-session', str(self._session)], capture_output=True)
+        result = subprocess.run(['loginctl', 'show-session', str(self._session)], capture_output=True)
         if not result.returncode == 0:
             raise Exception("Cannot get status of service {}:\n{}".format(self._session, result.stderr.decode()))
         data = {}
