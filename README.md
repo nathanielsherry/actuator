@@ -1,10 +1,10 @@
 # Actuator
 
-Actuator attempts to go beyond the pipeline model of unix processes by using a source/sink model which allows features like polling and rich data manipulation.
+Actuator attempts to go beyond the pipeline model of unix processes by using a source/sink component model which allows features like polling and rich data manipulation.
 
 ## Expressions
 
-Actuator expressions take the form:
+Actuator expressions connect different types of components together, and take the form:
 
     from <source> via <operator> to <sink> on <monitor>
 
@@ -23,6 +23,14 @@ A Sink accepts data at the end of the pipeline and performs some action with it.
 The Monitor defines the repetition strategy for a pipeline. For example, with `on start`, a pipeline will fire only once, whereas with `on interval`, a pipeline will fire once per second. 
 
 If no monitor is specified, the Sink is given the opportunity to provide one. This is useful for sinks like `sh.curses` which prefers an Interval monitor, or `net.serve` which prefers an OnDemand monitor so that it may run the pipeline whenever a GET request is received.
+
+## Component Syntax
+
+Individual components can accept both named and positional arguments. They are provided in the following way:
+
+    component(named="value")["positional"]
+    
+Named arguments may be provided without quotes in some occations. Because of limitations of the parser, floats and negative numbers must be provided in quotes for the time being.
 
 ## Examples
 
