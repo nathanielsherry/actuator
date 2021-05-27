@@ -7,7 +7,6 @@ def instructions():
         'locked': GDMLockSource,
         'process': ProcessConflictSource,
         'temp': TemperatureSource,
-        'weather': WeatherSource,
         'counter': CounterSource,
         'string': StringSource,
         'int': IntegerSource,
@@ -210,48 +209,6 @@ class WeatherCanadaSource(Source):
             
         return True
 
-class WeatherSource(Source):
-    def __init__(self, config):
-        super().__init__(config)
-        coords = config['coords']
-        lat, lon = coords.split(',')
-        lat = float(lat)
-        lon = float(lon)
-        self._id = WeatherSource.lookup_coords(lat, lon)
-        self._days = int(config.get('days', '3'))
-        self._low = config.get('low', None)
-        self._high = config.get('high', None)
-        if self._low: self._low = float(self._low)
-        if self._high: self._high = float(self._high)
-        
-        log.info("{name} received initial config {config}".format(name=self.name, config=config))
-
-    @staticmethod
-    def lookup_coords(lat, lon):
-        import json
-        url = "https://www.metaweather.com/api/location/search/?lattlong={},{}".format(lat, lon)
-        log.debug("WeatherSource looking up weather data from {}".format(url))
-        doc = util.get_url(url)
-        data = json.loads(doc)
-        return int(data[0]['woeid'])
-
-
-    @property
-    def value(self):
-        import json
-        document = util.get_url("https://www.metaweather.com/api/location/{id}/".format(id=self._id))
-        data = json.loads(document)
-        forecast = data['consolidated_weather'][:self._days]
-        high = max([day['max_temp'] for day in forecast])
-        low = max([day['max_temp'] for day in forecast])
-        log.info("{name} received weather data: high={high}, low={low}".format(name=self.name, low=low, high=high))
-
-        if self._low != None:
-            if self._low <= low: return False
-        if self._high != None:
-            if self._high <= high: return False
-            
-        return True
 
 
 
