@@ -1,4 +1,4 @@
-from . import sources
+from . import sources, sinks
 
 def load():
     from actuator import package
