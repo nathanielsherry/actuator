@@ -4,7 +4,6 @@ from actuator import log, util, operator
 
 def instructions():
     return {
-        'locked': GDMLockSource,
         'process': ProcessConflictSource,
         'temp': TemperatureSource,
         'counter': CounterSource,
@@ -122,18 +121,7 @@ class CounterSource(Source):
 
 
 
-class GDMLockSource(Source):
-    def __init__(self, config):
-        super().__init__(config)
-        self._session = config['session']
-    
-    #return a boolean
-    @property
-    def value(self):
-        result = subprocess.run("loginctl show-session {} | grep LockedHint | cut -d = -f 2".format(self._session), shell=True, capture_output=True)
-        stdout = result.stdout.decode().strip()
-        return stdout == "yes"  
-          
+
 
 
 class ProcessConflictSource(Source):
