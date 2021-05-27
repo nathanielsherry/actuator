@@ -1,3 +1,5 @@
+from actuator import log
+
 def extract(o, key, _default=None):
     import six
     
@@ -8,7 +10,7 @@ def extract(o, key, _default=None):
         try:
             return o[key]
         except:
-            log("Index '%s' out of range for list '%s'\n" % (key, o))
+            log.error("Index '%s' out of range for list '%s'\n" % (key, o))
             raise
     
     if isinstance(key, six.string_types) and hasattr(o, key): return getattr(o, key)
@@ -24,6 +26,15 @@ def extractor(key, default=None):
     else:
         return lambda o: extract(o, key, default)
 
+
+#Given a list of dicts, filters the list by key == value
+def dfilter(dicts, key, value):
+    return [d for d in dicts if d.get(key, None) == value]
+
+def dfilterer(key, value):
+    return lambda dicts: dfilter(dicts, key, value)
+    
+
 def compose(*args):
     args = reversed(args)
     args = [arg if callable(arg) else extractor(arg) for arg in args]
@@ -34,18 +45,28 @@ def compose(*args):
     return reduce(_compose, args)
     
 def accessor(access_string):
-	strings = access_string.split(".")
-	
-	components = []
-	for s in strings:
-		if s.isnumeric():
-			components.append(int(s))
-		elif s[0] == '[' and s[-1] == ']':
-			components.append(mapper(s[1:-1]))
-		else:
-			components.append(s)
+    strings = access_string.split(".")
+    
+    components = []
+    for s in strings:
+        if s.isnumeric():
+            components.append(int(s))
+        elif s[0] == '[' and s[-1] == ']':
+            components.append(mapper(s[1:-1]))
+        elif s[0] == '{' and s[-1] == '}' and '=' in s:
+            #Given a list of dicts, choose the (first) one where {key=value}
+            key, value = s[1:-1].split('=', maxsplit=1)
+            components.append(dfilterer(key, value))
+        else:
+            components.append(s)
 
-	return compose(*components)
+    return compose(*components)
 
 def access(obj, access_string):
-	return accessor(access_string)(obj)
+    return accessor(access_string)(obj)
+ 
+def mapper(fn):
+    from functools import partial
+    if not callable(fn) and not fn == None: 
+        fn = extractor(fn)
+    return partial(map, fn) 
