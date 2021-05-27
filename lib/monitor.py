@@ -38,8 +38,8 @@ class MonitorSleepMixin:
 class ExitOnNoneMixin:
     def __init__(self, config):
         self._exit_on_none = util.parse_bool(config.get('exit', 'true'))
-        self._bool = util.parse_bool(config.get('bool', 'true'))
-        self._blank = util.parse_bool(config.get('blank', 'true'))
+        self._bool = util.parse_bool(config.get('bool', 'false'))
+        self._blank = util.parse_bool(config.get('blank', 'false'))
             
     @property
     def exit_on_none(self): 
@@ -70,15 +70,19 @@ class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
     
     def start(self, source, sink):
         while True:
-            #Get the value from the source
-            value = source.value
-                        
-            #if we exit on a None value, and this is one, return
-            if self.value_is_none(value) and self.exit_on_none:
-                return
-            
-            #Pass the value to the sink
-            sink.perform(value)
+            try:
+                #Get the value from the source
+                value = source.value
+                            
+                #if we exit on a None value, and this is one, return
+                if self.value_is_none(value) and self.exit_on_none:
+                    return
+                
+                #Pass the value to the sink
+                sink.perform(value)
+            except:
+                import traceback
+                log.error(traceback.formac_exc())
             
             #sleep for the specified interval
             self.sleep()
