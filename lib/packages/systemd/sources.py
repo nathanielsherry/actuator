@@ -5,7 +5,7 @@ class Info(Source):
     def __init__(self, config):
         super().__init__(config)
         log.debug("{name} received initial config {config}".format(name=self.name, config=config))
-        self._service = config['service']
+        self._service = config['args'][0]
 
     @property
     def value(self):
