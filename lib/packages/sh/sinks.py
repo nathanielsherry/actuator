@@ -68,14 +68,6 @@ class Null(sink.Sink):
         pass
 
 
-class JsonSink(sink.Sink):
-    def __init__(self, config):
-        super().__init__(config)
-    def perform(self, payload):
-        import json
-        print(json.dumps(payload), flush=True)
-
-
 class Curses(sink.DedicatedThreadSink):   
     def __init__(self, config):
         super().__init__(config)
