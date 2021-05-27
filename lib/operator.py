@@ -12,7 +12,10 @@ def instructions():
         'once': Once,
         'split': Split,
         'noop': Noop,
-        'feed': Feed
+        'feed': Feed,
+        'eq': Equals,
+        'not': Not,
+        'get': Get,
     }
     
     
@@ -47,6 +50,43 @@ class Noop(Operator):
     @property
     def value(self):
         return self.upstream.value
+
+
+class Equals(Operator):
+    def __init__(self, config):
+        super().__init__(config)
+        self._to = config['args'][0]
+
+    @property
+    def value(self):
+        value = self.upstream.value
+        if isinstance(self._to, (list, tuple)):
+            return value in self._to
+        else:
+            return value == self._to
+
+
+class Not(Operator):
+    def __init__(self, config):
+        super().__init__(config)
+
+    @property
+    def value(self):
+        value = self.upstream.value
+        return not value
+
+class Get(Operator):
+    def __init__(self, config):
+        from actuator import accessor
+        super().__init__(config)
+        self._accessor = accessor.accessor(config['args'][0])
+        
+    @property
+    def value(self):
+        value = self.upstream.value
+        return self._accessor(value)
+        
+        
         
 #Eliminates jitter from a value flapping a bit. The state starts as False and
 #will switch when consistently the opposite for `delay[state]` seconds.
