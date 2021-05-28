@@ -16,6 +16,7 @@ def instructions():
         'eq': Equals,
         'not': Not,
         'get': Get,
+        'has': Has,
     }
     
     
@@ -86,7 +87,19 @@ class Get(Operator):
         value = self.upstream.value
         return self._accessor(value)
         
+
+class Has(Operator):
+    def __init__(self, config):
+        super().__init__(config)
+        self._names = config['args']
         
+    @property
+    def value(self):
+        value = self.upstream.value
+        for name in self._names:
+            if name in value: return True
+        return False
+
         
 #Eliminates jitter from a value flapping a bit. The state starts as False and
 #will switch when consistently the opposite for `delay[state]` seconds.
