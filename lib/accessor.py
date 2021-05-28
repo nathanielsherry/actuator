@@ -28,17 +28,16 @@ def extractor(key, default=None):
 
 
 #Given a list of dicts, filters the list by key == value
-def dfilter(dicts, key, value):
-    return [d for d in dicts if d.get(key, None) == value]
+def dicts_filter(dicts, key, value):
+    return [d for d in dicts if str(extract(d, key, None)) == value]
 
-def dfilterer(key, value):
-    return lambda dicts: dfilter(dicts, key, value)
+def dicts_filterer(key, value):
+    return lambda dicts: dicts_filter(dicts, key, value)
     
 
 def compose(*args):
     args = reversed(args)
     args = [arg if callable(arg) else extractor(arg) for arg in args]
-    #args = list(map(lambda arg: arg if callable(arg) else extractor(arg), args))
     def _compose(f, g):
         return lambda *args, **kwargs: f(g(*args, **kwargs))
     from functools import reduce
@@ -52,11 +51,12 @@ def accessor(access_string):
         if s.isnumeric():
             components.append(int(s))
         elif s[0] == '[' and s[-1] == ']':
-            components.append(mapper(s[1:-1]))
-        elif s[0] == '{' and s[-1] == '}' and '=' in s:
-            #Given a list of dicts, choose the (first) one where {key=value}
-            key, value = s[1:-1].split('=', maxsplit=1)
-            components.append(dfilterer(key, value))
+            s = s[1:-1]
+            if '=' in s:
+                key, value = s.split('=', maxsplit=1)
+                components.append(dicts_filterer(key, value))
+            else:    
+                components.append(mapper(s))
         else:
             components.append(s)
 
@@ -65,8 +65,11 @@ def accessor(access_string):
 def access(obj, access_string):
     return accessor(access_string)(obj)
  
+def listmap(fn, lst):
+    return list(map(fn, lst))
+
 def mapper(fn):
     from functools import partial
     if not callable(fn) and not fn == None: 
         fn = extractor(fn)
-    return partial(map, fn) 
+    return partial(listmap, fn) 
