@@ -4,7 +4,6 @@ from actuator import log, util, operator
 
 def instructions():
     return {
-        'process': ProcessConflictSource,
         'temp': TemperatureSource,
         'counter': CounterSource,
         'string': StringSource,
@@ -124,23 +123,6 @@ class CounterSource(Source):
 
 
 
-class ProcessConflictSource(Source):
-    def __init__(self, config):
-        super().__init__(config)
-        self._names = config['args']
-
-    #return a boolean
-    @property
-    def value(self):
-        import psutil
-        if not self._names: return True
-        for proc in psutil.process_iter(['name']):
-            procname = proc.name()
-            if procname in self._names:
-                log.info("{name} found {process}".format(name=self.name, process=procname)) 
-                return False
-        return True
-    
 
 class TemperatureSource(Source):
     def __init__(self, config):
