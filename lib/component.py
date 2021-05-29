@@ -9,6 +9,7 @@ class Component:
             if supers[0] == object: break
             supers[0].__init__(self, config)
             supers = supers[1:]
+            
     @property
     def name(self): 
         return type(self).__name__
@@ -17,3 +18,12 @@ class Component:
         return "<{name}>".format(name=self.name)
     def __str__(self):
         return self.name
+    
+    @property
+    def description_data(self):
+        return self.name
+
+    @property
+    def description(self):
+        import yaml
+        return yaml.dump(self.description_data)

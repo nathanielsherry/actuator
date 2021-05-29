@@ -1,14 +1,13 @@
-from actuator import util
+from actuator import util, node
 from actuator.package import REGISTRY
 
-INSTRUCTION_SEPARATOR = '::'
-PARAM_SEPARATOR = ','
-
+EXP_SEP = ';'
 KW_SINK = "to"
 KW_MONITOR = "on"
 KW_SOURCE = "from"
 KW_OPERATOR = "via"
-KEYWORDS = [KW_SINK, KW_MONITOR, KW_SOURCE, KW_OPERATOR]
+KW_NODE = "node"
+KEYWORDS = [KW_SOURCE, KW_SINK, KW_MONITOR, KW_OPERATOR, KW_NODE]
 
 PKG_SEP = '.' 
 
@@ -31,11 +30,13 @@ class ActuatorExpressionMixin:
         self._add_token_hook("act.sink", lambda t: t == KW_SINK, lambda: self.parse_sink())
         self._add_token_hook("act.monitor", lambda t: t == KW_MONITOR, lambda: self.parse_monitor())
         self._add_token_hook("act.operator", lambda t: t == KW_OPERATOR, lambda: self.parse_operator())
+        self._add_token_hook("act.node", lambda t: t == KW_NODE, lambda: self.parse_let())
+        self._add_token_hook("act.expsep", lambda t: t == EXP_SEP, lambda: self.parse_expsep())
         
         #self.add_instruction_hooks(REGISTRY.source_names)
         #self.add_instruction_hooks(REGISTRY.sink_names)
         #self.add_instruction_hooks(REGISTRY.monitor_names)
-        
+                
     def add_instruction_hooks(self, instructions):
         for instruction in instructions:
             self.add_instruction_hook(instruction)
@@ -111,19 +112,28 @@ class ActuatorExpressionMixin:
     #Parses a list of items.
     def parse_source(self):
         source = self.parse_instruction(KW_SOURCE, lambda t: t in REGISTRY.source_names, REGISTRY.build_source)
-        return ('source', source)
+        return (KW_SOURCE, source)
     
     def parse_sink(self):
         sink = self.parse_instruction(KW_SINK, lambda t: t in REGISTRY.sink_names, REGISTRY.build_sink)
-        return ('sink', sink)
+        return (KW_SINK, sink)
     
     def parse_monitor(self):
         monitor = self.parse_instruction(KW_MONITOR, lambda t: t in REGISTRY.monitor_names, REGISTRY.build_monitor)
-        return ('monitor', monitor)
+        return (KW_MONITOR, monitor)
         
     def parse_operator(self):
         operator = self.parse_instruction(KW_OPERATOR, lambda t: t in REGISTRY.operator_names, REGISTRY.build_operator, allow_upstream=True)
-        return ('operator', operator)
+        return (KW_OPERATOR, operator)
+               
+    def parse_let(self):
+        self.flexer.pop(KW_NODE)
+        name = self.flexer.pop()
+        return (KW_NODE, name)
+        
+    def parse_expsep(self):
+        self.flexer.pop(EXP_SEP)
+        return (EXP_SEP, None)
         
         
         
@@ -136,74 +146,46 @@ class ActuatorParser(FlexParser, SequenceParserMixin, PrimitivesParserMixin, Act
         
 
 
-def parse_actuator_expression_shell(args, default_source=None, default_sink=None):
-    return parse_actuator_expression(" ".join(args), default_source, default_sink)
-
 def parse_actuator_expression(exp, default_source=None, default_sink=None): 
     from actuator import source as mod_source
     from actuator import sink as mod_sink
     from actuator import monitor as mod_monitor
     from actuator import operator as mod_operator
-
     f = ActuatorParser(exp)
     parts = f.parse()
-    result = {'expression': exp}
+    node_manager = makenodes(parts)
+
+    return node_manager
+
+def makenodes(parts):
+    data = {}
+    nodes = []
     for part in parts:
-        result[part[0]] = part[1]
-        
-        #if isinstance(part, mod_source.Source):
-        #    if 'source' in result:
-        #        raise Exception("Found more than one source")
-        #    result['source'] = part
-        #elif isinstance(part, mod_sink.Sink):
-        #    if 'sink' in result:
-        #        raise Exception("Found more than one sink")
-        #    result['sink'] = part
-        #elif isinstance(part, mod_monitor.Monitor):
-        #    if 'monitor' in result:
-        #        raise Exception("Found more than one monitor")
-        #    result['monitor'] = part
-        #else:
-        #    raise Exception("Found unrecognised component")
-
-    #Create defaults if they were not included
-    if not 'source' in result:
-        result['source'] = default_source or REGISTRY.build_source('sh.stdin', {'split': 'false'})
-    
-    if not 'operator' in result:
-        result['operator'] = REGISTRY.build_operator('noop', {})
-        
-    if not 'sink' in result:
-        result['sink'] = default_sink or REGISTRY.build_sink('sh.stdout', {}) 
-    
-    if not 'monitor' in result:
-        #First see if the sink has a preferred monitor
-        sinkmon = result['sink'].custom_monitor()
-        if sinkmon:
-            result['monitor'] = sinkmon
-        else:
-            result['monitor'] = REGISTRY.build_monitor('start', {})
-    
-    #Connect the most upstream operator to the source
-    result['operator'].upstreams[0].set_upstream(result['source'])
-    
-    #start_source = result['source']
-    #while start_source.upstream:
-    #    if default_source and not default_source.upstream:
-    #        start_source._upstream = default_source
-    #    else:
-    #        start_source._upstream = REGISTRY.build_source('sh.stdin', {'split': 'false'})
-    #    start_source = start_source.upstream
-    
-    
-
-            
-
+        key, value = part
+        if key == EXP_SEP:
+            if data: nodes.append(makenode(data))
+            data = {}
+            continue
+        if key in KEYWORDS:
+            data[key] = value
+    if data: nodes.append(makenode(data))
+    return node.NodeManager(nodes)
         
 
+def makenode(kv):
+    operator = kv.get(KW_OPERATOR, REGISTRY.build_operator('noop', {}))
+    sink = kv.get(KW_SINK, REGISTRY.build_sink('sh.stdout', {}) )
+    source = kv.get(KW_SOURCE, REGISTRY.build_source('sh.stdin', {'split': 'false'}))
+    name = kv.get(KW_NODE, None)
+    monitor = kv.get(KW_MONITOR, None)
+    #First see if the sink has a preferred monitor, then pick a default
+    if not monitor: monitor = sink.custom_monitor()
+    if not monitor: monitor = REGISTRY.build_monitor('start', {})
     
-    return result
+    return node.Node(source, sink, operator, monitor, name)
     
+
+
 def parse_act_expression(exp):
     if not exp: return None
     f = ActuatorParser(exp)

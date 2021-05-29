@@ -43,6 +43,10 @@ class Operator(component.Component):
     def value(self):
         raise Exception("Unimplemented")
         
+    @property
+    def description_data(self):
+        return self.upstreams
+        
 
 class Noop(Operator):
     def __init__(self, config):

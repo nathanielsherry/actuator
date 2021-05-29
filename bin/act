@@ -10,31 +10,17 @@ def run(log_level, expression):
     from actuator import parser, source as mod_source, sink as mod_sink, package, util, log
     import sys
 
-    monitor = None
-    sink = None
-    source = None
-    operator = None
-
     log.set_level(log_level)
 
     #full expression
-    components = parser.parse_actuator_expression(expression)
-    source = components['source']
-    sink = components['sink']
-    operator = components['operator']
-    monitor = components['monitor']
-    expression = components['expression']
-
+    node_manager = parser.parse_actuator_expression(expression)
 
     import yaml
-    log.debug("Loaded monitor: {}".format(yaml.dump(monitor)))
-    log.debug("Loaded operator: {}".format(yaml.dump(operator)))
-    log.debug("Loaded Sink: {}".format(yaml.dump(sink)))
-
+    log.debug("Loaded nodes:\n---\n {}".format(node_manager.description))
     util.set_global('expression', expression)
 
     try:
-        monitor.start(operator, sink)
+        node_manager.start()
     except KeyboardInterrupt:
         pass
     except BrokenPipeError:
