@@ -4,7 +4,7 @@ from actuator import log, util
 class Set(Sink):
     def __init__(self, config):
         super().__init__(config)
-        self._varname = config.get('args', ['default'])[0]
+        self._varname = config.get('args', [''])[0]
         self._claimed = False
 
     def claim(self):
