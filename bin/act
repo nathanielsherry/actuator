@@ -13,14 +13,14 @@ def run(log_level, expression):
     log.set_level(log_level)
 
     #full expression
-    flow_manager = parser.parse_actuator_expression(expression)
+    flowctx = parser.parse_actuator_expression(expression)
 
     import yaml
-    log.debug("Loaded flows:\n---\n {}".format(flow_manager.description))
+    log.debug("Loaded flows:\n---\n {}".format(flowctx.description))
     util.set_global('expression', expression)
 
     try:
-        flow_manager.start()
+        flowctx.start()
     except KeyboardInterrupt:
         pass
     except BrokenPipeError:

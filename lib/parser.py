@@ -153,11 +153,11 @@ def parse_actuator_expression(exp, default_source=None, default_sink=None):
     from actuator import operator as mod_operator
     f = ActuatorParser(exp)
     parts = f.parse()
-    flow_manager = makeflows(parts)
+    flowctx = makeflowctx(parts)
 
-    return flow_manager
+    return flowctx
 
-def makeflows(parts):
+def makeflowctx(parts):
     data = {}
     flows = []
     for part in parts:
@@ -169,7 +169,7 @@ def makeflows(parts):
         if key in KEYWORDS:
             data[key] = value
     if data: flows.append(makeflow(data))
-    return flow.FlowManager(flows)
+    return flow.FlowContext(flows)
         
 
 def makeflow(kv):

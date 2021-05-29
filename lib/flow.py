@@ -40,7 +40,7 @@ class Flow(component.Component):
         return data
     
         
-class FlowManager(component.Component):
+class FlowContext(component.Component):
     def __init__(self, flows):
         from actuator.flexer import Scope
         super().__init__({})
