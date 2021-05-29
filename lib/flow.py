@@ -30,6 +30,20 @@ class Flow(component.Component):
         return "{}:{}".format(self._name, super().name)
     
     @property
+    def components(self):
+        cs = [] 
+        cs.extend(self._operator.upstreams)
+        cs.append(self._monitor)
+        cs.append(self._sink)
+        return cs
+    
+    def set_context(self, context):
+        super().set_context(context)
+        for c in self.components:
+            c.set_context(context)
+            
+    
+    @property
     def description_data(self):
         data = {self.name: {
             'source': self._source.description_data,
@@ -45,6 +59,8 @@ class FlowContext(component.Component):
         from actuator.flexer import Scope
         super().__init__({})
         self._flows = flows
+        for flow in self.flows:
+            flow.set_context(self)
         self._scope = Scope(None)
     
     @property
