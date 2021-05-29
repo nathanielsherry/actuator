@@ -1,7 +1,9 @@
 from actuator import util, flow
 from actuator.package import REGISTRY
 
-EXP_SEP = ';'
+SYM_SEP = ';'
+SYM_VARSTART = '$'
+SYM_VARSEP = '.'
 KW_SINK = "to"
 KW_MONITOR = "on"
 KW_SOURCE = "from"
@@ -31,12 +33,8 @@ class ActuatorExpressionMixin:
         self._add_token_hook("act.monitor", lambda t: t == KW_MONITOR, lambda: self.parse_monitor())
         self._add_token_hook("act.operator", lambda t: t == KW_OPERATOR, lambda: self.parse_operator())
         self._add_token_hook("act.flow", lambda t: t == KW_FLOW, lambda: self.parse_flow())
-        self._add_token_hook("act.expsep", lambda t: t == EXP_SEP, lambda: self.parse_expsep())
-        
-        #self.add_instruction_hooks(REGISTRY.source_names)
-        #self.add_instruction_hooks(REGISTRY.sink_names)
-        #self.add_instruction_hooks(REGISTRY.monitor_names)
-                
+        self._add_token_hook("act.expsep", lambda t: t == SYM_SEP, lambda: self.parse_expsep())
+
     def add_instruction_hooks(self, instructions):
         for instruction in instructions:
             self.add_instruction_hook(instruction)
@@ -57,17 +55,23 @@ class ActuatorExpressionMixin:
         from actuator.flexer import Symbol
         if key: key = self.flexer.pop(key)
         
+        parseargs = True
         args = None
         kwargs = None
         #custom parsing for inline shell commands
         if self.flexer.peek().startswith('`'):
             args = [self.flexer.pop()[1:-1]]
             instruction = "sh"
+            parseargs = False
+        elif self.flexer.peek() == SYM_VARSTART:
+            args = [self.parse_var()]
+            instruction = "var"
         else:
             instruction = self.parse_packagename()
             if not valid_instruction(instruction):
                 raise Exception("Invalid: '{}'".format(instruction))
-
+                
+        if parseargs:
             while True:
                 if self.flexer.peek() == '[':
                     args = self.parse_list()
@@ -132,8 +136,19 @@ class ActuatorExpressionMixin:
         return (KW_FLOW, name)
         
     def parse_expsep(self):
-        self.flexer.pop(EXP_SEP)
-        return (EXP_SEP, None)
+        self.flexer.pop(SYM_SEP)
+        return (SYM_SEP, None)
+        
+    def parse_var(self):
+        self.flexer.pop(SYM_VARSTART)
+        keys = []
+        while True:
+            keys.append(self.flexer.pop())
+            if not self.flexer.pop_if(SYM_VARSEP) == SYM_VARSEP:
+                break
+        
+        return ".".join(keys)
+        
         
         
         
@@ -162,7 +177,7 @@ def makeflowset(parts):
     flows = []
     for part in parts:
         key, value = part
-        if key == EXP_SEP:
+        if key == SYM_SEP:
             if data: flows.append(makeflow(data))
             data = {}
             continue
