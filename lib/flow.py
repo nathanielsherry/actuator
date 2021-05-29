@@ -1,7 +1,7 @@
 from actuator import util, component
 import threading
 
-class Node(component.Component):
+class Flow(component.Component):
     def __init__(self, source, sink, operator, monitor, name):
         super().__init__({})
         self._operator = operator
@@ -40,23 +40,26 @@ class Node(component.Component):
         return data
     
         
-class NodeManager(component.Component):
-    def __init__(self, nodes):
+class FlowManager(component.Component):
+    def __init__(self, flows):
         from actuator.flexer import Scope
         super().__init__({})
-        self._nodes = nodes
+        self._flows = flows
         self._scope = Scope(None)
     
     @property
     def scope(self): return self._scope
     
+    @property
+    def flows(self): return self._flows
+    
     def start(self):
-        for node in self._nodes:
-            node.start()
-        for node in self._nodes:
-            node.join()
+        for flows in self.flows:
+            flows.start()
+        for flows in self.flows:
+            flows.join()
     
     @property
     def description_data(self):
-        return {self.name: [n.description_data for n in self._nodes]}
+        return {self.name: [n.description_data for n in self.flows]}
 

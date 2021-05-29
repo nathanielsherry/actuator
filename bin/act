@@ -13,14 +13,14 @@ def run(log_level, expression):
     log.set_level(log_level)
 
     #full expression
-    node_manager = parser.parse_actuator_expression(expression)
+    flow_manager = parser.parse_actuator_expression(expression)
 
     import yaml
-    log.debug("Loaded nodes:\n---\n {}".format(node_manager.description))
+    log.debug("Loaded flows:\n---\n {}".format(flow_manager.description))
     util.set_global('expression', expression)
 
     try:
-        node_manager.start()
+        flow_manager.start()
     except KeyboardInterrupt:
         pass
     except BrokenPipeError:

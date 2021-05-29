@@ -1,4 +1,4 @@
-from actuator import util, node
+from actuator import util, flow
 from actuator.package import REGISTRY
 
 EXP_SEP = ';'
@@ -6,8 +6,8 @@ KW_SINK = "to"
 KW_MONITOR = "on"
 KW_SOURCE = "from"
 KW_OPERATOR = "via"
-KW_NODE = "node"
-KEYWORDS = [KW_SOURCE, KW_SINK, KW_MONITOR, KW_OPERATOR, KW_NODE]
+KW_FLOW = "flow"
+KEYWORDS = [KW_SOURCE, KW_SINK, KW_MONITOR, KW_OPERATOR, KW_FLOW]
 
 PKG_SEP = '.' 
 
@@ -30,7 +30,7 @@ class ActuatorExpressionMixin:
         self._add_token_hook("act.sink", lambda t: t == KW_SINK, lambda: self.parse_sink())
         self._add_token_hook("act.monitor", lambda t: t == KW_MONITOR, lambda: self.parse_monitor())
         self._add_token_hook("act.operator", lambda t: t == KW_OPERATOR, lambda: self.parse_operator())
-        self._add_token_hook("act.node", lambda t: t == KW_NODE, lambda: self.parse_let())
+        self._add_token_hook("act.flow", lambda t: t == KW_FLOW, lambda: self.parse_flow())
         self._add_token_hook("act.expsep", lambda t: t == EXP_SEP, lambda: self.parse_expsep())
         
         #self.add_instruction_hooks(REGISTRY.source_names)
@@ -126,10 +126,10 @@ class ActuatorExpressionMixin:
         operator = self.parse_instruction(KW_OPERATOR, lambda t: t in REGISTRY.operator_names, REGISTRY.build_operator, allow_upstream=True)
         return (KW_OPERATOR, operator)
                
-    def parse_let(self):
-        self.flexer.pop(KW_NODE)
+    def parse_flow(self):
+        self.flexer.pop(KW_FLOW)
         name = self.flexer.pop()
-        return (KW_NODE, name)
+        return (KW_FLOW, name)
         
     def parse_expsep(self):
         self.flexer.pop(EXP_SEP)
@@ -153,36 +153,36 @@ def parse_actuator_expression(exp, default_source=None, default_sink=None):
     from actuator import operator as mod_operator
     f = ActuatorParser(exp)
     parts = f.parse()
-    node_manager = makenodes(parts)
+    flow_manager = makeflows(parts)
 
-    return node_manager
+    return flow_manager
 
-def makenodes(parts):
+def makeflows(parts):
     data = {}
-    nodes = []
+    flows = []
     for part in parts:
         key, value = part
         if key == EXP_SEP:
-            if data: nodes.append(makenode(data))
+            if data: flows.append(makeflow(data))
             data = {}
             continue
         if key in KEYWORDS:
             data[key] = value
-    if data: nodes.append(makenode(data))
-    return node.NodeManager(nodes)
+    if data: flows.append(makeflow(data))
+    return flow.FlowManager(flows)
         
 
-def makenode(kv):
+def makeflow(kv):
     operator = kv.get(KW_OPERATOR, REGISTRY.build_operator('noop', {}))
     sink = kv.get(KW_SINK, REGISTRY.build_sink('sh.stdout', {}) )
     source = kv.get(KW_SOURCE, REGISTRY.build_source('sh.stdin', {'split': 'false'}))
-    name = kv.get(KW_NODE, None)
+    name = kv.get(KW_FLOW, None)
     monitor = kv.get(KW_MONITOR, None)
     #First see if the sink has a preferred monitor, then pick a default
     if not monitor: monitor = sink.custom_monitor()
     if not monitor: monitor = REGISTRY.build_monitor('start', {})
     
-    return node.Node(source, sink, operator, monitor, name)
+    return flow.Flow(source, sink, operator, monitor, name)
     
 
 
