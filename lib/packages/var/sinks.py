@@ -7,16 +7,9 @@ class Set(Sink):
         self._varname = config.get('args', [''])[0]
         self._claimed = False
 
-    def claim(self):
-        if self._claimed: return
-        scope = self.context.scope
-        if not scope.claim(self._varname):
-            raise Exception("Variable '{}' already claimed".format(self._varname))
-        self._claimed = True
-
     def perform(self, payload):
-        self.claim()
         scope = self.context.scope
-        scope.set(self._varname, payload)
+        scope.set(self._varname, payload, claim=(not self._claimed))
+        self._claimed = True
         
         

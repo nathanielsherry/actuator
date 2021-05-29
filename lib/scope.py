@@ -14,10 +14,13 @@ class Scope:
         if self.has_local(key): return self.get_local(key)
         if self.parent and self.parent.has(key): return self.parent.get(key)
         raise Exception("Undefined: '%s'" % key)
-    def set(self, key, value): self._values[key] = value
+    def set(self, key, value, claim=False):
+        if claim and not self.claim(key, initial=value):
+            raise Exception("Claim failed for key {}".format(key))
+        self._values[key] = value
     def claim(self, key, initial=None):
         if not self.has_local(key):
-            self.set(key, initial)
+            self.set(key, initial, claim=False)
             return True
         else:
             return False
@@ -64,7 +67,7 @@ class NamespacedScope(Scope):
         else:
             raise Exception("Undefined: '%s'" % key)
             
-    def set(self, key, value):
+    def set(self, key, value, claim=False):
         keys = self.parse(key)
         head = keys[0]
         tail = keys[1:]
@@ -73,8 +76,8 @@ class NamespacedScope(Scope):
             if not super().has_local(head):
                 raise Exception("Undefined: {}".format(head))
             scope = super().get_local(head)
-            scope.set(tail, value)
+            scope.set(tail, value, claim)
         elif len(keys) == 1:
-            super().set(head, value)
+            super().set(head, value, claim)
         else:
             raise Exception("Undefined: '%s'" % key)

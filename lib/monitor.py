@@ -82,7 +82,7 @@ class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
                 sink.perform(value)
             except:
                 import traceback
-                log.error(traceback.formac_exc())
+                log.error(traceback.format_exc())
             
             #sleep for the specified interval
             self.sleep()
