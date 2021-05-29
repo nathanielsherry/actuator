@@ -45,7 +45,10 @@ class Operator(component.Component):
         
     @property
     def description_data(self):
-        return self.upstreams
+        if self.upstream:
+            return [self.upstream.description_data, self.name]
+        else:
+            return self.name
         
 
 class Noop(Operator):
@@ -103,6 +106,17 @@ class Has(Operator):
         for name in self._names:
             if name in value: return True
         return False
+
+class SinkOperator(Operator):
+    def __init__(self, sink):
+        super().__init__({})
+        self._sink = sink
+        
+    @property
+    def value(self):
+        value = self.upstream.value
+        self._sink.perform(value)
+        return value
 
         
 #Eliminates jitter from a value flapping a bit. The state starts as False and
