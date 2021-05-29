@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import time
-from actuator import log, util
+from actuator import log, util, component
 
 
 def instructions():
@@ -17,7 +17,7 @@ def build(instruction, kwargs):
 
 
 
-class Monitor(util.BaseClass):
+class Monitor(component.Component):
     def __init__(self, config):
         super().__init__(config)
         self._source = None

@@ -1,4 +1,4 @@
-from actuator import util
+from actuator import util, component
 
 
 def instructions():
@@ -22,7 +22,7 @@ def instructions():
     
 
 #interface
-class Operator(util.BaseClass):
+class Operator(component.Component):
     def __init__(self, config):
         super().__init__(config)
         self._upstream = None

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from actuator import log, util
+from actuator import log, util, component
 
 def instructions():
     return {
@@ -13,7 +13,7 @@ def build(instruction, kwargs):
     
 
 
-class Sink(util.BaseClass):
+class Sink(component.Component):
     def __init__(self, config):
         super().__init__(config)
         
