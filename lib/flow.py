@@ -1,19 +1,35 @@
 from actuator import util, component
+from actuator.scope import NamespacedScope
 import threading
 
-class Flow(component.Component):
-    def __init__(self, source, sink, operator, monitor, name):
+
+class FlowContext(component.Component):
+    def __init__(self):
         super().__init__({})
+        self._scope = NamespacedScope(None)       
+    
+    @property
+    def scope(self): return self._scope
+    
+
+class Flow(FlowContext):
+    def __init__(self, source, sink, operator, monitor, flowname):
+        super().__init__()
         self._operator = operator
         self._source = source
         self._sink = sink
         self._monitor = monitor
-        self._name = name
+        self._flowname = flowname
+        self._scope = None
         
         #Threading is done w/ a callable back into this object
         self._thread = None
 
         self._operator.upstreams[0].set_upstream(self._source)
+        
+        #Set this flow as the context for these components
+        for c in self.components:
+            c.set_context(self)
 
     def start(self):
         self._thread = threading.Thread(target=lambda: self.run())
@@ -27,7 +43,11 @@ class Flow(component.Component):
     
     @property
     def name(self): 
-        return "{}:{}".format(self._name, super().name)
+        return "{}:{}".format(super().name, self.flowname)
+    
+    @property
+    def flowname(self):
+        return self._flowname
     
     @property
     def components(self):
@@ -36,12 +56,9 @@ class Flow(component.Component):
         cs.append(self._monitor)
         cs.append(self._sink)
         return cs
-    
-    def set_context(self, context):
-        super().set_context(context)
-        for c in self.components:
-            c.set_context(context)
             
+    @property
+    def scope(self): return self._scope
     
     @property
     def description_data(self):
@@ -54,28 +71,28 @@ class Flow(component.Component):
         return data
     
         
-class FlowContext(component.Component):
+
+    
+
+class FlowSet(FlowContext):
     def __init__(self, flows):
-        from actuator.flexer import Scope
-        super().__init__({})
+        super().__init__()
         self._flows = flows
         for flow in self.flows:
             flow.set_context(self)
-        self._scope = Scope(None)
-    
-    @property
-    def scope(self): return self._scope
-    
+            flow._scope = NamespacedScope(self.scope)
+            if flow.flowname:
+                self._scope.set(flow.flowname, flow.scope)
+                
     @property
     def flows(self): return self._flows
     
     def start(self):
-        for flows in self.flows:
-            flows.start()
-        for flows in self.flows:
-            flows.join()
+        for flow in self.flows:
+            flow.start()
+        for flow in self.flows:
+            flow.join()
     
     @property
     def description_data(self):
         return {self.name: [n.description_data for n in self.flows]}
-
