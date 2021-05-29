@@ -42,9 +42,14 @@ class Node(component.Component):
         
 class NodeManager(component.Component):
     def __init__(self, nodes):
+        from actuator.flexer import Scope
         super().__init__({})
         self._nodes = nodes
-        
+        self._scope = Scope(None)
+    
+    @property
+    def scope(self): return self._scope
+    
     def start(self):
         for node in self._nodes:
             node.start()
