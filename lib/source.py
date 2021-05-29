@@ -4,7 +4,6 @@ from actuator import log, util, operator
 
 def instructions():
     return {
-        'temp': TemperatureSource,
         'counter': CounterSource,
         'string': StringSource,
         'int': IntegerSource,
@@ -124,19 +123,7 @@ class CounterSource(Source):
 
 
 
-class TemperatureSource(Source):
-    def __init__(self, config):
-        super().__init__(config)
-        self._cutoff = float(config['cutoff'])
 
-    @property
-    def value(self):
-        #try:
-        import temper
-        t = temper.Temper()
-        return t.read[0]['internal temperature'] <= self._cutoff
-        #except:
-        #    return True
 
 
 class WeatherCanadaSource(Source):
