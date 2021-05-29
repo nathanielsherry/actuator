@@ -305,21 +305,3 @@ class SExpressionMixin(object):
 
 
 
-class Scope:
-    def __init__(self, parent):
-        self._values = {}
-        self._parent = parent
-
-    @property
-    def parent(self): return self._parent
-
-    def has_local(self, key): return key in self._values.keys()
-    def has(self, key): return self.has_local or self.parent.has(key) if self.parent else False
-    def get_local(self, key): return self._values[key]
-    def get(self, key): 
-        if self.has_local(key): return self.get_local(key)
-        if self.parent and self.parent.has(key): return self.parent.get(key)
-        raise Exception("Undefined: '%s'" % key)
-    def set(self, key, value): self._values[key] = value
-
-
