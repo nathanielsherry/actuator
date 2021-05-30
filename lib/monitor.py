@@ -20,11 +20,18 @@ def build(instruction, kwargs):
 class Monitor(component.Component):
     def __init__(self, config):
         super().__init__(config)
-        self._source = None
-        self._sink = None
         
-    def start(self, source, sink):
+    def start(self):
         raise Exception("Unimplemented")
+        
+    @property
+    def source(self): return self.context.source
+    
+    @property
+    def sink(self): return self.context.sink
+    
+    @property
+    def operator(self): return self.context.operator
         
 
 class MonitorSleepMixin:
@@ -57,8 +64,8 @@ class OnceMonitor(Monitor):
     def __init__(self, config):
         super().__init__(config)
         
-    def start(self, source, sink):
-        sink.perform(source.value)
+    def start(self):
+        self.sink.perform(self.operator.value)
 
 
 
@@ -68,18 +75,18 @@ class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
     def __init__(self, config):
         super().__init__(config)
     
-    def start(self, source, sink):
+    def start(self):
         while True:
             try:
                 #Get the value from the source
-                value = source.value
+                value = self.operator.value
                             
                 #if we exit on a None value, and this is one, return
                 if self.value_is_none(value) and self.exit_on_none:
                     return
                 
                 #Pass the value to the sink
-                sink.perform(value)
+                self.sink.perform(value)
             except:
                 import traceback
                 log.error(traceback.format_exc())
@@ -96,15 +103,15 @@ class ChangeMonitor(Monitor, MonitorSleepMixin):
     def __init__(self, config):
         super().__init__(config)
 
-    def start(self, source, sink):
-        log.info("Starting {name} with test {source} and sink {sink}".format(name=self.name, source=source, sink=sink))
+    def start(self):
+        log.info("Starting {name} with test {source} and sink {sink}".format(name=self.name, source=self.operator, sink=self.sink))
         last_state = None
         new_state = None
         while True:
-            new_state = source.value
+            new_state = self.operator.value
             if new_state != last_state:
                 log.info("{name} yields '{state}' ({result}), running sink.".format(name=self.name, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
-                sink.perform(new_state)
+                self.sink.perform(new_state)
                 last_state = new_state
             self.sleep()
 
@@ -116,17 +123,15 @@ class OnDemandMonitor(Monitor):
         super().__init__(config)
         
         
-    def start(self, source, sink):
-        self._source = source
-        self._sink = sink
+    def start(self):
         #Call sink.perform once in case there's any one-time setup needed
-        self._sink.perform(self.demand())
+        self.sink.perform(self.demand())
         #Block the monitor thread as if we were doing something important
         import time
         while True: time.sleep(1)
         
     def demand(self):
-        return self._source.value
+        return self.operator.value
         
 
 

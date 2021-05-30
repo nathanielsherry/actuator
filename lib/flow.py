@@ -41,19 +41,19 @@ class Flow(FlowContext):
             c.set_context(self)
 
     def wire(self):
-        from actuator import sink
+        from actuator import sink as mod_sink
         #Look up all of the sinks which are pointed at this flow and
         #feed it to the operator
         inbound = []
         for flow in self.context.flows:
             sink = flow.sink
-            if not isinstance(sink, sink.WiringSink): continue
-            if not self.flowname == sink.target_flow: continue
+            if not isinstance(sink, mod_sink.WiringSink): continue
+            if not self.flowname == sink.target_name: continue
             inbound.append(flow)
-        self._source.wire(inbound)
+        self.source.wire(inbound)
                 
         #Wire the operators to the source
-        self._operator.upstreams[0].set_upstream(self._source)        
+        self.operator.upstreams[0].set_upstream(self.source)        
 
     def start(self):
         self._thread = threading.Thread(target=lambda: self.run())
@@ -63,7 +63,20 @@ class Flow(FlowContext):
         self._thread.join()
         
     def run(self):
-        self._monitor.start(self._operator, self._sink)
+        self.monitor.start()
+    
+    
+    @property
+    def sink(self): return self._sink
+    
+    @property
+    def source(self): return self._source
+    
+    @property
+    def monitor(self): return self._monitor
+    
+    @property
+    def operator(self): return self._operator
     
     @property
     def name(self): 
@@ -76,11 +89,11 @@ class Flow(FlowContext):
     @property
     def components(self):
         cs = [] 
-        cs.extend(self._operator.upstreams)
-        cs.append(self._monitor)
-        cs.append(self._sink)
-        if cs[0] != self._source:
-            cs = [self._source] + cs
+        cs.extend(self.operator.upstreams)
+        cs.append(self.monitor)
+        cs.append(self.sink)
+        if cs[0] != self.source:
+            cs = [self.source] + cs
         return cs
             
     @property
@@ -89,10 +102,10 @@ class Flow(FlowContext):
     @property
     def description_data(self):
         data = {self.name: {
-            'source': self._source.description_data,
-            'operator': self._operator.description_data,
-            'sink': self._sink.description_data,
-            'monitor': self._monitor.description_data
+            'source': self.source.description_data,
+            'operator': self.operator.description_data,
+            'sink': self.sink.description_data,
+            'monitor': self.monitor.description_data
         }}
         return data
     

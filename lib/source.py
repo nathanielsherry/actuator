@@ -7,6 +7,7 @@ def instructions():
         'counter': CounterSource,
         'string': StringSource,
         'int': IntegerSource,
+        "inflow": WiringSource,
     }
 
 def build(instruction, kwargs):
@@ -21,7 +22,7 @@ class Source(operator.Operator):
     def set_upstream(self, upstream):
         raise Exception("Source cannot have an upstream operator")
 
-    def wire(self, inbound_flows):
+    def wire(self, inflows):
         pass
 
     #return a boolean
@@ -88,6 +89,24 @@ class DelegatingSource(Source):
 
 
 
+class WiringSource(Source):
+    def __init__(self, config):
+        super().__init__(config)
+        self._inflows = []
+    
+    def wire(self, inflows):
+        self._inflows = inflows
+    
+    @property
+    def value(self):
+        #no inflows, return None
+        if len(self._inflows) == 0: return None
+        #one inflow, return the payload
+        if len(self._inflows) == 1: return self._inflows[0].sink.get_payload()
+        #more than one inflow, return a list of payloads
+        return [i.get_payload() for i in self._inflows]
+            
+    
     
     
 class StringSource(Source):

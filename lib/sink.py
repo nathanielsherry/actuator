@@ -4,7 +4,7 @@ from actuator import log, util, component
 
 def instructions():
     return {
-        
+        "outflow": WiringSink
     }
     
     
@@ -26,6 +26,28 @@ class Sink(component.Component):
     def custom_monitor(self):
         return None
 
+
+class OnDemandMixin:
+    def __init__(self, config):
+        self._monitor = None
+        self._push_payload = None
+    
+    def get_payload(self):
+        if self._monitor:
+            return self._monitor.demand()
+        else:
+            return self._push_payload
+    
+    def set_payload(self, payload):
+        self._push_payload = payload
+    
+    @property
+    def ondemand_monitor(self):
+        from actuator import monitor
+        if not self._monitor: 
+            self._monitor = monitor.OnDemandMonitor({})
+        return self._monitor
+
 class ToggleSink(Sink):
     def perform(self, payload):
         return self.toggle(payload)
@@ -39,16 +61,19 @@ class RunnerSink(Sink):
         raise Exception("Unimplemented")
 
 
-class WiringSink(Sink):
-    def __init__(self, name):
-        super().__init__({})
-        self._target_name = name
+class WiringSink(Sink, OnDemandMixin):
+    def __init__(self, config):
+        super().__init__(config)
+        self._target_name = config['args'][0]
         
     @property
-    def target_name(self): return self._name
+    def target_name(self): return self._target_name
+    
+    def custom_monitor(self):
+        return self.ondemand_monitor
     
     def perform(self, payload):
-        return self.toggle(payload)
+        self.set_payload(payload)
 
 
         
