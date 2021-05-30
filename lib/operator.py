@@ -17,6 +17,8 @@ def instructions():
         'not': Not,
         'get': Get,
         'has': Has,
+        'all': All,
+        'any': Any,
     }
     
     
@@ -106,6 +108,26 @@ class Has(Operator):
         for name in self._names:
             if name in value: return True
         return False
+
+class All(Operator):
+    def __init__(self, config):
+        super().__init__(config)
+            
+    @property
+    def value(self):
+        value = self.upstream.value
+        return all(value)
+
+
+class Any(Operator):
+    def __init__(self, config):
+        super().__init__(config)
+            
+    @property
+    def value(self):
+        value = self.upstream.value
+        return any(value)
+
 
 class SinkOperator(Operator):
     def __init__(self, sink):

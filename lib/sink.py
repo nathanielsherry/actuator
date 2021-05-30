@@ -4,7 +4,7 @@ from actuator import log, util, component
 
 def instructions():
     return {
-        "outflow": WiringSink
+        "outflow": FlowSink
     }
     
     
@@ -61,7 +61,7 @@ class RunnerSink(Sink):
         raise Exception("Unimplemented")
 
 
-class WiringSink(Sink, OnDemandMixin):
+class FlowSink(Sink, OnDemandMixin):
     def __init__(self, config):
         super().__init__(config)
         self._target_name = config['args'][0]

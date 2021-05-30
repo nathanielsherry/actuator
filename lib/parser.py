@@ -4,7 +4,7 @@ from actuator.package import REGISTRY
 SYM_SEP = ';'
 SYM_VARSTART = '$'
 SYM_VARSEP = '.'
-SYM_WIRE = '@'
+SYM_OUTFLOW = '@'
 KW_SINK = "to"
 KW_MONITOR = "on"
 KW_SOURCE = "from"
@@ -67,9 +67,9 @@ class ActuatorExpressionMixin:
         elif self.flexer.peek() == SYM_VARSTART:
             args = [self.parse_var()]
             instruction = "var"
-        elif self.flexer.peek() == SYM_WIRE and key == KW_SINK:
-            self.flexer.pop(SYM_WIRE)
-            instruction = "wire"
+        elif self.flexer.peek() == SYM_OUTFLOW and key == KW_SINK:
+            self.flexer.pop(SYM_OUTFLOW)
+            instruction = "outflow"
             parseargs = False
             args = [self.flexer.pop()]
         else:

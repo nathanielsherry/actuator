@@ -7,7 +7,8 @@ def instructions():
         'counter': CounterSource,
         'string': StringSource,
         'int': IntegerSource,
-        "inflow": WiringSource,
+        'bool': BooleanSource,
+        'inflow': FlowSource,
     }
 
 def build(instruction, kwargs):
@@ -30,36 +31,6 @@ class Source(operator.Operator):
     def value(self):
         raise Exception("Unimplemented")
     
-        
-
-class AllSource(Source):
-    def __init__(self, tests):
-        if any([t == None for t in tests]): 
-            raise Exception("Test cannot be None")
-        self._tests = tests
-            
-    #return a boolean
-    @property
-    def value(self):
-        return all([t.value for t in self._tests])
-
-    @property
-    def name(self): return "[{}]|All".format(",".join([t.name for t in self._tests]))
-
-
-class AnySource(Source):
-    def __init__(self, tests):
-        if any([t == None for t in tests]): 
-            raise Exception("Test cannot be None")
-        self._tests = tests
-        
-    #return a boolean
-    @property
-    def value(self):
-        return any([t.value for t in self._tests])
-        
-    @property
-    def name(self): return "[{}]|Any".format(",".join([t.name for t in self._tests]))
 
 
 #Simple Source that takes a function and params
@@ -89,7 +60,7 @@ class DelegatingSource(Source):
 
 
 
-class WiringSource(Source):
+class FlowSource(Source):
     def __init__(self, config):
         super().__init__(config)
         self._inflows = []
@@ -104,7 +75,7 @@ class WiringSource(Source):
         #one inflow, return the payload
         if len(self._inflows) == 1: return self._inflows[0].sink.get_payload()
         #more than one inflow, return a list of payloads
-        return [i.get_payload() for i in self._inflows]
+        return [i.sink.get_payload() for i in self._inflows]
             
     
     
@@ -122,6 +93,15 @@ class IntegerSource(Source):
     def __init__(self, config):
         super().__init__(config)
         self._value = int(config.get('value', '1'))
+        
+    @property
+    def value(self):
+        return self._value
+
+class BooleanSource(Source):
+    def __init__(self, config):
+        super().__init__(config)
+        self._value = util.parse_bool(config.get('value', True))
         
     @property
     def value(self):
