@@ -6,7 +6,12 @@ import threading
 class FlowContext(component.Component):
     def __init__(self):
         super().__init__({})
-        self._scope = NamespacedScope(None)       
+        self._scope = None
+    
+    #To be called after `set_context`. If the former is about making
+    #sure each component is aware of its relationships, then `wire` is
+    #about using that information to make connections 
+    def wire(self): raise Exception("Unimplemented")
     
     @property
     def scope(self): return self._scope
@@ -20,16 +25,24 @@ class Flow(FlowContext):
         self._sink = sink
         self._monitor = monitor
         self._flowname = flowname
-        self._scope = None
         
         #Threading is done w/ a callable back into this object
         self._thread = None
 
-        self._operator.upstreams[0].set_upstream(self._source)
+    def set_context(self, context):
+        super().set_context(context)
+        print(self._context)
+        self._scope = NamespacedScope(context.scope)
         
-        #Set this flow as the context for these components
+        #Set this flow as the context for these components. This
+        #is the earliest we can call this and still allow the 
+        #components to access not just the Flow but also the FlowSet
         for c in self.components:
             c.set_context(self)
+
+    def wire(self):
+        #Wire the operators to the source
+        self._operator.upstreams[0].set_upstream(self._source)        
 
     def start(self):
         self._thread = threading.Thread(target=lambda: self.run())
@@ -55,6 +68,8 @@ class Flow(FlowContext):
         cs.extend(self._operator.upstreams)
         cs.append(self._monitor)
         cs.append(self._sink)
+        if cs[0] != self._source:
+            cs = [self._source] + cs
         return cs
             
     @property
@@ -77,12 +92,14 @@ class Flow(FlowContext):
 class FlowSet(FlowContext):
     def __init__(self, flows):
         super().__init__()
+        self._scope = NamespacedScope(None)
         self._flows = flows
         for flow in self.flows:
             flow.set_context(self)
-            flow._scope = NamespacedScope(self.scope)
             if flow.flowname:
                 self._scope.set(flow.flowname, flow.scope)
+        for flow in self.flows:
+            flow.wire()
                 
     @property
     def flows(self): return self._flows
