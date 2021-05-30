@@ -39,6 +39,16 @@ class RunnerSink(Sink):
         raise Exception("Unimplemented")
 
 
+class WiringSink(Sink):
+    def __init__(self, name):
+        super().__init__({})
+        self._target_name = name
+        
+    @property
+    def target_name(self): return self._name
+    
+    def perform(self, payload):
+        return self.toggle(payload)
 
 
         

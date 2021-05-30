@@ -41,6 +41,17 @@ class Flow(FlowContext):
             c.set_context(self)
 
     def wire(self):
+        from actuator import sink
+        #Look up all of the sinks which are pointed at this flow and
+        #feed it to the operator
+        inbound = []
+        for flow in self.context.flows:
+            sink = flow.sink
+            if not isinstance(sink, sink.WiringSink): continue
+            if not self.flowname == sink.target_flow: continue
+            inbound.append(flow)
+        self._source.wire(inbound)
+                
         #Wire the operators to the source
         self._operator.upstreams[0].set_upstream(self._source)        
 

@@ -21,6 +21,9 @@ class Source(operator.Operator):
     def set_upstream(self, upstream):
         raise Exception("Source cannot have an upstream operator")
 
+    def wire(self, inbound_flows):
+        pass
+
     #return a boolean
     @property
     def value(self):
