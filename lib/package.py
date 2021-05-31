@@ -69,15 +69,6 @@ class Registry:
     def __init__(self):
         pass
     
-    def load_package(self, name):
-        package = None
-        for loader in loaders:
-            package = loader.load(name)
-            if package: break
-        if not package:
-            raise Exception("")
-        self.packages.register_item(name, package)
-    
     @property
     def source_names(self):
         return self.item_names(lambda p: p.sources)
@@ -96,15 +87,28 @@ class Registry:
 
     def item_names(self, get_archive):
         names = [] 
+        for package in self.packages:
+            for itemname, item in get_archive(package).contents.items():
+                name = ""
+                if package.name: name += package.name
+                if package.name and itemname: name += SEP
+                if itemname: name += itemname
+                names.append(name)
+        return names
+
+    @property
+    def packages(self):
+        ps = []
         for loader in loaders:
             for packagename, package in loader.packages.contents.items():
-                for itemname, item in get_archive(package).contents.items():
-                    name = ""
-                    if packagename: name += packagename
-                    if packagename and itemname: name += SEP
-                    if itemname: name += itemname
-                    names.append(name)
-        return names
+                ps.append(package)
+        return ps
+    
+    def get_package(self, name):
+        for loader in loaders:
+            if name in loader.packages.contents:
+                return loader.packages.contents[name]
+        return None
 
 
     def lookup_item(self, name, get_archive):
@@ -134,7 +138,8 @@ class Registry:
                 if package:
                     source = get_archive(package).get(itemname)
                     if source: return source
-                
+            
+    
     def lookup_source(self, name):
         return self.lookup_item(name, lambda p: p.sources)
     
@@ -202,6 +207,7 @@ class LocalPackageLoader(Loader):
         try:
             m = importlib.import_module("actuator.packages.{}".format(name))
             package = m.load()
+            if not package: return
             self.packages.register_item(package.name, package)
         except:
             import traceback

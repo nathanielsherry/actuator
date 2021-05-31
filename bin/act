@@ -1,17 +1,60 @@
 #!/usr/bin/python3
 
 import click
+from blessed import Terminal
 
 @click.command()
 @click.option("-l", "--log-level", default='info', help='Select log level from [error, warn, info, debug, trace]')
-@click.argument("expression")
-def run(log_level, expression):
+@click.option("--list-packages", default=None, is_flag=True)
+@click.option("--show-package")
+@click.argument("expression", default="")
+def run(log_level, list_packages, show_package, expression):
 
     from actuator import parser, source as mod_source, sink as mod_sink, package, util, log
     import sys
 
+    term = Terminal()
+
     log.set_level(log_level)
 
+    if list_packages:
+        print("\n    " + term.underline(term.bold("Packages") + "\n"))
+        for p in package.REGISTRY.packages:
+            name = p.name or "<builtin>"
+            print("      " + name)
+        print("\n")
+        return
+    
+    if show_package:
+        p = package.REGISTRY.get_package(show_package)
+        if not p:
+            print("Could not find package '{}'".format(show_package))
+            return
+        
+        print("\n    " + term.underline(term.bold("Package '{}'".format(p.name)) + "\n"))
+        
+        if p.sources.contents:
+            print("      " + term.underline(term.bold("Sources") + "\n"))
+            for sk, sv in p.sources.contents.items():
+                name = sk or "<default>"
+                print("        " + name)
+            print("\n")
+        
+        if p.operators.contents:    
+            print("      " + term.underline(term.bold("Operators") + "\n"))
+            for sk, sv in p.operators.contents.items():
+                name = sk or "<default>"
+                print("        " + name)
+            print("\n")
+        
+        if p.sinks.contents:
+            print("      " + term.underline(term.bold("Sinks") + "\n"))
+            for sk, sv in p.sinks.contents.items():
+                name = sk or "<default>"
+                print("        " + name)
+            print("\n")
+                
+       
     #full expression
     flowctx = parser.parse_actuator_expression(expression)
 
