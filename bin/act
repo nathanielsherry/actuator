@@ -2,6 +2,7 @@
 
 import click
 from blessed import Terminal
+import os
 
 @click.command()
 @click.option("-l", "--log-level", default='info', help='Select log level from [error, warn, info, debug, trace]')
@@ -26,12 +27,16 @@ def run(log_level, list_packages, show_package, expression):
         return
     
     if show_package:
-        p = package.REGISTRY.get_package(show_package)
+        pkgname = show_package
+        if pkgname == "builtin" or pkgname == "<builtin>":
+            pkgname = None
+        p = package.REGISTRY.get_package(pkgname)
+        
         if not p:
             print("Could not find package '{}'".format(show_package))
             return
         
-        print("\n    " + term.underline(term.bold("Package '{}'".format(p.name)) + "\n"))
+        print("\n    " + term.underline(term.bold("Package '{}'".format(show_package)) + "\n"))
         
         if p.sources.contents:
             print("      " + term.underline(term.bold("Sources") + "\n"))
@@ -54,7 +59,16 @@ def run(log_level, list_packages, show_package, expression):
                 print("        " + name)
             print("\n")
                 
-       
+      
+    
+    if os.path.exists(expression):
+        fh = open(expression, 'r')
+        expression = fh.read()
+        fh.close()
+        expression = "\n".join([l.strip() for l in expression.split("\n") if not l.strip().startswith("#")])
+        
+        
+    
     #full expression
     flowctx = parser.parse_actuator_expression(expression)
 

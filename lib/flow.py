@@ -31,7 +31,6 @@ class Flow(FlowContext):
 
     def set_context(self, context):
         super().set_context(context)
-        print(self._context)
         self._scope = NamespacedScope(context.scope)
         
         #Set this flow as the context for these components. This
@@ -47,7 +46,7 @@ class Flow(FlowContext):
         inbound = []
         for flow in self.context.flows:
             sink = flow.sink
-            if not isinstance(sink, mod_sink.WiringSink): continue
+            if not isinstance(sink, mod_sink.FlowSink): continue
             if not self.flowname == sink.target_name: continue
             inbound.append(flow)
         self.source.wire(inbound)
