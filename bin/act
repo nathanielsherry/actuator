@@ -39,7 +39,8 @@ def run(log_level, list_packages, show_package, expression):
     
 
 def run_expression(expression):
-    from actuator import parser, log, util
+    from actuator import log, util
+    from actuator.lang import parser
     import sys
     flowctx = parser.parse_actuator_expression(expression)
 

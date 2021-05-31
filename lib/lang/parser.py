@@ -23,7 +23,7 @@ def twosplit(s, delim):
     return first, second
 
 
-from actuator.flexer import FlexParser, SequenceParserMixin, PrimitivesParserMixin
+from actuator.lang.flexer import FlexParser, SequenceParserMixin, PrimitivesParserMixin
 
 #A Sequence PARSER for reading values or sequences of values
 class ActuatorExpressionMixin:
@@ -36,24 +36,9 @@ class ActuatorExpressionMixin:
         self._add_token_hook("act.flow", lambda t: t == KW_FLOW, lambda: self.parse_flow())
         self._add_token_hook("act.expsep", lambda t: t == SYM_SEP, lambda: self.parse_expsep())
 
-    def add_instruction_hooks(self, instructions):
-        for instruction in instructions:
-            self.add_instruction_hook(instruction)
-    
-    #This needs to be a separate function from add_instruction_hooks to 
-    #complete the closure in the test fn
-    def add_instruction_hook(self, instruction):
-            try:
-                self._add_value_hook(
-                    "act.inst.{}".format(instruction), 
-                    lambda t: t == instruction,
-                    lambda: self.flexer.pop(instruction)
-                )
-            except:
-                pass
     
     def parse_instruction(self, key, valid_instruction, build, allow_upstream=False, upstream=None):
-        from actuator.flexer import Symbol
+        from actuator.lang.flexer import Symbol
         if key: key = self.flexer.pop(key)
         
         parseargs = True
