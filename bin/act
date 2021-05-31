@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+#Global imports go here. These are the packages that we want to be sure are 
+#available regardless of the functionality being accessed
 import click
 from blessed import Terminal
 import os
@@ -11,65 +13,34 @@ import os
 @click.argument("expression", default="")
 def run(log_level, list_packages, show_package, expression):
 
-    from actuator import parser, source as mod_source, sink as mod_sink, package, util, log
-    import sys
-
-    term = Terminal()
-
+    from actuator import log
     log.set_level(log_level)
 
     if list_packages:
-        print("\n    " + term.underline(term.bold("Packages") + "\n"))
-        for p in package.REGISTRY.packages:
-            name = p.name or "<builtin>"
-            print("      " + name)
-        print("\n")
+        run_list_packages()
         return
     
     if show_package:
-        pkgname = show_package
-        if pkgname == "builtin" or pkgname == "<builtin>":
-            pkgname = None
-        p = package.REGISTRY.get_package(pkgname)
-        
-        if not p:
-            print("Could not find package '{}'".format(show_package))
-            return
-        
-        print("\n    " + term.underline(term.bold("Package '{}'".format(show_package)) + "\n"))
-        
-        if p.sources.contents:
-            print("      " + term.underline(term.bold("Sources") + "\n"))
-            for sk, sv in p.sources.contents.items():
-                name = sk or "<default>"
-                print("        " + name)
-            print("\n")
-        
-        if p.operators.contents:    
-            print("      " + term.underline(term.bold("Operators") + "\n"))
-            for sk, sv in p.operators.contents.items():
-                name = sk or "<default>"
-                print("        " + name)
-            print("\n")
-        
-        if p.sinks.contents:
-            print("      " + term.underline(term.bold("Sinks") + "\n"))
-            for sk, sv in p.sinks.contents.items():
-                name = sk or "<default>"
-                print("        " + name)
-            print("\n")
-                
-      
-    
+        run_show_package(show_package)
+        return
+
+    #support passing filename as expression, enables shebang functionality
     if os.path.exists(expression):
         fh = open(expression, 'r')
         expression = fh.read()
         fh.close()
         expression = "\n".join([l.strip() for l in expression.split("\n") if not l.strip().startswith("#")])
-        
-        
     
-    #full expression
+    
+    if expression:
+        run_expression(expression)
+        return
+    
+    
+
+def run_expression(expression):
+    from actuator import parser, log, util
+    import sys
     flowctx = parser.parse_actuator_expression(expression)
 
     import yaml
@@ -79,13 +50,61 @@ def run(log_level, list_packages, show_package, expression):
     try:
         flowctx.start()
     except KeyboardInterrupt:
+        #TODO: now that flows run in their own threads, we need to actually
+        #close them down cleanly here.
         pass
     except BrokenPipeError:
         pass
 
     util.run_shutdown_hooks()
-
     sys.stderr.close()
+    
+
+def run_list_packages():
+    from actuator import package
+    term = Terminal()
+    print("\n    " + term.underline(term.bold("Packages") + "\n"))
+    for p in package.REGISTRY.packages:
+        name = p.name or "<builtin>"
+        print("      " + name)
+    print("\n")
+
+def run_show_package(show_package):
+    from actuator import package
+    term = Terminal()
+    pkgname = show_package
+    if pkgname == "builtin" or pkgname == "<builtin>":
+        pkgname = None
+    p = package.REGISTRY.get_package(pkgname)
+    
+    if not p:
+        print("Could not find package '{}'".format(show_package))
+        return
+    
+    print("\n    " + term.underline(term.bold("Package '{}'".format(show_package)) + "\n"))
+    
+    if p.sources.contents:
+        print("      " + term.underline(term.bold("Sources") + "\n"))
+        for sk, sv in p.sources.contents.items():
+            name = sk or "<default>"
+            print("        " + name)
+        print("\n")
+    
+    if p.operators.contents:    
+        print("      " + term.underline(term.bold("Operators") + "\n"))
+        for sk, sv in p.operators.contents.items():
+            name = sk or "<default>"
+            print("        " + name)
+        print("\n")
+    
+    if p.sinks.contents:
+        print("      " + term.underline(term.bold("Sinks") + "\n"))
+        for sk, sv in p.sinks.contents.items():
+            name = sk or "<default>"
+            print("        " + name)
+        print("\n")
+    
     
 if __name__ == "__main__":
     run()
+    
