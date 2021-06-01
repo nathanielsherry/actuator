@@ -6,7 +6,10 @@ Actuator attempts to go beyond the pipeline model of unix processes by using a s
 
 Actuator expressions connect different types of components together, and take the form:
 
-    from <source> via <operator> to <sink> on <monitor>
+    flow <name> from <source> via <operator> to <sink> on <monitor>
+
+### Name
+A Flow's name is a unique identifier that can be used to reference it elsewhere. If you do not intend to reference this flow, a name is not required.
 
 ### Source
 A Source supplies some kind of input to the processing pipeline on demand. If no source is specified in an Actuator expression, the default is to read the entirety of stdin.
