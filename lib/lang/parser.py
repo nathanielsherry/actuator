@@ -1,5 +1,6 @@
 from actuator import util
 from actuator.flows import flow
+from actuator.flows import flowset
 from actuator.package import REGISTRY
 
 SYM_SEP = ';'
@@ -176,7 +177,7 @@ def makeflowset(parts):
         if key in KEYWORDS:
             data[key] = value
     if data: flows.append(makeflow(data))
-    return flow.FlowSet(flows)
+    return flowset.FlowSet(flows)
         
 
 def makeflow(kv):
