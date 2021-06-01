@@ -88,7 +88,7 @@ class Not(Operator):
 
 class Get(Operator):
     def __init__(self, config):
-        from actuator import accessor
+        from actuator.lang import accessor
         super().__init__(config)
         self._accessor = accessor.accessor(config['args'][0])
         
