@@ -1,4 +1,4 @@
-from actuator.source import Source
+from actuator.components.source import Source
 from actuator import log, util
 import time
 

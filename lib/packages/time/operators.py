@@ -1,4 +1,4 @@
-from actuator import operator
+from actuator.components import operator
 
 class IntervalSource(operator.Operator):
     def __init__(self, config):

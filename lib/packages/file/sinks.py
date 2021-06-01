@@ -1,4 +1,4 @@
-from actuator import sink
+from actuator.components import sink
 
 
 class FileSink(sink.Sink):

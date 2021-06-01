@@ -1,4 +1,4 @@
-from actuator.sink import ToggleSink
+from actuator.components.sink import ToggleSink
 
 class Toggle(ToggleSink):
     def __init__(self, config):

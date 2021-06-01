@@ -1,4 +1,4 @@
-from actuator import source
+from actuator.components import source
 
 class TrueSource(source.Source):
     def __init__(self, config):

@@ -1,4 +1,5 @@
-from actuator import util, component
+from actuator import util
+from actuator.components import component
 from actuator.flows.scope import NamespacedScope
 import threading
 
@@ -40,7 +41,7 @@ class Flow(FlowContext):
             c.set_context(self)
 
     def wire(self):
-        from actuator import sink as mod_sink
+        from actuator.components import sink as mod_sink
         #Look up all of the sinks which are pointed at this flow and
         #feed it to the operator
         inbound = []

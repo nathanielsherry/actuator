@@ -1,4 +1,5 @@
-from actuator import sink, util
+from actuator.components import sink
+from actuator import util
 
 import subprocess, threading
 

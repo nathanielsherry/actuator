@@ -1,4 +1,4 @@
-from actuator import source
+from actuator.components import source
 import time
 
 class TimeSource(source.Source):

@@ -1,6 +1,7 @@
 import subprocess
 import psutil
-from actuator import source, util
+from actuator.components import source
+from actuator import util
 
 class Info(source.Source):
     def __init__(self, config):

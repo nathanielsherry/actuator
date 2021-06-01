@@ -1,4 +1,5 @@
-from actuator import operator, util
+from actuator.components import operator
+from actuator import util
 
 def tobool(o):
     if isinstance(o, bool): return o

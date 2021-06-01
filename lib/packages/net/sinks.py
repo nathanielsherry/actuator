@@ -1,4 +1,4 @@
-from actuator import sink, monitor
+from actuator.components import sink, monitor
 import socketserver
 import http.server
 

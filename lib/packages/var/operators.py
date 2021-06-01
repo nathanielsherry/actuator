@@ -1,4 +1,4 @@
-from actuator.operator import Operator, SinkOperator
+from actuator.components.operator import Operator, SinkOperator
 from actuator import log, util
 from . import sinks
 

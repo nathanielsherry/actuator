@@ -1,5 +1,6 @@
 import subprocess
-from actuator import source, util
+from actuator.components import source
+from actuator import util
 
 class ShellSource(source.Source):
     def __init__(self, config):

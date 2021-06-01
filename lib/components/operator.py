@@ -1,4 +1,5 @@
-from actuator import util, component
+from actuator import util
+from actuator.components import component
 
 
 def instructions():

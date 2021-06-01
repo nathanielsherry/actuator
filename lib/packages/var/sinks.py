@@ -1,4 +1,4 @@
-from actuator.sink import Sink
+from actuator.components.sink import Sink
 from actuator import log, util
 
 class Set(Sink):

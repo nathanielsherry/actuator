@@ -1,6 +1,7 @@
 import time
 import subprocess
-from actuator import log, util, operator
+from actuator import log, util
+from actuator.components import operator
 
 def instructions():
     return {

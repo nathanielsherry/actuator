@@ -1,4 +1,5 @@
-from actuator import operator, util
+from actuator import util
+from actuator.components import operator
 
 class ToJson(operator.Operator):
     def __init__(self, config):

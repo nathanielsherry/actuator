@@ -1,4 +1,5 @@
-from actuator import util, source
+from actuator import util
+from actuator.components import source
 
 class URLSource(source.Source):
     def __init__(self, config):

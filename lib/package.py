@@ -218,19 +218,19 @@ class BuiltinLoader(Loader):
     def scan(self):
         p = Package(None)
         
-        from actuator import sink as mod_sink
+        from actuator.components import sink as mod_sink
         for k, v in mod_sink.instructions().items():
             p.sinks.register_item(k, v)
         
-        from actuator import source as mod_source
+        from actuator.components import source as mod_source
         for k, v in mod_source.instructions().items():
             p.sources.register_item(k, v)
             
-        from actuator import monitor as mod_monitor
+        from actuator.components import monitor as mod_monitor
         for k, v in mod_monitor.instructions().items():
             p.monitors.register_item(k, v)
             
-        from actuator import operator as mod_operator
+        from actuator.components import operator as mod_operator
         for k, v in mod_operator.instructions().items():
             p.operators.register_item(k, v)
         

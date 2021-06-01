@@ -1,4 +1,4 @@
-from actuator.source import Source
+from actuator.components.source import Source
 
 class Temper(Source):
     def __init__(self, config):

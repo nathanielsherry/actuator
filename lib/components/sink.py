@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
-from actuator import log, util, component
+from actuator import log, util
+from actuator.components import component
 
 def instructions():
     return {
@@ -43,7 +44,7 @@ class OnDemandMixin:
     
     @property
     def ondemand_monitor(self):
-        from actuator import monitor
+        from actuator.components import monitor
         if not self._monitor: 
             self._monitor = monitor.OnDemandMonitor({})
         return self._monitor
