@@ -1,5 +1,5 @@
 from actuator import util, component
-from actuator.scope import NamespacedScope
+from actuator.flows.scope import NamespacedScope
 import threading
 
 

@@ -1,4 +1,5 @@
-from actuator import util, flow
+from actuator import util
+from actuator.flows import flow
 from actuator.package import REGISTRY
 
 SYM_SEP = ';'
