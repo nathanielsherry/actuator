@@ -68,13 +68,11 @@ class ActuatorExpressionMixin:
             while True:
                 if self.flexer.peek() == '[':
                     args = self.parse_list()
+                    args = [arg.name if isinstance(arg, Symbol) else arg for arg in args]
                     continue
                 if self.flexer.peek() == '(':
                     kwargs = self.parse_keyvalue()
-                    for key in kwargs.keys():
-                        value = kwargs[key]
-                        if isinstance(value, Symbol):
-                            kwargs[key] = value.name
+                    kwargs = {k: v.name if isinstance(v, Symbol) else v for k, v in kwargs.iteritems()}
                     continue
                 break
             
