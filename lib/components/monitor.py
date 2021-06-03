@@ -24,7 +24,10 @@ class Monitor(component.Component):
         
     def start(self):
         raise Exception("Unimplemented")
-        
+    
+    def stop(self):
+        raise Exception("Unimplemented")
+    
     @property
     def source(self): return self.context.source
     
@@ -33,15 +36,30 @@ class Monitor(component.Component):
     
     @property
     def operator(self): return self.context.operator
-        
+    
+    
+    
 
 class MonitorSleepMixin:
     def __init__(self, config):
+        from threading import Event
         self._sleep = float(config.get('sleep', '1'))
+        self._sleeper = Event()
+        self._stopped = False
             
     def sleep(self):
-        import time
-        time.sleep(self._sleep)
+        try:
+            self._sleeper.wait(self._sleep)
+        except:
+            import traceback, sys
+            sys.stderr.write(traceback.format_exc())
+            return False
+        return not self._stopped
+        
+        
+    def stop_sleep(self):
+        self._stopped = True
+        self._sleeper.set()
     
 class ExitOnNoneMixin:
     def __init__(self, config):
@@ -93,9 +111,10 @@ class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
                 log.error(traceback.format_exc())
             
             #sleep for the specified interval
-            self.sleep()
+            if not self.sleep(): return
 
-            
+    def stop(self):
+        self.stop_sleep()
 
 
 #Monitors the result of a Source over time, triggering an event (callback) 
@@ -114,12 +133,15 @@ class ChangeMonitor(Monitor, MonitorSleepMixin):
                 log.info("{name} yields '{state}' ({result}), running sink.".format(name=self.name, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
                 self.sink.perform(new_state)
                 last_state = new_state
-            self.sleep()
+            if not self.sleep(): return
+            
+    def stop(self):
+        self.stop_sleep()
 
 #NOTE: This monitor is never created through the expression explicitly. Instead
 #this monitor can be returned by a sink when no monitor is specified, effectively
 #allowing the sink to override the default, not the user
-class OnDemandMonitor(Monitor):
+class OnDemandMonitor(Monitor, MonitorSleepMixin):
     def __init__(self, config):
         super().__init__(config)
         
@@ -128,8 +150,11 @@ class OnDemandMonitor(Monitor):
         #Call sink.perform once in case there's any one-time setup needed
         self.sink.perform(self.demand())
         #Block the monitor thread as if we were doing something important
-        import time
-        while True: time.sleep(1)
+        while True:
+            if not self.sleep(): return
+        
+    def stop(self):
+        self.stop_sleep()
         
     def demand(self):
         return self.operator.value

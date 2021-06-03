@@ -17,11 +17,26 @@ class FlowSet(FlowContext):
     def flows(self): return self._flows
     
     def start(self):
-        for flow in self.flows:
-            flow.start()
-        for flow in self.flows:
-            flow.join()
-    
+        try:          
+            for flow in self.flows:
+                flow.start()
+            for flow in self.flows:
+                flow.join()
+        except KeyboardInterrupt:
+            try:
+                for flow in self.flows:
+                    flow.stop()
+            except:
+                import traceback, sys
+                sys.stderr.write(traceback.format_exc())
+        except:
+            import traceback, sys
+            sys.stderr.write(traceback.format_exc())
+        finally:
+            for flow in self.flows:
+                flow.join()
+            
+
     @property
     def description_data(self):
         return {self.name: [n.description_data for n in self.flows]}

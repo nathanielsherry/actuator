@@ -10,7 +10,7 @@ class WebServerSink(sink.DedicatedThreadSink):
         self._address = config.get('address', '')
         self._monitor = None
         self._pushstate = None
-    
+
     def makededicated(self): 
         return WebServerSink.HTTPServerThread(self)
         

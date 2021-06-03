@@ -86,7 +86,7 @@ class Curses(sink.DedicatedThreadSink):
         return Curses.ScreenThread()
     
     def setdedicatedstate(self, payload): 
-        self._dedicated.set_buffer(payload)
+        self.dedicated.set_buffer(payload)
     
     def custom_monitor(self):
         from actuator import monitor

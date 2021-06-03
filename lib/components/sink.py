@@ -21,6 +21,10 @@ class Sink(component.Component):
     def perform(self, payload):
         raise Exception("Unimplemented")
     
+    def stop(self):
+        #By default, a sink does not run any threads
+        return
+    
     #There are cases where the sink may want to provide
     #its own monitor so that pull-based sink implementations
     #such as a web server may fetch data more effectively
@@ -91,18 +95,26 @@ class DedicatedThreadSink(Sink):
     def perform(self, payload):
         if not self._dedicated:
             self._dedicated = self.makededicated()
-            self._dedicated.start()
-            util.add_shutdown_hook(lambda: self._dedicated.terminate())
+            self.dedicated.start()
         self.setdedicatedstate(payload)
+
+    @property
+    def dedicated(self):
+        return self._dedicated
+
+    def stopdedicated(self):
+        self.dedicated.terminate()
+
+    def stop(self):
+        self.stopdedicated()
 
     def makededicated(self): raise Exception("Unimplemented")
     def setdedicatedstate(self, kwargs): raise Exception("Unimplemented")
 
 
-
 class DedicatedThread(threading.Thread):
     def __init__(self):
-        super().__init__()
+        super().__init__(daemon=True)
         self._terminated = threading.Event()
     
     #Called when the thread starts by the thread itself

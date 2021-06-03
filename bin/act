@@ -50,10 +50,6 @@ def run_expression(expression):
 
     try:
         flowctx.start()
-    except KeyboardInterrupt:
-        #TODO: now that flows run in their own threads, we need to actually
-        #close them down cleanly here.
-        pass
     except BrokenPipeError:
         pass
 

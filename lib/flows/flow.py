@@ -56,8 +56,12 @@ class Flow(FlowContext):
         self.operator.upstreams[0].set_upstream(self.source)        
 
     def start(self):
-        self._thread = threading.Thread(target=lambda: self.run())
+        self._thread = threading.Thread(target=lambda: self.run(), daemon=True)
         self._thread.start()
+        
+    def stop(self):
+        self.monitor.stop()
+        self.sink.stop()
         
     def join(self):
         self._thread.join()
