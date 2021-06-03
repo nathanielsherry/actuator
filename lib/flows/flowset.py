@@ -6,18 +6,19 @@ class FlowSet(FlowContext):
         super().__init__()
         self._scope = NamespacedScope(None)
         self._flows = flows
-        for flow in self.flows:
-            flow.set_context(self)
-            if flow.flowname:
-                self._scope.set(flow.flowname, flow.scope)
-        for flow in self.flows:
-            flow.wire()
                 
     @property
     def flows(self): return self._flows
-    
+        
     def start(self):
-        try:          
+        try:
+            for flow in self.flows:
+                flow.set_context(self)
+            for flow in self.flows:
+                flow.scope.set('global', self.scope)
+                if flow.flowname: self._scope.set(flow.flowname, flow.scope)
+            for flow in self.flows:
+                flow.wire()
             for flow in self.flows:
                 flow.start()
             for flow in self.flows:
