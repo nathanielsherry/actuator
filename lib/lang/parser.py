@@ -68,11 +68,11 @@ class ActuatorExpressionMixin:
             while True:
                 if self.flexer.peek() == '[':
                     args = self.parse_list()
-                    args = [arg.name if isinstance(arg, Symbol) else arg for arg in args]
+                    args = [self.parse_collection_symbol(arg) for arg in args]
                     continue
                 if self.flexer.peek() == '(':
                     kwargs = self.parse_keyvalue()
-                    kwargs = {k: v.name if isinstance(v, Symbol) else v for k, v in kwargs.iteritems()}
+                    kwargs = {k: self.parse_collection_symbol(v) for k, v in kwargs.iteritems()}
                     continue
                 break
             
@@ -140,11 +140,29 @@ class ActuatorExpressionMixin:
         
         return ".".join(keys)
         
+    #Given a string or Symbol s, parse the string as a $VAR, returning:
+    # * a string if the input is not a valid $var symbol
+    # * a VariableReference if it is
+    def parse_collection_symbol(self, s):
+        if not isinstance(s, Symbol): return s
+        s = s.name
+        if not s.startswith(SYM_VARSTART): return s
+        return VariableReference(s)
         
         
         
         
+class VariableReference:
+    def __init__(self, reference):
+        self._reference = reference
         
+    @property
+    def reference(self): return self._reference
+    
+    def dereference(self, flowctx):
+        return flowctx.scope.get(self.reference)
+    
+    
 
 class ActuatorParser(FlexParser, SequenceParserMixin, PrimitivesParserMixin, ActuatorExpressionMixin):
     def __init__(self, exp):
