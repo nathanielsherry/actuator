@@ -23,13 +23,13 @@ class Scope:
             errmsg += " from domain {}".format(domain)
         raise Exception(errstd)
     def set(self, key, value, domain=None, claim=False):
-        if claim and not self.claim(key, domain=domain, initial=value):
+        if claim and not self.claim(key, initial=value, domain=domain):
             errmsg = "Claim failed for key {}".format(key)
             if domain:
                 errmsg += " in domain {}".format(domain)
             raise Exception(errmsg)
         self.domain(domain)[key] = value
-    def claim(self, key, domain=None, initial=None):
+    def claim(self, key, initial=None, domain=None,):
         if not self.has_local(key, domain):
             self.set(key, initial, domain=domain, claim=False)
             return True
