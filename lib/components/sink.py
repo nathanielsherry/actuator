@@ -94,22 +94,22 @@ class DedicatedThreadSink(Sink):
 
     def perform(self, payload):
         if not self._dedicated:
-            self._dedicated = self.makededicated()
+            self._dedicated = self.make_dedicated()
             self.dedicated.start()
-        self.setdedicatedstate(payload)
+        self.set_dedicated_state(payload)
 
     @property
     def dedicated(self):
         return self._dedicated
 
-    def stopdedicated(self):
+    def stop_dedicated(self):
         self.dedicated.terminate()
 
     def stop(self):
-        self.stopdedicated()
+        self.stop_dedicated()
 
-    def makededicated(self): raise Exception("Unimplemented")
-    def setdedicatedstate(self, kwargs): raise Exception("Unimplemented")
+    def make_dedicated(self): raise Exception("Unimplemented")
+    def set_dedicated_state(self, kwargs): raise Exception("Unimplemented")
 
 
 class DedicatedThread(threading.Thread):

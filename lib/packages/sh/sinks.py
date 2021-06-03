@@ -82,10 +82,10 @@ class Curses(sink.DedicatedThreadSink):
         super().__init__(config)
         self._monitor = None
    
-    def makededicated(self): 
+    def make_dedicated(self): 
         return Curses.ScreenThread()
     
-    def setdedicatedstate(self, payload): 
+    def set_dedicated_state(self, payload): 
         self.dedicated.set_buffer(payload)
     
     def custom_monitor(self):

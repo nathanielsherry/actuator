@@ -2,32 +2,23 @@ from actuator.components import sink, monitor
 import socketserver
 import http.server
 
-class WebServerSink(sink.DedicatedThreadSink):
+class WebServerSink(sink.DedicatedThreadSink, sink.OnDemandMixin):
     
     def __init__(self, config):
         super().__init__(config)
         self._port = int(config.get('port', '8080'))
         self._address = config.get('address', '')
         self._monitor = None
-        self._pushstate = None
 
-    def makededicated(self): 
+    def make_dedicated(self): 
         return WebServerSink.HTTPServerThread(self)
         
-    def setdedicatedstate(self, payload):
-        self._pushstate = payload
+    def set_dedicated_state(self, payload):
+        self.set_payload(payload)
     
     def custom_monitor(self):
-        if not self._monitor: 
-            self._monitor = monitor.OnDemandMonitor({}) 
-        return self._monitor
-    
-    def get_payload(self):
-        if self._monitor:
-            return self._monitor.demand()
-        else:
-            return self._pushstate
-        
+        return self.ondemand_monitor
+            
     class HTTPServerThread(sink.DedicatedThread):
         def __init__(self, sink):
             super().__init__()
