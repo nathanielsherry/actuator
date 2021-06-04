@@ -2,8 +2,8 @@ from actuator import util
 from actuator.components import source
 
 class URLSource(source.Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._url = args[0]
         self._text_only = util.parse_bool(kwargs.get('html-to-text', 'false'))
         

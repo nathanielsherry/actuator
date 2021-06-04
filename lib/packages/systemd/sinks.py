@@ -1,7 +1,8 @@
 from actuator.components.sink import ToggleSink
 
 class Toggle(ToggleSink):
-    def __init__(self, *args, **kwargs):
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._service = args[0]
         
     def toggle(self, payload):

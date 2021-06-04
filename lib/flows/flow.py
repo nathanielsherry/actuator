@@ -6,7 +6,7 @@ import threading
 
 class FlowContext(component.Component):
     def __init__(self):
-        super().__init__({})
+        super().__init__()
         self._scope = None
     
     #To be called after `set_context`. If the former is about making
@@ -40,7 +40,13 @@ class Flow(FlowContext):
         for c in self.components:
             c.set_context(self)
 
+
     def wire(self):
+        
+        #Components stash their args&kwargs until setup time
+        for c in self.components:
+            c.setup()
+        
         from actuator.components import sink as mod_sink
         #Look up all of the sinks which are pointed at this flow and
         #feed it to the operator

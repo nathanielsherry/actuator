@@ -6,8 +6,8 @@ import subprocess, threading
 
 #Runs an arbitrary shell command on activation
 class Shell(sink.Sink):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._args = args
         self._shell = False
         if len(self._args) == 1 and ' ' in self._args[0]:
@@ -20,8 +20,8 @@ class Shell(sink.Sink):
 
 #Runs an arbitrary shell command on activation
 class ShellRunner(sink.RunnerSink):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._args = args
         self._shell = False
         if len(self._args) == 1 and ' ' in self._args[0]:
@@ -41,8 +41,8 @@ class Stdout(sink.Sink):
             pp.pprint(payload)
 
 class StdoutIf(sink.ToggleSink):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._true_msg = kwargs['true']
         self._false_msg = kwargs['false']
         

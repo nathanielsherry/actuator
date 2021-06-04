@@ -39,7 +39,7 @@ class Monitor(component.Component):
     
 
 class MonitorSleepMixin:
-    def __init__(self, *args, **kwargs):
+    def initialise(self, *args, **kwargs):
         from threading import Event
         self._sleep = float(kwargs.get('sleep', '1'))
         self._sleeper = Event()
@@ -60,7 +60,7 @@ class MonitorSleepMixin:
         self._sleeper.set()
     
 class ExitOnNoneMixin:
-    def __init__(self, *args, **kwargs):
+    def initialise(self, *args, **kwargs):
         self._exit_on_none = util.parse_bool(kwargs.get('exit', 'true'))
         self._bool = util.parse_bool(kwargs.get('bool', 'false'))
         self._blank = util.parse_bool(kwargs.get('blank', 'false'))
@@ -78,9 +78,6 @@ class ExitOnNoneMixin:
 
 #Just runs once and exits. Good starter Monitor.
 class OnceMonitor(Monitor):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
     def start(self):
         self.sink.perform(self.operator.value)
 
@@ -89,9 +86,6 @@ class OnceMonitor(Monitor):
 #The interval monitor runs repeatedly with a delay, optionally exiting on a 
 #None or, also optionally, False
 class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-    
     def start(self):
         while True:
             try:
@@ -118,9 +112,6 @@ class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
 #Monitors the result of a Source over time, triggering an event (callback) 
 #when the value changes, passing the new state as the single argument.
 class ChangeMonitor(Monitor, MonitorSleepMixin):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def start(self):
         log.info("Starting {name} with test {source} and sink {sink}".format(name=self.name, source=self.operator, sink=self.sink))
         last_state = None
@@ -140,10 +131,6 @@ class ChangeMonitor(Monitor, MonitorSleepMixin):
 #this monitor can be returned by a sink when no monitor is specified, effectively
 #allowing the sink to override the default, not the user
 class OnDemandMonitor(Monitor, MonitorSleepMixin):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        
     def start(self):
         #Call sink.perform once in case there's any one-time setup needed
         self.sink.perform(self.demand())

@@ -3,8 +3,8 @@ from actuator import log, util
 import time
 
 class Get(Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._varname = args[0]
         self._wait = util.parse_bool(kwargs.get('wait', True))
 

@@ -2,8 +2,8 @@ from actuator.components import source
 import time
 
 class TimeSource(source.Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._format = kwargs.get('format', '%H:%M:%S')
         
     @property

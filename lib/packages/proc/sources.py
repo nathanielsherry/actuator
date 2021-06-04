@@ -4,8 +4,8 @@ from actuator.components import source
 from actuator import util
 
 class Info(source.Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._full = util.parse_bool(kwargs.get('full', 'false'))
         self._keys = args
         
@@ -25,8 +25,8 @@ class Info(source.Source):
 
 
 class Get(Info):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._key = args[0]
         
     @property
@@ -34,18 +34,15 @@ class Get(Info):
         value = super().value
         return [p[self._key] for p in value]        
 
-class Names(Info):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
+class Names(Info):      
     @property
     def value(self):
         value = super().value
         return [p['name'] for p in value]
     
 class Has(source.Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._search = kwargs
     
     def compare(self, proc):

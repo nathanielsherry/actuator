@@ -18,8 +18,8 @@ def build(instruction, kwargs):
     
 #interface
 class Source(operator.Operator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
     
     def set_upstream(self, upstream):
         raise Exception("Source cannot have an upstream operator")
@@ -36,8 +36,8 @@ class Source(operator.Operator):
 
 #Simple Source that takes a function and params
 class FnSource(Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._fn = kwargs['fn']
         self._parameters = kwargs['args']
     
@@ -48,8 +48,8 @@ class FnSource(Source):
 
 
 class DelegatingSource(Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._inner = kwargs.get('inner', None)
 
     @property
@@ -63,8 +63,8 @@ class DelegatingSource(Source):
 
 
 class FlowSource(Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._inflows = []
     
     def wire(self, inflows):
@@ -83,8 +83,8 @@ class FlowSource(Source):
     
     
 class StringSource(Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._value = kwargs.get('value', 'yes')
         
     @property
@@ -92,8 +92,8 @@ class StringSource(Source):
         return self._value
 
 class IntegerSource(Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._value = int(kwargs.get('value', '1'))
         
     @property
@@ -101,8 +101,8 @@ class IntegerSource(Source):
         return self._value
 
 class BooleanSource(Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._value = util.parse_bool(wkargs.get('value', True))
         
     @property
@@ -111,8 +111,8 @@ class BooleanSource(Source):
 
 
 class CounterSource(Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(con*args, **kwargsfig)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._value = 0
         
     @property
@@ -131,8 +131,8 @@ class CounterSource(Source):
 
 
 class WeatherCanadaSource(Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._province = kwargs['province']
         self._citycode = kwargs['citycode']
         self._current = kwargs.get('current', None)

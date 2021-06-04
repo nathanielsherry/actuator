@@ -1,8 +1,8 @@
 from actuator.components.source import Source
 
 class FileSource(Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._filename = args[0]
         self._binary = util.parse_bool(kwargs.get('binary', 'false'))
 

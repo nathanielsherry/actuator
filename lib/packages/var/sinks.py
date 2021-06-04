@@ -2,8 +2,8 @@ from actuator.components.sink import Sink
 from actuator import log, util
 
 class Set(Sink):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._varname = args[0]
         self._claimed = False
 

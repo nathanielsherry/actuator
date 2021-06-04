@@ -2,8 +2,8 @@ from actuator.components.source import Source
 from actuator import log, util
 
 class Fetch(Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         log.debug("{name} received initial config {config}".format(name=self.name, config=(args, kwargs)))
         coords = kwargs['coords']
         lat, lon = coords.split(',')
@@ -30,8 +30,8 @@ class Fetch(Source):
 
 
 class Comparison(Fetch):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._days = int(kwargs.get('days', '3'))
         self._low = kwargs.get('low', None)
         self._high = kwargs.get('high', None)

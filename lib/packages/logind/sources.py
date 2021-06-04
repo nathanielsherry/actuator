@@ -2,8 +2,8 @@ from actuator.components.source import Source
 from actuator import log, util
 
 class Info(Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         log.debug("{name} received initial config {config}".format(name=self.name, config=(args, kwargs)))
         self._session = args[0]
 

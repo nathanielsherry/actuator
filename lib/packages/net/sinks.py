@@ -4,8 +4,8 @@ import http.server
 
 class WebServerSink(sink.DedicatedThreadSink, sink.OnDemandMixin):
     
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._port = int(kwargs.get('port', '8080'))
         self._address = kwargs.get('address', '')
         self._monitor = None

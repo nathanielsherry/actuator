@@ -3,8 +3,8 @@ from actuator.components import source
 from actuator import util
 
 class ShellSource(source.Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._args = args
         self._shell = False
         if len(self._args) == 1 and ' ' in self._args[0]:
@@ -17,8 +17,8 @@ class ShellSource(source.Source):
         
         
 class StdinSource(source.Source):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._split = util.parse_bool(kwargs.get('split', 'true'))
 
         

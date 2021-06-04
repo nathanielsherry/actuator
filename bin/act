@@ -44,14 +44,15 @@ def run_expression(expression):
     import sys
     flowctx = parser.parse_actuator_expression(expression)
 
-    import yaml
-    log.debug("Loaded flows:\n---\n {}".format(flowctx.description))
+    
     util.set_global('expression', expression)
 
     try:
         flowctx.start()
     except BrokenPipeError:
         pass
+
+    #log.debug("Loaded flows:\n---\n {}".format(flowctx.description))
 
     util.run_shutdown_hooks()
     sys.stderr.close()

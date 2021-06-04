@@ -2,8 +2,8 @@ from actuator.components import sink
 
 
 class FileSink(sink.Sink):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._filename = args[0]
         self._mode = kwargs.get('mode', 'false')
         

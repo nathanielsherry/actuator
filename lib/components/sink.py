@@ -30,7 +30,7 @@ class Sink(component.Component):
 
 
 class OnDemandMixin:
-    def __init__(self, *args, **kwargs):
+    def initialise(self, *args, **kwargs):
         self._monitor = None
         self._push_payload = None
     
@@ -64,8 +64,8 @@ class RunnerSink(Sink):
 
 
 class FlowSink(Sink, OnDemandMixin):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._target_name = args[0]
         
     @property
@@ -85,8 +85,8 @@ class FlowSink(Sink, OnDemandMixin):
 
 import threading
 class DedicatedThreadSink(Sink):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._dedicated = None
 
     def perform(self, payload):
@@ -110,8 +110,8 @@ class DedicatedThreadSink(Sink):
 
 
 class DedicatedThread(threading.Thread):
-    def __init__(self):
-        super().__init__(daemon=True)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._terminated = threading.Event()
     
     #Called when the thread starts by the thread itself

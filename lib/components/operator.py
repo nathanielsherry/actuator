@@ -26,6 +26,7 @@ def instructions():
 
 #interface
 class Operator(component.Component):
+    #upstream needs to be defined at creation time
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._upstream = None
@@ -61,8 +62,8 @@ class Noop(Operator):
 
 
 class Equals(Operator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._to = args[0]
 
     @property
@@ -75,18 +76,15 @@ class Equals(Operator):
 
 
 class Not(Operator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     @property
     def value(self):
         value = self.upstream.value
         return not value
 
 class Get(Operator):
-    def __init__(self, *args, **kwargs):
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         from actuator.lang import accessor
-        super().__init__(*args, **kwargs)
         self._accessor = accessor.accessor(args[0])
         
     @property
@@ -96,8 +94,8 @@ class Get(Operator):
         
 
 class Has(Operator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._names = args
         
     @property
@@ -137,8 +135,8 @@ class SinkOperator(Operator):
 #will switch when consistently the opposite for `delay[state]` seconds.
 #delay is a dict with integer values for keys True and False
 class Smooth(Operator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         
         delay = float(kwargs.get('delay', '10'))
         delay_true = float(kwargs.get('delay-true', delay))
@@ -171,8 +169,8 @@ class Smooth(Operator):
     
 
 class Cached(Operator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._last_time = 0
         self._last_value = None
         self._delay = float(kwargs.get('delay', '10'))
@@ -195,8 +193,8 @@ class Cached(Operator):
 
 
 class Forever(Operator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._value = None
 
     @property
@@ -207,8 +205,8 @@ class Forever(Operator):
 
 
 class Once(Operator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._done = False
 
     @property
@@ -219,8 +217,8 @@ class Once(Operator):
 
 
 class Change(Operator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._state = None
 
     @property
@@ -233,8 +231,8 @@ class Change(Operator):
 
 
 class Split(Operator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._delim = kwargs.get('delim', '\n')
         self._parts = []
 
@@ -249,8 +247,8 @@ class Split(Operator):
 #Accepts a list and produces one item from that list until done, then repeats
 #TODO: expand this to cover iterables, dict kv pairs, etc
 class Feed(Operator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._parts = []
 
     @property
@@ -268,8 +266,8 @@ class Feed(Operator):
 
         
 class Try(Operator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._default = kwargs.get('default', 'false')
 
     @property
@@ -281,8 +279,8 @@ class Try(Operator):
             return self._default
 
 class Hash(Operator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
         self._algo = kwargs.get('algo', 'md5')
         
     @property
