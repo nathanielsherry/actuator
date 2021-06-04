@@ -39,7 +39,7 @@ class Flow(FlowContext):
         #components to access not just the Flow but also the FlowSet
         for c in self.components:
             c.set_context(self)
-
+        
 
     def wire(self):
         

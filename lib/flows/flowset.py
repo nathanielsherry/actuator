@@ -9,16 +9,18 @@ class FlowSet(FlowContext):
                 
     @property
     def flows(self): return self._flows
-        
+    
+    def setup(self):
+        for flow in self.flows:
+            flow.set_context(self)
+        for flow in self.flows:
+            flow.scope.set('global', self.scope, claim=True)
+            if flow.flowname: self.scope.set(flow.flowname, flow.scope, claim=True)
+        for flow in self.flows:
+            flow.wire()
+    
     def start(self):
         try:
-            for flow in self.flows:
-                flow.set_context(self)
-            for flow in self.flows:
-                flow.scope.set('global', self.scope, claim=True)
-                if flow.flowname: self.scope.set(flow.flowname, flow.scope, claim=True)
-            for flow in self.flows:
-                flow.wire()
             for flow in self.flows:
                 flow.start()
             for flow in self.flows:

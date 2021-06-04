@@ -42,17 +42,19 @@ def run_expression(expression):
     from actuator import log, util
     from actuator.lang import parser
     import sys
-    flowctx = parser.parse_actuator_expression(expression)
+    flowset = parser.parse_actuator_expression(expression)
 
     
     util.set_global('expression', expression)
-
+    
+    flowset.setup()
+    log.debug("Loaded flows:\n---\n {}".format(flowset.description))
     try:
-        flowctx.start()
+        flowset.start()
     except BrokenPipeError:
         pass
 
-    #log.debug("Loaded flows:\n---\n {}".format(flowctx.description))
+    
 
     util.run_shutdown_hooks()
     sys.stderr.close()
