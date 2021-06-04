@@ -2,10 +2,10 @@ from actuator.components.source import Source
 from actuator import log, util
 
 class Info(Source):
-    def __init__(self, config):
-        super().__init__(config)
-        log.debug("{name} received initial config {config}".format(name=self.name, config=config))
-        self._session = config['args'][0]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        log.debug("{name} received initial config {config}".format(name=self.name, config=(args, kwargs)))
+        self._session = args[0]
 
     @property
     def value(self):

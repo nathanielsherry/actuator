@@ -152,22 +152,22 @@ class Registry:
     def lookup_operator(self, name):
         return self.lookup_item(name, lambda p: p.operators)
         
-    def build_item(self, name, config, get_archive):
+    def build_item(self, name, get_archive, *args, **kwargs):
         item = self.lookup_item(name, get_archive)
-        return item(config)
+        return item(*args, **kwargs)
         
         
-    def build_source(self, name, config):
-        return self.build_item(name, config, lambda p: p.sources)
+    def build_source(self, name, *args, **kwargs):
+        return self.build_item(name, lambda p: p.sources, *args, **kwargs)
         
-    def build_sink(self, name, config):
-        return self.build_item(name, config, lambda p: p.sinks)
+    def build_sink(self, name, *args, **kwargs):
+        return self.build_item(name, lambda p: p.sinks, *args, **kwargs)
         
-    def build_monitor(self, name, config):
-        return self.build_item(name, config, lambda p: p.monitors)
+    def build_monitor(self, name, *args, **kwargs):
+        return self.build_item(name, lambda p: p.monitors, *args, **kwargs)
         
-    def build_operator(self, name, config):
-        return self.build_item(name, config, lambda p: p.operators)
+    def build_operator(self, name, *args, **kwargs):
+        return self.build_item(name, lambda p: p.operators, *args, **kwargs)
         
         
 

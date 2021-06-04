@@ -15,9 +15,6 @@ def build(instruction, kwargs):
 
 
 class Sink(component.Component):
-    def __init__(self, config):
-        super().__init__(config)
-        
     def perform(self, payload):
         raise Exception("Unimplemented")
     
@@ -33,7 +30,7 @@ class Sink(component.Component):
 
 
 class OnDemandMixin:
-    def __init__(self, config):
+    def __init__(self, *args, **kwargs):
         self._monitor = None
         self._push_payload = None
     
@@ -67,9 +64,9 @@ class RunnerSink(Sink):
 
 
 class FlowSink(Sink, OnDemandMixin):
-    def __init__(self, config):
-        super().__init__(config)
-        self._target_name = config['args'][0]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._target_name = args[0]
         
     @property
     def target_name(self): return self._target_name
@@ -88,8 +85,8 @@ class FlowSink(Sink, OnDemandMixin):
 
 import threading
 class DedicatedThreadSink(Sink):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._dedicated = None
 
     def perform(self, payload):

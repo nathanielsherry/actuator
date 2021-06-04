@@ -1,13 +1,13 @@
 
 class Component:
-    def __init__(self, config):
+    def __init__(self, *args, **kwargs):
         #Run mixin init methods if this is the first superclass 
         #and there are others after it
         supers = self.__class__.mro()
         supers = supers[supers.index(Component)+1:]
         while True:
             if supers[0] == object: break
-            supers[0].__init__(self, config)
+            supers[0].__init__(self, *args, **kwargs)
             supers = supers[1:]
         
         self._context = None

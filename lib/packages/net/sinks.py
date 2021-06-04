@@ -4,10 +4,10 @@ import http.server
 
 class WebServerSink(sink.DedicatedThreadSink, sink.OnDemandMixin):
     
-    def __init__(self, config):
-        super().__init__(config)
-        self._port = int(config.get('port', '8080'))
-        self._address = config.get('address', '')
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._port = int(kwargs.get('port', '8080'))
+        self._address = kwargs.get('address', '')
         self._monitor = None
 
     def make_dedicated(self): 

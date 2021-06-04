@@ -26,8 +26,8 @@ def instructions():
 
 #interface
 class Operator(component.Component):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._upstream = None
     
     def set_upstream(self, upstream):
@@ -55,18 +55,15 @@ class Operator(component.Component):
         
 
 class Noop(Operator):
-    def __init__(self, config):
-        super().__init__(config)
-
     @property
     def value(self):
         return self.upstream.value
 
 
 class Equals(Operator):
-    def __init__(self, config):
-        super().__init__(config)
-        self._to = config['args'][0]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._to = args[0]
 
     @property
     def value(self):
@@ -78,8 +75,8 @@ class Equals(Operator):
 
 
 class Not(Operator):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     @property
     def value(self):
@@ -87,10 +84,10 @@ class Not(Operator):
         return not value
 
 class Get(Operator):
-    def __init__(self, config):
+    def __init__(self, *args, **kwargs):
         from actuator.lang import accessor
-        super().__init__(config)
-        self._accessor = accessor.accessor(config['args'][0])
+        super().__init__(*args, **kwargs)
+        self._accessor = accessor.accessor(args[0])
         
     @property
     def value(self):
@@ -99,9 +96,9 @@ class Get(Operator):
         
 
 class Has(Operator):
-    def __init__(self, config):
-        super().__init__(config)
-        self._names = config['args']
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._names = args
         
     @property
     def value(self):
@@ -110,10 +107,7 @@ class Has(Operator):
             if name in value: return True
         return False
 
-class All(Operator):
-    def __init__(self, config):
-        super().__init__(config)
-            
+class All(Operator):           
     @property
     def value(self):
         value = self.upstream.value
@@ -121,9 +115,6 @@ class All(Operator):
 
 
 class Any(Operator):
-    def __init__(self, config):
-        super().__init__(config)
-            
     @property
     def value(self):
         value = self.upstream.value
@@ -132,7 +123,7 @@ class Any(Operator):
 
 class SinkOperator(Operator):
     def __init__(self, sink):
-        super().__init__({})
+        super().__init__()
         self._sink = sink
         
     @property
@@ -146,12 +137,12 @@ class SinkOperator(Operator):
 #will switch when consistently the opposite for `delay[state]` seconds.
 #delay is a dict with integer values for keys True and False
 class Smooth(Operator):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
-        delay = float(config.get('delay', '10'))
-        delay_true = float(config.get('delay-true', delay))
-        delay_false = float(config.get('delay-false', delay))
+        delay = float(kwargs.get('delay', '10'))
+        delay_true = float(kwargs.get('delay-true', delay))
+        delay_false = float(kwargs.get('delay-false', delay))
         self._lag = {True: delay_true, False: delay_false}
         
         self._last_time = time.time()
@@ -180,11 +171,11 @@ class Smooth(Operator):
     
 
 class Cached(Operator):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._last_time = 0
         self._last_value = None
-        self._delay = float(config.get('delay', '10'))
+        self._delay = float(kwargs.get('delay', '10'))
 
     @property
     def delay(self):
@@ -204,8 +195,8 @@ class Cached(Operator):
 
 
 class Forever(Operator):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._value = None
 
     @property
@@ -216,8 +207,8 @@ class Forever(Operator):
 
 
 class Once(Operator):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._done = False
 
     @property
@@ -228,8 +219,8 @@ class Once(Operator):
 
 
 class Change(Operator):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._state = None
 
     @property
@@ -242,9 +233,9 @@ class Change(Operator):
 
 
 class Split(Operator):
-    def __init__(self, config):
-        super().__init__(config)
-        self._delim = config.get('delim', '\n')
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._delim = kwargs.get('delim', '\n')
         self._parts = []
 
     @property
@@ -258,8 +249,8 @@ class Split(Operator):
 #Accepts a list and produces one item from that list until done, then repeats
 #TODO: expand this to cover iterables, dict kv pairs, etc
 class Feed(Operator):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._parts = []
 
     @property
@@ -277,9 +268,9 @@ class Feed(Operator):
 
         
 class Try(Operator):
-    def __init__(self, config):
-        super().__init__(config)
-        self._default = config.get('default', 'false')
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._default = kwargs.get('default', 'false')
 
     @property
     def value(self):
@@ -290,9 +281,9 @@ class Try(Operator):
             return self._default
 
 class Hash(Operator):
-    def __init__(self, config):
-        super().__init__(config)
-        self._algo = config.get('algo', 'md5')
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._algo = kwargs.get('algo', 'md5')
         
     @property
     def value(self):

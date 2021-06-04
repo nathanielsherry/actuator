@@ -2,9 +2,9 @@ from actuator import util
 from actuator.components import operator
 
 class ToJson(operator.Operator):
-    def __init__(self, config):
-        super().__init__(config)
-        self._pretty = util.parse_bool(config.get('pretty', 'true'))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._pretty = util.parse_bool(kwargs.get('pretty', 'true'))
     
     @property
     def value(self):
@@ -18,9 +18,6 @@ class ToJson(operator.Operator):
 
 
 class FromJson(operator.Operator):
-    def __init__(self, config):
-        super().__init__(config)
-    
     @property
     def value(self):
         import json
@@ -32,9 +29,9 @@ class FromJson(operator.Operator):
         
         
 class ToYaml(operator.Operator):
-    def __init__(self, config):
-        super().__init__(config)
-        self._pretty = util.parse_bool(config.get('pretty', 'true'))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._pretty = util.parse_bool(kwargs.get('pretty', 'true'))
     
     @property
     def value(self):
@@ -48,9 +45,6 @@ class ToYaml(operator.Operator):
 
 
 class FromYaml(operator.Operator):
-    def __init__(self, config):
-        super().__init__(config)
-    
     @property
     def value(self):
         import yaml

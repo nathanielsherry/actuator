@@ -2,9 +2,9 @@ from actuator.components.source import Source
 from actuator import log, util
 
 class Info(Source):
-    def __init__(self, config):
-        super().__init__(config)
-        log.debug("{name} received initial config {config}".format(name=self.name, config=config))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        log.debug("{name} received initial config {config}".format(name=self.name, config=(args, kwargs)))
         self._service = config['args'][0]
 
     @property

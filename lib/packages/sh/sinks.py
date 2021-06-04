@@ -6,9 +6,9 @@ import subprocess, threading
 
 #Runs an arbitrary shell command on activation
 class Shell(sink.Sink):
-    def __init__(self, config):
-        super().__init__(config)
-        self._args = config['args']
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._args = args
         self._shell = False
         if len(self._args) == 1 and ' ' in self._args[0]:
             self._shell = True
@@ -20,9 +20,9 @@ class Shell(sink.Sink):
 
 #Runs an arbitrary shell command on activation
 class ShellRunner(sink.RunnerSink):
-    def __init__(self, config):
-        super().__init__(config)
-        self._args = config['args']
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._args = args
         self._shell = False
         if len(self._args) == 1 and ' ' in self._args[0]:
             self._shell = True
@@ -32,8 +32,6 @@ class ShellRunner(sink.RunnerSink):
         subprocess.run(self._args, shell=self._shell)
 
 class Stdout(sink.Sink):
-    def __init__(self, config):
-        super().__init__(config)
     def perform(self, payload):          
         if isinstance(payload, str):
             print(payload, flush=True)
@@ -43,10 +41,10 @@ class Stdout(sink.Sink):
             pp.pprint(payload)
 
 class StdoutIf(sink.ToggleSink):
-    def __init__(self, config):
-        super().__init__(config)
-        self._true_msg = config['true']
-        self._false_msg = config['false']
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._true_msg = kwargs['true']
+        self._false_msg = kwargs['false']
         
     def toggle(self, state):
         msg = self._true_msg if state else self._false_msg
@@ -54,32 +52,27 @@ class StdoutIf(sink.ToggleSink):
       
      
 class StdoutMsg(sink.RunnerSink):
-    def __init__(self, config):
-        super().__init__(config)
-        self._msg = config.get('msg', 'message')
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._msg = kwargs.get('msg', 'message')
     def run(self):
         print(self._msg, flush=True)
 
 
 class Null(sink.Sink):
-    def __init__(self, config):
-        super().__init__(config)
-
     def perform(self, payload):
         pass
 
 
 class JsonSink(sink.Sink):
-    def __init__(self, config):
-        super().__init__(config)
     def perform(self, payload):
         import json
         print(json.dumps(payload), flush=True)
 
 
 class Curses(sink.DedicatedThreadSink):   
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._monitor = None
    
     def make_dedicated(self): 

@@ -11,9 +11,6 @@ def tobool(o):
         return False
 
 class Not(operator.Operator):
-    def __init__(self, config):
-        super().__init__(config)
-    
     @property
     def value(self):
         import json
@@ -22,9 +19,6 @@ class Not(operator.Operator):
     
     
 class Any(operator.Operator):
-    def __init__(self, config):
-        super().__init__(config)
-    
     @property
     def value(self):
         import json
@@ -34,9 +28,6 @@ class Any(operator.Operator):
         return any(value)
         
 class All(operator.Operator):
-    def __init__(self, config):
-        super().__init__(config)
-    
     @property
     def value(self):
         import json

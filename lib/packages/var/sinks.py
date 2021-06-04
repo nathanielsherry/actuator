@@ -2,9 +2,9 @@ from actuator.components.sink import Sink
 from actuator import log, util
 
 class Set(Sink):
-    def __init__(self, config):
-        super().__init__(config)
-        self._varname = config.get('args', [''])[0]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._varname = args[0]
         self._claimed = False
 
     def perform(self, payload):

@@ -19,8 +19,6 @@ def build(instruction, kwargs):
 
 
 class Monitor(component.Component):
-    def __init__(self, config):
-        super().__init__(config)
         
     def start(self):
         raise Exception("Unimplemented")
@@ -41,9 +39,9 @@ class Monitor(component.Component):
     
 
 class MonitorSleepMixin:
-    def __init__(self, config):
+    def __init__(self, *args, **kwargs):
         from threading import Event
-        self._sleep = float(config.get('sleep', '1'))
+        self._sleep = float(kwargs.get('sleep', '1'))
         self._sleeper = Event()
         self._stopped = False
             
@@ -62,10 +60,10 @@ class MonitorSleepMixin:
         self._sleeper.set()
     
 class ExitOnNoneMixin:
-    def __init__(self, config):
-        self._exit_on_none = util.parse_bool(config.get('exit', 'true'))
-        self._bool = util.parse_bool(config.get('bool', 'false'))
-        self._blank = util.parse_bool(config.get('blank', 'false'))
+    def __init__(self, *args, **kwargs):
+        self._exit_on_none = util.parse_bool(kwargs.get('exit', 'true'))
+        self._bool = util.parse_bool(kwargs.get('bool', 'false'))
+        self._blank = util.parse_bool(kwargs.get('blank', 'false'))
             
     @property
     def exit_on_none(self): 
@@ -80,8 +78,8 @@ class ExitOnNoneMixin:
 
 #Just runs once and exits. Good starter Monitor.
 class OnceMonitor(Monitor):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
     def start(self):
         self.sink.perform(self.operator.value)
@@ -91,8 +89,8 @@ class OnceMonitor(Monitor):
 #The interval monitor runs repeatedly with a delay, optionally exiting on a 
 #None or, also optionally, False
 class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
     
     def start(self):
         while True:
@@ -120,8 +118,8 @@ class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
 #Monitors the result of a Source over time, triggering an event (callback) 
 #when the value changes, passing the new state as the single argument.
 class ChangeMonitor(Monitor, MonitorSleepMixin):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def start(self):
         log.info("Starting {name} with test {source} and sink {sink}".format(name=self.name, source=self.operator, sink=self.sink))
@@ -142,8 +140,8 @@ class ChangeMonitor(Monitor, MonitorSleepMixin):
 #this monitor can be returned by a sink when no monitor is specified, effectively
 #allowing the sink to override the default, not the user
 class OnDemandMonitor(Monitor, MonitorSleepMixin):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
         
     def start(self):

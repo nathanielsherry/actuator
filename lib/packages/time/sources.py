@@ -2,9 +2,9 @@ from actuator.components import source
 import time
 
 class TimeSource(source.Source):
-    def __init__(self, config):
-        super().__init__(config)
-        self._format = config.get('format', '%H:%M:%S')
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._format = kwargs.get('format', '%H:%M:%S')
         
     @property
     def delay(self): 
@@ -20,9 +20,6 @@ class TimeSource(source.Source):
 
 
 class EpochSource(source.Source):
-    def __init__(self, config):
-        super().__init__(config)
-
     @property
     def delay(self): 
         return self._delay or source.DELAY_SHORT
@@ -33,10 +30,10 @@ class EpochSource(source.Source):
         
 
 class DuringSource(source.Source):
-    def __init__(self, config):
-        super().__init__(config)
-        self._start = DuringSource.parse(config['start'])
-        self._end = DuringSource.parse(config['end'])
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._start = DuringSource.parse(kwargs['start'])
+        self._end = DuringSource.parse(kwargs['end'])
     
     @staticmethod
     def parse(s):

@@ -4,10 +4,10 @@ from actuator.components import source
 from actuator import util
 
 class Info(source.Source):
-    def __init__(self, config):
-        super().__init__(config)
-        self._full = util.parse_bool(config.get('full', 'false'))
-        self._keys = config.get('args', [])
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._full = util.parse_bool(kwargs.get('full', 'false'))
+        self._keys = args
         
     @property
     def value(self):
@@ -25,9 +25,9 @@ class Info(source.Source):
 
 
 class Get(Info):
-    def __init__(self, config):
-        super().__init__(config)
-        self._key = config.get['args'][0]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._key = args[0]
         
     @property
     def value(self):
@@ -35,8 +35,8 @@ class Get(Info):
         return [p[self._key] for p in value]        
 
 class Names(Info):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
     @property
     def value(self):
@@ -44,9 +44,9 @@ class Names(Info):
         return [p['name'] for p in value]
     
 class Has(source.Source):
-    def __init__(self, config):
-        super().__init__(config)
-        self._search = config
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._search = kwargs
     
     def compare(self, proc):
         keys = list(self._search.keys())

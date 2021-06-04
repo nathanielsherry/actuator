@@ -3,10 +3,10 @@ from actuator import log, util
 import time
 
 class Get(Source):
-    def __init__(self, config):
-        super().__init__(config)
-        self._varname = config.get('args', [''])[0]
-        self._wait = util.parse_bool(config.get('wait', True))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._varname = args[0]
+        self._wait = util.parse_bool(kwargs.get('wait', True))
 
     @property
     def value(self):

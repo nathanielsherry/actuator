@@ -1,9 +1,9 @@
 from actuator.components import operator
 
 class IntervalSource(operator.Operator):
-    def __init__(self, config):
-        super().__init__(config)
-        self._sleep_interval = float(config.get('sleep', '1'))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._sleep_interval = float(kwargs.get('sleep', '1'))
     
     def sleep(self):
         import time

@@ -78,11 +78,11 @@ class ActuatorExpressionMixin:
             
         if not kwargs: 
             kwargs = {}
+        
+        if not args:
+            args = []
             
-        if args:
-            kwargs['args'] = args
-            
-        finished = build(instruction, kwargs)
+        finished = build(instruction, *args, **kwargs)
         
         if upstream:
             finished.set_upstream(upstream)

@@ -1,10 +1,10 @@
 from actuator.components.source import Source
 
 class FileSource(Source):
-    def __init__(self, config):
-        super().__init__(config)
-        self._filename = config['args'][0]
-        self._binary = util.parse_bool(config.get('binary', 'false'))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._filename = args[0]
+        self._binary = util.parse_bool(kwargs.get('binary', 'false'))
 
     @property
     def value(self):

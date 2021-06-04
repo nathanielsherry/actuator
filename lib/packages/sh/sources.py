@@ -3,9 +3,9 @@ from actuator.components import source
 from actuator import util
 
 class ShellSource(source.Source):
-    def __init__(self, config):
-        super().__init__(config)
-        self._args = config['args']
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._args = args
         self._shell = False
         if len(self._args) == 1 and ' ' in self._args[0]:
             self._shell = True
@@ -17,9 +17,9 @@ class ShellSource(source.Source):
         
         
 class StdinSource(source.Source):
-    def __init__(self, config):
-        super().__init__(config)
-        self._split = util.parse_bool(config.get('split', 'true'))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._split = util.parse_bool(kwargs.get('split', 'true'))
 
         
     @property
@@ -41,10 +41,7 @@ class StdinSource(source.Source):
             return line.strip()
             
 
-class JsonSource(source.Source):
-    def __init__(self, config):
-        super().__init__(config)
-        
+class JsonSource(source.Source):       
     @property
     def value(self):
         import sys, json
