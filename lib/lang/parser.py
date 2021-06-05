@@ -39,13 +39,14 @@ class ActuatorExpressionMixin:
         self._add_token_hook("act.expsep", lambda t: t == SYM_SEP, lambda: self.parse_expsep())
 
     
-    def parse_instruction(self, key, valid_instruction, build, allow_upstream=False, upstream=None):
+    def parse_instruction(self, key, valid_instruction, build):
         from actuator.lang.flexer import Symbol
         if key: key = self.flexer.pop(key)
         
         parseargs = True
         args = None
         kwargs = None
+        instruction = None
         #custom parsing for inline shell commands
         if self.flexer.peek().startswith('`'):
             args = [self.flexer.pop()[1:-1]]
@@ -82,33 +83,9 @@ class ActuatorExpressionMixin:
         if not args:
             args = []
             
-        finished = build(instruction, *args, **kwargs)
-        
-        if upstream:
-            finished.set_upstream(upstream)
-        
-        
-        #TODO: This section is specific to operators, should it be in 
-        #this general function for parsing any component?
-        if self.flexer.pop_if('|') == '|':
-            #Chaining to another operator
-            if allow_upstream:
-                return self.parse_instruction(None, valid_instruction, build, upstream=finished, allow_upstream=allow_upstream)
-            else:
-                raise Exception("Chaining this type of operator is not permitted")
-        elif self.flexer.pop_if('>') == '>':
-            #Chaining to a syncop
-            if allow_upstream:
-                from actuator.components.operator import SinkOperator
-                valid_sink = lambda t: t in REGISTRY.sink_names
-                build_sinkop = lambda *args, **kwargs: SinkOperator(REGISTRY.build_sink(*args, **kwargs))
-                return self.parse_instruction(None, valid_sink, build_sinkop, upstream=finished, allow_upstream=allow_upstream)
-            else:
-                raise Exception("Chaining this type of operator is not permitted")
-        else:
-            return finished
-
+        return build(instruction, *args, **kwargs)
     
+        
     def parse_packagename(self):
         topname = self.parse_value().name
         if self.flexer.pop_if('.') == PKG_SEP:
@@ -131,8 +108,41 @@ class ActuatorExpressionMixin:
         return (KW_MONITOR, monitor)
         
     def parse_operator(self):
-        operator = self.parse_instruction(KW_OPERATOR, lambda t: t in REGISTRY.operator_names, REGISTRY.build_operator, allow_upstream=True)
+        self.flexer.pop(KW_OPERATOR)
+        operator = self.parse_opchain()
         return (KW_OPERATOR, operator)
+               
+    def parse_opchain(self, upstream=None):
+        CHAIN_OPS = ['|', '>']
+        
+        #No default chainop, if there's an upstream, we should parse one
+        chainop = None
+        if upstream:
+            chainop = self.flexer.pop(*CHAIN_OPS)
+        
+        if not chainop or chainop == "|":
+            #normal (or no) chaining, just parse the op
+            valid_name = lambda t: t in REGISTRY.operator_names
+            builder = REGISTRY.build_operator
+        elif chainop == ">":
+            #Sink chaining, parse as a sink and wrap in a SinkOperator
+            from actuator.components.operator import SinkOperator
+            valid_name = lambda t: t in REGISTRY.sink_names
+            builder = lambda *args, **kwargs: SinkOperator(REGISTRY.build_sink(*args, **kwargs))
+        
+        #parse the instruction using the prepared values
+        operator = self.parse_instruction(None, valid_name, builder)
+        
+        #If there was an operator before this one, set it
+        if upstream:
+            operator.set_upstream(upstream)
+        
+        #If there is an operator after this one, recurse to parse it
+        if self.flexer.peek() in CHAIN_OPS:
+            return self.parse_opchain(operator)
+        else:
+            return operator
+               
                
     def parse_flow(self):
         self.flexer.pop(KW_FLOW)
