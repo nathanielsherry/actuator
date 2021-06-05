@@ -99,8 +99,9 @@ class ActuatorExpressionMixin:
         source = self.parse_instruction(KW_SOURCE, lambda t: t in REGISTRY.source_names, REGISTRY.build_source)
         return (KW_SOURCE, source)
     
-    def parse_sink(self):
-        sink = self.parse_instruction(KW_SINK, lambda t: t in REGISTRY.sink_names, REGISTRY.build_sink)
+    def parse_sink(self, inline=False):
+        key = None if inline else KW_SINK
+        sink = self.parse_instruction(key, lambda t: t in REGISTRY.sink_names, REGISTRY.build_sink)
         return (KW_SINK, sink)
     
     def parse_monitor(self):
@@ -122,16 +123,13 @@ class ActuatorExpressionMixin:
         
         if not chainop or chainop == "|":
             #normal (or no) chaining, just parse the op
-            valid_name = lambda t: t in REGISTRY.operator_names
-            builder = REGISTRY.build_operator
+            operator = self.parse_instruction(None, lambda t: t in REGISTRY.operator_names, REGISTRY.build_operator)
         elif chainop == ">":
             #Sink chaining, parse as a sink and wrap in a SinkOperator
             from actuator.components.operator import SinkOperator
-            valid_name = lambda t: t in REGISTRY.sink_names
-            builder = lambda *args, **kwargs: SinkOperator(REGISTRY.build_sink(*args, **kwargs))
+            sink = self.parse_sink(inline=True)
+            operator = SinkOperator(sink[1])
         
-        #parse the instruction using the prepared values
-        operator = self.parse_instruction(None, valid_name, builder)
         
         #If there was an operator before this one, set it
         if upstream:
