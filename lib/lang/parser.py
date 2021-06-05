@@ -87,9 +87,22 @@ class ActuatorExpressionMixin:
         if upstream:
             finished.set_upstream(upstream)
         
+        
+        #TODO: This section is specific to operators, should it be in 
+        #this general function for parsing any component?
         if self.flexer.pop_if('|') == '|':
+            #Chaining to another operator
             if allow_upstream:
                 return self.parse_instruction(None, valid_instruction, build, upstream=finished, allow_upstream=allow_upstream)
+            else:
+                raise Exception("Chaining this type of operator is not permitted")
+        elif self.flexer.pop_if('>') == '>':
+            #Chaining to a syncop
+            if allow_upstream:
+                from actuator.components.operator import SinkOperator
+                valid_sink = lambda t: t in REGISTRY.sink_names
+                build_sinkop = lambda *args, **kwargs: SinkOperator(REGISTRY.build_sink(*args, **kwargs))
+                return self.parse_instruction(None, valid_sink, build_sinkop, upstream=finished, allow_upstream=allow_upstream)
             else:
                 raise Exception("Chaining this type of operator is not permitted")
         else:
