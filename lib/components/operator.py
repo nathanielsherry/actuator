@@ -20,6 +20,9 @@ def instructions():
         'has': Has,
         'all': All,
         'any': Any,
+        'str': Str,
+        'int': Int,
+        'float': Float,
     }
     
     
@@ -80,6 +83,21 @@ class Not(Operator):
     def value(self):
         value = self.upstream.value
         return not value
+
+class Str(Operator):
+    @property
+    def value(self):
+        return str(self.upstream.value)
+
+class Int(Operator):
+    @property
+    def value(self):
+        return int(self.upstream.value)
+        
+class Float(Operator):
+    @property
+    def value(self):
+        return float(self.upstream.value)
 
 class Get(Operator):
     def initialise(self, *args, **kwargs):
