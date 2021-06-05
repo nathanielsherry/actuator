@@ -141,7 +141,14 @@ class SinkOperator(Operator):
     def __init__(self, sink):
         super().__init__()
         self._sink = sink
-        
+    
+    def setup(self):
+        super().setup()
+        self.sink.setup()
+    
+    @property
+    def sink(self): return self._sink
+    
     @property
     def value(self):
         value = self.upstream.value

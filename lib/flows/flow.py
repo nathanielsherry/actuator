@@ -47,16 +47,8 @@ class Flow(FlowContext):
         for c in self.components:
             c.setup()
         
-        from actuator.components import sink as mod_sink
-        #Look up all of the sinks which are pointed at this flow and
-        #feed it to the operator
-        inbound = []
-        for flow in self.context.flows:
-            sink = flow.sink
-            if not isinstance(sink, mod_sink.FlowSink): continue
-            if not self.flowname == sink.target_name: continue
-            inbound.append(flow)
-        self.source.wire(inbound)
+        #Wire all inflows to the source
+        self.source.wire(self.inflows)
                 
         #Wire the operators to the source
         self.operator.upstreams[0].set_upstream(self.source)        
@@ -95,6 +87,27 @@ class Flow(FlowContext):
     @property
     def flowname(self):
         return self._flowname
+    
+    @property
+    def outflows(self):
+        from actuator.components import sink, operator
+        outflows = []
+        for c in self.components:
+            if isinstance(c, sink.Sink):
+                outflows.append(c)
+            elif isinstance(c, operator.SinkOperator):
+                outflows.append(c.sink)
+        return outflows
+    
+    @property
+    def inflows(self):
+        from actuator.components.sink import FlowSink
+        inbound = []
+        def is_inflow(o):
+            return isinstance(o, FlowSink) and o.target_name == self.flowname
+        for flow in self.context.flows:
+            inbound.extend([o for o in flow.outflows if is_inflow(o)])
+        return inbound
     
     @property
     def components(self):
