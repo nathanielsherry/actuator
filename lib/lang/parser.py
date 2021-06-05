@@ -55,7 +55,7 @@ class ActuatorExpressionMixin:
         elif self.flexer.peek() == SYM_VARSTART:
             args = [self.parse_var()]
             instruction = "var"
-        elif self.flexer.peek() == SYM_OUTFLOW and key == KW_SINK:
+        elif self.flexer.peek() == SYM_OUTFLOW:
             self.flexer.pop(SYM_OUTFLOW)
             instruction = "outflow"
             parseargs = False
