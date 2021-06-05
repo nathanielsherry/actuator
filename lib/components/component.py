@@ -58,3 +58,11 @@ class Component:
     def description(self):
         import yaml
         return yaml.dump(self.description_data)
+        
+        
+class ComponentMixin:
+    def __init__(self, *args, **kwargs):
+        pass
+    
+    def initialise(self, *args, **kwargs):
+        pass

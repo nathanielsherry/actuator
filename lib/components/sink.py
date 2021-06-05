@@ -29,7 +29,8 @@ class Sink(component.Component):
         return None
 
 
-class OnDemandMixin:
+class OnDemandMixin(component.ComponentMixin):
+    
     def initialise(self, *args, **kwargs):
         self._monitor = None
         self._push_payload = None

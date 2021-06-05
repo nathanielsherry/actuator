@@ -38,7 +38,7 @@ class Monitor(component.Component):
     
     
 
-class MonitorSleepMixin:
+class MonitorSleepMixin(component.ComponentMixin):
     def initialise(self, *args, **kwargs):
         from threading import Event
         self._sleep = float(kwargs.get('sleep', '1'))
@@ -59,7 +59,7 @@ class MonitorSleepMixin:
         self._stopped = True
         self._sleeper.set()
     
-class ExitOnNoneMixin:
+class ExitOnNoneMixin(component.ComponentMixin):
     def initialise(self, *args, **kwargs):
         self._exit_on_none = util.parse_bool(kwargs.get('exit', 'true'))
         self._bool = util.parse_bool(kwargs.get('bool', 'false'))
