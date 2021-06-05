@@ -10,6 +10,7 @@ def instructions():
         "change": ChangeMonitor,
         "interval": IntervalMonitor,
         "start": OnceMonitor,
+        "demand": OnDemandMonitor,
     }
     
 
