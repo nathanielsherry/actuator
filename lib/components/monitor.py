@@ -23,10 +23,10 @@ def build(instruction, kwargs):
 class Monitor(component.Component):
         
     def start(self):
-        raise Exception("Unimplemented")
+        raise Exception("Unimplemented for {}".format(self.name))
     
     def stop(self):
-        raise Exception("Unimplemented")
+        raise Exception("Unimplemented for {}".format(self.name))
     
     @property
     def source(self): return self.context.source
@@ -82,16 +82,21 @@ class ExitOnNoneMixin(component.ComponentMixin):
 class OnceMonitor(Monitor):
     def start(self):
         self.sink.perform(self.operator.value)
+    def stop(self):
+        pass
 
 
 #Just runs once and exits. Good starter Monitor.
 class CountMonitor(Monitor):
     def initialise(self, *args, **kwargs):
         self._count = int(args[0])
+        self._terminate = False
     def start(self):
         for i in range(0, self._count):
+            if self._terminate: return
             self.sink.perform(self.operator.value)
-
+    def stop(self):
+        self._terminate = True
 
 #The interval monitor runs repeatedly with a delay, optionally exiting on a 
 #None or, also optionally, False
@@ -144,17 +149,18 @@ class OnDemandMonitor(Monitor, MonitorSleepMixin):
     def start(self):
         #Call sink.perform once in case there's any one-time setup needed
         self.sink.perform(self.demand())
-        #Block the monitor thread as if we were doing something important
-        while True:
-            if not self.sleep(): return
+        #Block the monitor thread so long as there are sinks showing as active
+        while self.active_sinks:
+            if not self.sleep(): break
+        #Done, sleep has been interrupted or all sinks are inactive
         
     def stop(self):
         self.stop_sleep()
         
     def demand(self):
         return self.operator.value
-        
-
-
-
-
+    
+    @property
+    def active_sinks(self):
+        return [s for s in self.context.sinks if s.active]
+    
