@@ -16,11 +16,18 @@ def build(instruction, kwargs):
 
 class Sink(component.Component):
     def perform(self, payload):
-        raise Exception("Unimplemented")
+        raise Exception("Unimplemented for {}".format(self.name))
     
     def stop(self):
         #By default, a sink does not run any threads
         return
+    
+    @property
+    def active(self):
+        #by default, sinks are passive, accepting input as it arrives
+        #sinks which are in control somehow should return True so long 
+        #as they are active (ie not stopped/finished) 
+        return False
     
     #There are cases where the sink may want to provide
     #its own monitor so that pull-based sink implementations
@@ -57,22 +64,32 @@ class ToggleSink(Sink):
     def perform(self, payload):
         return self.toggle(payload)
     def toggle(self, state):
-        raise Exception("Unimplemented")
+        raise Exception("Unimplemented for {}".format(self.name))
 
 class RunnerSink(Sink):
     def perform(self, payload):
         self.run()
     def run(self):
-        raise Exception("Unimplemented")
+        raise Exception("Unimplemented for {}".format(self.name))
 
 
 class FlowSink(Sink, OnDemandMixin):
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
         self._target_name = args[0]
-        
+        flow = self.context
+        flowset = flow.context
+        self._target = flowset.get_flow(self.target_name)
+    
+    #This sink is active as long as it's target flow is running
+    @property
+    def active(self): return self.target.running
+    
     @property
     def target_name(self): return self._target_name
+    
+    @property
+    def target(self): return self._target
     
     def custom_monitor(self):
         return self.ondemand_monitor
@@ -95,7 +112,11 @@ class DedicatedThreadSink(Sink):
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
         self._dedicated = None
-
+        self._active = True
+        
+    @property
+    def active(self): return self._active
+        
     def perform(self, payload):
         if not self._dedicated:
             self._dedicated = self.make_dedicated()
@@ -111,6 +132,7 @@ class DedicatedThreadSink(Sink):
 
     def stop(self):
         self.stop_dedicated()
+        self._active = False
 
     def make_dedicated(self): raise Exception("Unimplemented")
     def set_dedicated_state(self, kwargs): raise Exception("Unimplemented")
