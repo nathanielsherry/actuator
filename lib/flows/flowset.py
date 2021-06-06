@@ -10,6 +10,12 @@ class FlowSet(FlowContext):
     @property
     def flows(self): return self._flows
     
+    def get_flow(self, name):
+        for flow in self.flows:
+            if flow.flowname == name: 
+                return flow
+        return None
+    
     def setup(self):
         for flow in self.flows:
             flow.set_context(self)
