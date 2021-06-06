@@ -48,7 +48,7 @@ class Operator(component.Component):
     #return a boolean
     @property
     def value(self):
-        raise Exception("Unimplemented")
+        raise Exception("Unimplemented for {}".format(self.name))
         
     @property
     def description_data(self):

@@ -30,7 +30,7 @@ class Source(operator.Operator):
     #return a boolean
     @property
     def value(self):
-        raise Exception("Unimplemented")
+        raise Exception("Unimplemented for {}".format(self.name))
     
 
 
