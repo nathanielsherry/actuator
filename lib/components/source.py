@@ -6,7 +6,7 @@ from actuator.components import operator
 def instructions():
     return {
         'counter': CounterSource,
-        'string': StringSource,
+        'str': StringSource,
         'int': IntegerSource,
         'bool': BooleanSource,
         'inflow': FlowSource,
@@ -93,7 +93,7 @@ class FlowSource(Source):
 class StringSource(Source):
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
-        self._value = kwargs.get('value', 'yes')
+        self._value = args[0]
         
     @property
     def value(self):

@@ -60,6 +60,10 @@ class ActuatorExpressionMixin:
             instruction = "outflow"
             parseargs = False
             args = [self.flexer.pop()]
+        elif self.flexer.peek().startswith('"') or self.flexer.peek().startswith("'"):
+            args = [self.flexer.pop()[1:-1]] 
+            instruction = "str"
+            parseargs = False
         else:
             instruction = self.parse_packagename()
             if not valid_instruction(instruction):
