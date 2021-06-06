@@ -98,6 +98,11 @@ class StringSource(Source):
     @property
     def value(self):
         return self._value
+    @property
+    def description_data(self):
+        return {self.name: {
+            'value': self.value
+        }}
 
 class IntegerSource(Source):
     def initialise(self, *args, **kwargs):
@@ -108,6 +113,12 @@ class IntegerSource(Source):
     def value(self):
         return self._value
 
+    @property
+    def description_data(self):
+        return {self.name: {
+            'value': self.value
+        }}
+
 class BooleanSource(Source):
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
@@ -116,6 +127,12 @@ class BooleanSource(Source):
     @property
     def value(self):
         return self._value
+
+    @property
+    def description_data(self):
+        return {self.name: {
+            'value': self.value
+        }}
 
 
 class CounterSource(Source):
