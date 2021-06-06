@@ -80,7 +80,11 @@ class FlowSink(Sink, OnDemandMixin):
     def perform(self, payload):
         self.set_payload(payload)
 
-
+    @property
+    def description_data(self):
+        return {self.name: {
+            'target': self.target_name
+        }}
         
         
 

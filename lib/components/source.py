@@ -71,15 +71,23 @@ class FlowSource(Source):
         self._inflows = inflows
     
     @property
+    def inflows(self):
+        return self._inflows
+    
+    @property
     def value(self):
         #no inflows, return None
-        if len(self._inflows) == 0: return None
+        if len(self.inflows) == 0: return None
         #one inflow, return the payload
-        if len(self._inflows) == 1: return self._inflows[0].sink.get_payload()
+        if len(self.inflows) == 1: return self.inflows[0].get_payload()
         #more than one inflow, return a list of payloads
-        return [i.sink.get_payload() for i in self._inflows]
+        return [i.get_payload() for i in self.inflows]
             
-    
+    @property
+    def description_data(self):
+        return {self.name: {
+            'inflows': [i.name for i in self.inflows]
+        }}
     
     
 class StringSource(Source):

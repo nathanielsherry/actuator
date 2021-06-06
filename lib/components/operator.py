@@ -155,6 +155,12 @@ class SinkOperator(Operator):
         self._sink.perform(value)
         return value
 
+    @property
+    def description_data(self):
+        return {self.name: {
+            'sink': self.sink.description_data
+        }}
+
         
 #Eliminates jitter from a value flapping a bit. The state starts as False and
 #will switch when consistently the opposite for `delay[state]` seconds.
