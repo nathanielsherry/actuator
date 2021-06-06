@@ -25,7 +25,8 @@ class Flow(FlowContext):
         self._source = source
         self._sink = sink
         self._monitor = monitor
-        self._flowname = flowname
+        from actuator.naming import get_random_name
+        self._flowname = flowname or get_random_name()
         
         #Threading is done w/ a callable back into this object
         self._thread = None
