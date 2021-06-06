@@ -11,6 +11,7 @@ def instructions():
         "interval": IntervalMonitor,
         "start": OnceMonitor,
         "demand": OnDemandMonitor,
+        "counter": CountMonitor,
     }
     
 
@@ -82,6 +83,14 @@ class OnceMonitor(Monitor):
     def start(self):
         self.sink.perform(self.operator.value)
 
+
+#Just runs once and exits. Good starter Monitor.
+class CountMonitor(Monitor):
+    def initialise(self, *args, **kwargs):
+        self._count = int(args[0])
+    def start(self):
+        for i in range(0, self._count):
+            self.sink.perform(self.operator.value)
 
 
 #The interval monitor runs repeatedly with a delay, optionally exiting on a 
