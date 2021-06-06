@@ -30,7 +30,8 @@ class Flow(FlowContext):
         
         #Threading is done w/ a callable back into this object
         self._thread = None
-
+        self._running = False
+                
     def set_context(self, context):
         super().set_context(context)
         self._scope = NamespacedScope(context.scope)
@@ -53,25 +54,49 @@ class Flow(FlowContext):
         #Wire all inflows to the source
         self.source.wire(self.inflows)
         #Wire the operators to the source
-        self.operator.upstreams[0].set_upstream(self.source)        
+        self.operator.upstreams[0].set_upstream(self.source)
+        
+        #We're *ready* to run now -- we don't want some other flow starting
+        #first and thinking we've already terminated
+        self._running = True
 
     def start(self):
         self._thread = threading.Thread(target=lambda: self.run(), daemon=True)
         self._thread.start()
         
     def stop(self):
+        if not self.running: return
         self.monitor.stop()
         self.sink.stop()
+        self._running = False
         
     def join(self):
         self._thread.join()
         
     def run(self):
         self.monitor.start()
+        #monitor has exited, that means we're done
+        self.stop()
     
+    @property
+    def running(self): return self._running
+
     
     @property
     def sink(self): return self._sink
+    
+    @property
+    def sinks(self):
+        #The sink property returns the "actual" sink, whereas
+        #This returns that sink plus opsinks
+        from actuator.components import sink, operator
+        sinks = []
+        for c in self.components:
+            if isinstance(c, sink.Sink):
+                sinks.append(c)
+            elif isinstance(c, operator.SinkOperator):
+                sinks.append(c.sink)
+        return sinks
     
     @property
     def source(self): return self._source
@@ -89,24 +114,21 @@ class Flow(FlowContext):
     @property
     def flowname(self):
         return self._flowname
+
     
     @property
     def outflows(self):
-        from actuator.components import sink, operator
-        outflows = []
-        for c in self.components:
-            if isinstance(c, sink.Sink):
-                outflows.append(c)
-            elif isinstance(c, operator.SinkOperator):
-                outflows.append(c.sink)
-        return outflows
+        from actuator.components.sink import FlowSink
+        sinks = self.sinks
+        return [s for s in sinks if isinstance(s, FlowSink)]
+            
     
     @property
     def inflows(self):
         from actuator.components.sink import FlowSink
         inbound = []
         def is_inflow(o):
-            return isinstance(o, FlowSink) and o.target_name == self.flowname
+            return o.target_name == self.flowname
         for flow in self.context.flows:
             inbound.extend([o for o in flow.outflows if is_inflow(o)])
         return inbound
