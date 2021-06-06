@@ -42,15 +42,16 @@ class Flow(FlowContext):
             c.set_context(self)
         
 
-    def wire(self):
-        
+    def setup(self):
         #Components stash their args&kwargs until setup time
+        #These need to be loaded before wiring because wiring 
+        #draws information from these arguments
         for c in self.components:
             c.setup()
-        
+
+    def wire(self):
         #Wire all inflows to the source
         self.source.wire(self.inflows)
-                
         #Wire the operators to the source
         self.operator.upstreams[0].set_upstream(self.source)        
 

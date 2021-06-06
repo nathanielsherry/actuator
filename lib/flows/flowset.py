@@ -17,6 +17,8 @@ class FlowSet(FlowContext):
             flow.scope.set('global', self.scope, claim=True)
             if flow.flowname: self.scope.set(flow.flowname, flow.scope, claim=True)
         for flow in self.flows:
+            flow.setup()
+        for flow in self.flows:
             flow.wire()
     
     def start(self):
