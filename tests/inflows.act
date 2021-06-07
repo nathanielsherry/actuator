@@ -1,0 +1,11 @@
+#!/usr/local/bin/act
+
+#This flowset should print "['hello', 'world']" once
+
+flow h from "hello" to @target;
+flow w from "world" to @target;
+
+flow target
+  from inflow
+  to sh.stdout
+  on start;

@@ -1,0 +1,5 @@
+#!/usr/local/bin/act
+
+#This flowset should print "hello" once
+
+from "hello, world";
