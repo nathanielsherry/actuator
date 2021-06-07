@@ -2,10 +2,14 @@
 
 
 function test() {
+	echo "-= Testing $1 =-"
 	./$1.act | diff $1.out -
 	if [ $? -eq "1" ]; then
-		echo "FAILED $1"
+		echo "   [FAILED]"
+	else
+		echo "   [  OK  ]"
 	fi
+	echo ""
 }
 
 test "echo"
