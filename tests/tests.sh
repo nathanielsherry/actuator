@@ -10,3 +10,4 @@ function test() {
 
 test "echo"
 test "inflows"
+test "vars"

@@ -1,0 +1,9 @@
+#!/usr/local/bin/act
+
+#This flowset should print "A" once
+
+flow source
+  from "A" 
+  to $A;
+
+from $source.A;
