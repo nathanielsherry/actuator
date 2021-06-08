@@ -16,9 +16,22 @@ class Component:
         
         self._context = None
     
+    #At creation time, args and kwargs are stashed until such time as 
+    #they can be loaded and interpereted within the context in which 
+    #this component will be run
     def setup(self):
         args = list(self.__component_args)
         kwargs = dict(self.__component_kwargs)
+        
+        def deref(o):
+            from actuator.lang.parser import VariableReference
+            if isinstance(o, VariableReference): 
+                return o.dereference(self.context.context)
+            else:
+                return o
+        
+        args = [deref(arg) for arg in args]
+        kwargs = {k: deref(v) for k, v in kwargs.items()}
         
         #Call the standard initialise method
         result = self.initialise(*args, **kwargs)

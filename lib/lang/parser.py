@@ -38,6 +38,7 @@ class ActuatorExpressionMixin:
         self._add_token_hook("act.flow", lambda t: t == KW_FLOW, lambda: self.parse_flow())
         self._add_token_hook("act.expsep", lambda t: t == SYM_SEP, lambda: self.parse_expsep())
 
+        self._add_value_hook("act.variable", lambda t: t == SYM_VARSTART, lambda: self.parse_var())
     
     def parse_instruction(self, key, valid_instruction, build):
         from actuator.lang.flexer import Symbol
@@ -53,7 +54,7 @@ class ActuatorExpressionMixin:
             instruction = "sh"
             parseargs = False
         elif self.flexer.peek() == SYM_VARSTART:
-            args = [self.parse_var()]
+            args = [self.parse_var().reference]
             instruction = "var"
         elif self.flexer.peek() == SYM_OUTFLOW:
             self.flexer.pop(SYM_OUTFLOW)
@@ -73,11 +74,9 @@ class ActuatorExpressionMixin:
             while True:
                 if self.flexer.peek() == '[':
                     args = self.parse_list()
-                    args = [self.parse_collection_symbol(arg) for arg in args]
                     continue
                 if self.flexer.peek() == '(':
                     kwargs = self.parse_keyvalue()
-                    kwargs = {k: self.parse_collection_symbol(v) for k, v in kwargs.iteritems()}
                     continue
                 break
             
@@ -163,16 +162,8 @@ class ActuatorExpressionMixin:
             if not self.flexer.pop_if(SYM_VARSEP) == SYM_VARSEP:
                 break
         
-        return ".".join(keys)
+        return VariableReference(".".join(keys))
         
-    #Given a string or Symbol s, parse the string as a $VAR, returning:
-    # * a string if the input is not a valid $var symbol
-    # * a VariableReference if it is
-    def parse_collection_symbol(self, s):
-        if not isinstance(s, Symbol): return s
-        s = s.name
-        if not s.startswith(SYM_VARSTART): return s
-        return VariableReference(s)
         
         
         
@@ -200,6 +191,7 @@ def parse_actuator_expression(exp, default_source=None, default_sink=None):
     from actuator.components import sink as mod_sink
     from actuator.components import monitor as mod_monitor
     from actuator.components import operator as mod_operator
+    
     f = ActuatorParser(exp)
     parts = f.parse()
     flowset = makeflowset(parts)
