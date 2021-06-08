@@ -31,14 +31,19 @@ class Flow(FlowContext):
         #Threading is done w/ a callable back into this object
         self._thread = None
         self._running = False
-                
+    
+    #Set up the context that this flow is operating in, both the flowset and
+    #the variable scope hierarchy, followed by recursing into our components
     def set_context(self, context):
         super().set_context(context)
         self._scope = NamespacedScope(context.scope)
+        self.scope.set('global', context.scope, claim=True)
+        if self.flowname: context.scope.set(self.flowname, self.scope, claim=True)
         
         #Set this flow as the context for these components. This
         #is the earliest we can call this and still allow the 
         #components to access not just the Flow but also the FlowSet
+        #and related variable scopes
         for c in self.components:
             c.set_context(self)
         
