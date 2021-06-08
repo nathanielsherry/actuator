@@ -74,12 +74,24 @@ class RunnerSink(Sink):
 
 
 class FlowSink(Sink, OnDemandMixin):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
+    #Stash the target name early, so that once the context is set
+    #we'll have everything we need to wire flows together
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._target_name = args[0]
+           
+    #Once the context is set, we have everything we need to look up
+    #The target flow. This allows us to wire earlier
+    def set_context(self, context):
+        super().set_context(context)
         flow = self.context
         flowset = flow.context
         self._target = flowset.get_flow(self.target_name)
+        
+    #Everything has already been done by __init__ and set_context
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
+        
     
     #This sink is active as long as it's target flow is running
     @property

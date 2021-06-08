@@ -63,9 +63,13 @@ class DelegatingSource(Source):
 
 
 class FlowSource(Source):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._inflows = []
+        
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
-        self._inflows = []
+        
     
     def wire(self, inflows):
         self._inflows = inflows
