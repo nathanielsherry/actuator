@@ -8,6 +8,10 @@ class FlowContext(component.Component):
     def __init__(self):
         super().__init__()
         self._scope = None
+        
+        #Threading is done w/ a callable back into this object
+        self._thread = None
+        self._started = threading.Event()
     
     #To be called after `set_context`. If the former is about making
     #sure each component is aware of its relationships, then `wire` is
@@ -17,6 +21,9 @@ class FlowContext(component.Component):
     @property
     def scope(self): return self._scope
     
+    def startup_wait(self): self._started.wait()
+
+    def join(self): self._thread.join()
 
 class Flow(FlowContext):
     STATE_INIT = 0
@@ -35,10 +42,8 @@ class Flow(FlowContext):
         self._sink = sink
         self._monitor = monitor
         from actuator.naming import get_random_name
-        self._flowname = flowname or get_random_name()
-        
-        #Threading is done w/ a callable back into this object
-        self._thread = None
+        self._flowname = flowname or get_random_name()        
+
         self._state = Flow.STATE_INIT
 
     
@@ -93,8 +98,7 @@ class Flow(FlowContext):
         self._state = Flow.STATE_ENDED
         
         
-    def join(self):
-        self._thread.join()
+
         
     def run(self):
         #This method will run after this flow has been wired. It will first
@@ -104,6 +108,7 @@ class Flow(FlowContext):
         
         self._state = Flow.STATE_STARTED
         self.monitor.start()
+        self._started.set()
         
         #monitor has exited, that means we're done
         self.stop()

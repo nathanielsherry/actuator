@@ -1,5 +1,6 @@
 from actuator.flows.flow import FlowContext
 from actuator.flows.scope import NamespacedScope
+import threading
 
 class FlowSet(FlowContext):
     def __init__(self, flows):
@@ -23,9 +24,16 @@ class FlowSet(FlowContext):
             flow.wire()
     
     def start(self):
+        self._thread = threading.Thread(target=lambda: self.run(), daemon=True)
+        self._thread.start()
+    
+    def run(self):
         try:
             for flow in self.flows:
                 flow.start()
+            for flow in self.flows:
+                flow.startup_wait()
+            self._started.set()
             for flow in self.flows:
                 flow.join()
         except KeyboardInterrupt:
