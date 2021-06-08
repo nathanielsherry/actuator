@@ -79,6 +79,7 @@ class Flow(FlowContext):
         self._thread.join()
         
     def run(self):
+        self.setup()
         self.monitor.start()
         #monitor has exited, that means we're done
         self.stop()

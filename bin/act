@@ -48,7 +48,7 @@ def run_expression(expression):
     util.set_global('expression', expression)
     
     flowset.setup()
-    log.debug("Loaded flows:\n---\n {}".format(flowset.description))
+    #log.debug("Loaded flows:\n---\n {}".format(flowset.description))
     try:
         flowset.start()
     except BrokenPipeError:

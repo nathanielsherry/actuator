@@ -21,9 +21,6 @@ class FlowSet(FlowContext):
             flow.set_context(self)
         for flow in self.flows:
             flow.wire()
-        for flow in self.flows:
-            flow.setup()
-
     
     def start(self):
         try:
