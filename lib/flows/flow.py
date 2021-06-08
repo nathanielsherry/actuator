@@ -19,6 +19,15 @@ class FlowContext(component.Component):
     
 
 class Flow(FlowContext):
+    STATE_INIT = 0
+    STATE_CONTEXT = 1
+    STATE_WIRED = 2
+    STATE_SETUP = 3
+    STATE_STARTED = 4
+    STATE_ENDING = 5
+    STATE_ENDED = 6
+    
+    
     def __init__(self, source, sink, operator, monitor, flowname):
         super().__init__()
         self._operator = operator
@@ -30,7 +39,8 @@ class Flow(FlowContext):
         
         #Threading is done w/ a callable back into this object
         self._thread = None
-        self._running = False
+        self._state = Flow.STATE_INIT
+
     
     #Set up the context that this flow is operating in, both the flowset and
     #the variable scope hierarchy, followed by recursing into our components
@@ -46,7 +56,11 @@ class Flow(FlowContext):
         #and related variable scopes
         for c in self.components:
             c.set_context(self)
+            
+        self._state = Flow.STATE_CONTEXT
         
+    @property
+    def state(self): return self._state
 
     def setup(self):
         #Components stash their args&kwargs until setup time
@@ -54,6 +68,8 @@ class Flow(FlowContext):
         #draws information from these arguments
         for c in self.components:
             c.setup()
+        
+        self._state = Flow.STATE_SETUP
 
     def wire(self):
         #Wire all inflows to the source
@@ -63,29 +79,34 @@ class Flow(FlowContext):
         
         #We're *ready* to run now -- we don't want some other flow starting
         #first and thinking we've already terminated
-        self._running = True
+        self._state = Flow.STATE_WIRED
 
     def start(self):
         self._thread = threading.Thread(target=lambda: self.run(), daemon=True)
         self._thread.start()
         
     def stop(self):
-        if not self.running: return
+        if self.state >= Flow.STATE_ENDING: return
+        self._state = Flow.STATE_ENDING
         self.monitor.stop()
         self.sink.stop()
-        self._running = False
+        self._state = Flow.STATE_ENDED
+        
         
     def join(self):
         self._thread.join()
         
     def run(self):
+        #This method will run after this flow has been wired. It will first
+        #set up each of its components. This is normally fast, but if a dep
+        #exists, it may take a noticable amount of time.
         self.setup()
+        
+        self._state = Flow.STATE_STARTED
         self.monitor.start()
+        
         #monitor has exited, that means we're done
         self.stop()
-    
-    @property
-    def running(self): return self._running
 
     
     @property

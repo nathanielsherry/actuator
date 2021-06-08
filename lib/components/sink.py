@@ -95,7 +95,9 @@ class FlowSink(Sink, OnDemandMixin):
     
     #This sink is active as long as it's target flow is running
     @property
-    def active(self): return self.target.running
+    def active(self):
+        from actuator.flows.flow import Flow 
+        return self.target.state == Flow.STATE_STARTED
     
     @property
     def target_name(self): return self._target_name
