@@ -51,7 +51,7 @@ class Flow(FlowContext):
     #the variable scope hierarchy, followed by recursing into our components
     def set_context(self, context):
         super().set_context(context)
-        self._scope = NamespacedScope(context.scope)
+        self._scope = NamespacedScope(context.scope, self)
         self.scope.set('global', context.scope, claim=True)
         if self.flowname: context.scope.set(self.flowname, self.scope, claim=True)
         

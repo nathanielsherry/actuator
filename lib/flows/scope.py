@@ -1,11 +1,22 @@
 
 class Scope:
-    def __init__(self, parent):
+    def __init__(self, parent, owner):
         self._values = {}
         self._parent = parent
+        self._owner = owner
+        
+        self.set('parent', self.parent, claim=True)
 
     @property
     def parent(self): return self._parent
+
+    @property
+    def owner(self): return self._owner
+
+    @property
+    def root(self):
+        if self.parent: return self.parent.root
+        return self
 
     def domain(self, domain):
         if not domain in self._values:
@@ -35,7 +46,7 @@ class Scope:
             return True
         else:
             return False
-
+    
 
 class NamespacedScope(Scope):
     def parse(self, key):

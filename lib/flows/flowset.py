@@ -5,7 +5,7 @@ import threading
 class FlowSet(FlowContext):
     def __init__(self, flows):
         super().__init__()
-        self._scope = NamespacedScope(None)
+        self._scope = NamespacedScope(None, self)
         self._flows = flows
                 
     @property
