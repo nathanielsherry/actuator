@@ -1,0 +1,13 @@
+#!/usr/local/bin/act
+
+
+#Prints "['John', 'Doe']" once
+
+flow person from sh.null to sh.null;
+flow A to $global.person.firstname from "John"; 
+flow B to $global.person.lastname from "Doe";
+
+flow C from $person.firstname to @out;
+flow D from $person.lastname to @out;
+flow out from inflow;
+
