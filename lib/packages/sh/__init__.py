@@ -6,6 +6,7 @@ def load():
     pkg.sources.register_item(None, sources.ShellSource)
     pkg.sources.register_item('stdin', sources.StdinSource)
     pkg.sources.register_item('jsonin', sources.JsonSource)
+    pkg.sources.register_item('null', sources.NullSource)
     #pkg.sinks.register_item(None, sinks.ShellRunner)
     pkg.sinks.register_item(None, sinks.Shell)
     pkg.sinks.register_item('stdout', sinks.Stdout)

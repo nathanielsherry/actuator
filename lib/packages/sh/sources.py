@@ -55,3 +55,10 @@ class JsonSource(source.Source):
             
             
 
+class NullSource(source.Source):
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
+        
+    @property
+    def value(self):
+        return None
