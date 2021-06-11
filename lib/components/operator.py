@@ -264,7 +264,7 @@ class Change(Operator):
 class Split(Operator):
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
-        self._delim = kwargs.get('delim', '\n')
+        self._delim = args[0]
         self._parts = []
 
     @property
@@ -272,6 +272,7 @@ class Split(Operator):
         value = self.upstream.value
         if value == None: return None
         if not isinstance(value, str): value = str(value)
+        
         return value.split(self._delim)
                 
 

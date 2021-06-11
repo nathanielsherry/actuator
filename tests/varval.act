@@ -3,4 +3,4 @@
 #This flowset should print "['$a', 'c']"
 
 from "b" to $global.delim;
-from "$abc" via split(delim=$delim);
+from "$abc" via split[$delim];
