@@ -29,6 +29,8 @@ def twosplit(s, delim):
 
 from actuator.lang.flexer import FlexParser, SequenceParserMixin, PrimitivesParserMixin
 
+
+
 #A Sequence PARSER for reading values or sequences of values
 class ActuatorExpressionMixin:
     def __init__(self):
@@ -43,7 +45,7 @@ class ActuatorExpressionMixin:
         self._add_value_hook("act.variable", lambda t: t == SYM_VARSTART, lambda: self.parse_var())
         self._add_value_hook("act.flowref", lambda t: t == SYM_FLOWREF, lambda: self.parse_flowref())
     
-    def parse_instruction(self, key, valid_instruction, build):
+    def parse_component(self, key, valid_instruction, build):
         from actuator.lang.flexer import Symbol
         if key: key = self.flexer.pop(key)
         
@@ -96,16 +98,16 @@ class ActuatorExpressionMixin:
 
     #Parses a list of items.
     def parse_source(self):
-        source = self.parse_instruction(KW_SOURCE, lambda t: t in REGISTRY.source_names, REGISTRY.build_source)
+        source = self.parse_component(KW_SOURCE, lambda t: t in REGISTRY.source_names, REGISTRY.build_source)
         return (KW_SOURCE, source)
     
     def parse_sink(self, inline=False):
         key = None if inline else KW_SINK
-        sink = self.parse_instruction(key, lambda t: t in REGISTRY.sink_names, REGISTRY.build_sink)
+        sink = self.parse_component(key, lambda t: t in REGISTRY.sink_names, REGISTRY.build_sink)
         return (KW_SINK, sink)
     
     def parse_monitor(self):
-        monitor = self.parse_instruction(KW_MONITOR, lambda t: t in REGISTRY.monitor_names, REGISTRY.build_monitor)
+        monitor = self.parse_component(KW_MONITOR, lambda t: t in REGISTRY.monitor_names, REGISTRY.build_monitor)
         return (KW_MONITOR, monitor)
         
     def parse_operator(self):
@@ -123,7 +125,7 @@ class ActuatorExpressionMixin:
         
         if not chainop or chainop == "|":
             #normal (or no) chaining, just parse the op
-            operator = self.parse_instruction(None, lambda t: t in REGISTRY.operator_names, REGISTRY.build_operator)
+            operator = self.parse_component(None, lambda t: t in REGISTRY.operator_names, REGISTRY.build_operator)
         elif chainop == ">":
             #Sink chaining, parse as a sink and wrap in a SinkOperator
             from actuator.components.operator import SinkOperator
@@ -166,17 +168,35 @@ class ActuatorExpressionMixin:
         
         return VariableReference(".".join(keys))
         
+
+
+
+#An Accessor PARSER for reading accessor strings
+class AccessorParserMixin(object):
+    def __init__(self):
+        pass
+
     def parse_accessor(self):
         self.flexer.pop(SYM_GETSTART)
         parts = []
         while True:
-            part = self.flexer.pop()
+            part = self.parse_accessor_element()
             parts.append(part)
             if not self.flexer.pop_if(SYM_GETSEP) == SYM_GETSEP:
                 break
         return AccessorReference(parts)
 
-
+    def parse_accessor_element(self):
+        part = self.flexer.pop()
+        if part == '[':
+            part += self.flexer.pop()
+            if self.flexer.pop_if('=') == '=':
+                part += '='
+                #TODO: parse_value and return in more structured format?
+                part += self.flexer.pop()
+            self.flexer.pop(']')
+            part += ']'
+        return part
 
 
 class Reference:
@@ -206,7 +226,7 @@ class AccessorReference(Reference):
         return getter
 
 
-class ActuatorParser(FlexParser, SequenceParserMixin, PrimitivesParserMixin, ActuatorExpressionMixin):
+class ActuatorParser(FlexParser, SequenceParserMixin, PrimitivesParserMixin, ActuatorExpressionMixin, AccessorParserMixin):
     def __init__(self, exp):
         super().__init__(exp)
         
@@ -275,4 +295,4 @@ def parse_act_expression(exp):
         if name in REGISTRY.sink_names: return REGISTRY.build_sink(name, config)
         if name in REGISTRY.source_names: return REGISTRY.build_source(name, config)
         return None
-    return f.parse_instruction(None, valid, build)
+    return f.parse_component(None, valid, build)

@@ -228,6 +228,9 @@ class SequenceParserMixin(object):
 
 
 
+
+
+
 #value hooks for primitive data types
 class PrimitivesParserMixin(object):
     def __init__(self):
