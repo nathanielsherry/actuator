@@ -48,14 +48,14 @@ class Operator(component.Component):
     #return a boolean
     @property
     def value(self):
-        raise Exception("Unimplemented for {}".format(self.name))
+        raise Exception("Unimplemented for {}".format(self.kind))
         
     @property
     def description_data(self):
         if self.upstream:
-            return [self.upstream.description_data, self.name]
+            return [self.upstream.description_data, self.kind]
         else:
-            return self.name
+            return self.kind
         
 
 class Noop(Operator):
@@ -157,7 +157,7 @@ class SinkOperator(Operator):
 
     @property
     def description_data(self):
-        return {self.name: {
+        return {self.kind: {
             'sink': self.sink.description_data
         }}
 
@@ -215,7 +215,7 @@ class Cached(Operator):
         #if it has been more than `delay` seconds since
         #the last poll of the upstream source, poll it now
         if time.time() > self._last_time + self.delay or self._last_value == None:
-            log.debug("{name} checking upstream value".format(name=self.name))
+            log.debug("{kind} checking upstream value".format(kind=self.kind))
             self._last_time = time.time()
             self._last_value = self.upstream.value
             
@@ -307,7 +307,7 @@ class Try(Operator):
         try:
             return self.upstream.value
         except:
-            log.warn("{} threw an error, returning default value {}".format(self.upstream.name, self._default))
+            log.warn("{} threw an error, returning default value {}".format(self.upstream.kind, self._default))
             return self._default
 
 class Hash(Operator):

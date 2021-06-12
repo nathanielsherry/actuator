@@ -42,7 +42,7 @@ class Flow(FlowContext):
         self._sink = sink
         self._monitor = monitor
         from actuator.naming import get_random_name
-        self._flowname = flowname or get_random_name()        
+        self._name = flowname or get_random_name()
 
         self._state = Flow.STATE_INIT
 
@@ -53,7 +53,7 @@ class Flow(FlowContext):
         super().set_context(context)
         self._scope = NamespacedScope(context.scope, self)
         self.scope.set('global', context.scope, claim=True)
-        if self.flowname: context.scope.set(self.flowname, self.scope, claim=True)
+        if self.name: context.scope.set(self.name, self.scope, claim=True)
         
         #Set this flow as the context for these components. This
         #is the earliest we can call this and still allow the 
@@ -140,12 +140,12 @@ class Flow(FlowContext):
     def operator(self): return self._operator
     
     @property
-    def name(self): 
-        return "{}:{}".format(super().name, self.flowname)
+    def kind(self):
+        return "{}<{}>".format(self.name, super().kind)
     
     @property
-    def flowname(self):
-        return self._flowname
+    def name(self):
+        return self._name
 
     
     @property
@@ -160,7 +160,7 @@ class Flow(FlowContext):
         from actuator.components.sink import FlowSink
         inbound = []
         def is_inflow(o):
-            return o.target_name == self.flowname
+            return o.target_name == self.name
         for flow in self.context.flows:
             inbound.extend([o for o in flow.outflows if is_inflow(o)])
         return inbound

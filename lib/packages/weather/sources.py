@@ -4,7 +4,7 @@ from actuator import log, util
 class Fetch(Source):
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
-        log.debug("{name} received initial config {config}".format(name=self.name, config=(args, kwargs)))
+        log.debug("{kind} received initial config {config}".format(kind=self.kind, config=(args, kwargs)))
         coords = kwargs['coords']
         lat, lon = coords.split(',')
         lat = float(lat)
@@ -15,10 +15,10 @@ class Fetch(Source):
     def lookup_coords(self, lat, lon):
         import json
         url = "https://www.metaweather.com/api/location/search/?lattlong={},{}".format(lat, lon)
-        log.debug("{} looking up weather data from {}".format(self.name, url))
+        log.debug("{} looking up weather data from {}".format(self.kind, url))
         doc = util.get_url(url)
         data = json.loads(doc)
-        log.debug("{} received weather data: {}".format(self.name, data))
+        log.debug("{} received weather data: {}".format(self.kind, data))
         return int(data[0]['woeid'])
 
     @property
@@ -44,7 +44,7 @@ class Comparison(Fetch):
         forecast = data['consolidated_weather'][:self._days]
         high = max([day['max_temp'] for day in forecast])
         low = max([day['min_temp'] for day in forecast])
-        log.debug("{name} received weather data: high={high}, low={low}".format(name=self.name, low=low, high=high))
+        log.debug("{kind} received weather data: high={high}, low={low}".format(kind=self.kind, low=low, high=high))
         
         return high, low
 

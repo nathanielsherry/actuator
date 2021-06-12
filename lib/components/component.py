@@ -47,15 +47,18 @@ class Component:
     
     def initialise(self, *args, **kwargs):
         return
+
+    @property
+    def name(self): return None
     
     @property
-    def name(self): 
+    def kind(self):
         return type(self).__name__
     
     def __repr__(self):
-        return "<{name}>".format(name=self.name)
+        return "<{name}>".format(name=self.kind)
     def __str__(self):
-        return self.name
+        return self.kind
     
     @property
     def context(self): return self._context
@@ -65,7 +68,7 @@ class Component:
     
     @property
     def description_data(self):
-        return self.name
+        return self.kind
 
     @property
     def description(self):

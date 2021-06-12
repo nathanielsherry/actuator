@@ -4,7 +4,7 @@ from actuator import log, util
 class Info(Source):
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
-        log.debug("{name} received initial config {config}".format(name=self.name, config=(args, kwargs)))
+        log.debug("{kind} received initial config {config}".format(kind=self.kind, config=(args, kwargs)))
         self._service = config['args'][0]
 
     @property

@@ -13,7 +13,7 @@ class FlowSet(FlowContext):
     
     def get_flow(self, name):
         for flow in self.flows:
-            if flow.flowname == name: 
+            if flow.name == name:
                 return flow
         return None
     
@@ -53,4 +53,4 @@ class FlowSet(FlowContext):
 
     @property
     def description_data(self):
-        return {self.name: [n.description_data for n in self.flows]}
+        return {self.kind: [n.description_data for n in self.flows]}

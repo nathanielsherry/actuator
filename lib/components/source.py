@@ -30,7 +30,7 @@ class Source(operator.Operator):
     #return a boolean
     @property
     def value(self):
-        raise Exception("Unimplemented for {}".format(self.name))
+        raise Exception("Unimplemented for {}".format(self.kind))
     
 
 
@@ -57,8 +57,8 @@ class DelegatingSource(Source):
         return self._inner
 
     @property
-    def name(self): 
-        return "{}|{}".format(self.inner.name, type(self).__name__)
+    def kind(self):
+        return "{}|{}".format(self.inner.kind, super().kind)
 
 
 
@@ -89,8 +89,8 @@ class FlowSource(Source):
             
     @property
     def description_data(self):
-        return {self.name: {
-            'inflows': [i.name for i in self.inflows]
+        return {self.kind: {
+            'inflows': [i.kind for i in self.inflows]
         }}
     
     
@@ -104,7 +104,7 @@ class StringSource(Source):
         return self._value
     @property
     def description_data(self):
-        return {self.name: {
+        return {self.kind: {
             'value': self.value
         }}
 
@@ -119,7 +119,7 @@ class IntegerSource(Source):
 
     @property
     def description_data(self):
-        return {self.name: {
+        return {self.kind: {
             'value': self.value
         }}
 
@@ -134,7 +134,7 @@ class BooleanSource(Source):
 
     @property
     def description_data(self):
-        return {self.name: {
+        return {self.kind: {
             'value': self.value
         }}
 
@@ -171,7 +171,7 @@ class WeatherCanadaSource(Source):
         if self._low: self._low = float(self._low)
         if self._high: self._high = float(self._high)
         
-        log.info("{name} received initial config {config}".format(name=self.name, config=(args, kwargs)))
+        log.info("{kind} received initial config {config}".format(kind=self.kind, config=(args, kwargs)))
     
     @property
     def value(self):
@@ -188,7 +188,7 @@ class WeatherCanadaSource(Source):
             high = root.forecastGroup.forecast[0].temperatures.temperature
             low = root.forecastGroup.forecast[1].temperatures.temperature
         
-        log.info("{name} received weather data: current={current}, high={high}, low={low}".format(name=self.name, current=current, low=low, high=high))
+        log.info("{kind} received weather data: current={current}, high={high}, low={low}".format(kind=self.kind, current=current, low=low, high=high))
         
         if self._current != None:
             if self._current <= current: return False

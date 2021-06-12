@@ -23,10 +23,10 @@ def build(instruction, kwargs):
 class Monitor(component.Component):
         
     def start(self):
-        raise Exception("Unimplemented for {}".format(self.name))
+        raise Exception("Unimplemented for {}".format(self.kind))
     
     def stop(self):
-        raise Exception("Unimplemented for {}".format(self.name))
+        raise Exception("Unimplemented for {}".format(self.kind))
     
     @property
     def source(self): return self.context.source
@@ -128,13 +128,13 @@ class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
 #when the value changes, passing the new state as the single argument.
 class ChangeMonitor(Monitor, MonitorSleepMixin):
     def start(self):
-        log.info("Starting {name} with test {source} and sink {sink}".format(name=self.name, source=self.operator, sink=self.sink))
+        log.info("Starting {kind} with test {source} and sink {sink}".format(kind=self.kind, source=self.operator, sink=self.sink))
         last_state = None
         new_state = None
         while True:
             new_state = self.operator.value
             if new_state != last_state:
-                log.info("{name} yields '{state}' ({result}), running sink.".format(name=self.name, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
+                log.info("{kind} yields '{state}' ({result}), running sink.".format(kind=self.kind, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
                 self.sink.perform(new_state)
                 last_state = new_state
             if not self.sleep(): return

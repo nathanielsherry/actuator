@@ -16,7 +16,7 @@ def build(instruction, kwargs):
 
 class Sink(component.Component):
     def perform(self, payload):
-        raise Exception("Unimplemented for {}".format(self.name))
+        raise Exception("Unimplemented for {}".format(self.kind))
     
     def stop(self):
         #By default, a sink does not run any threads
@@ -64,13 +64,13 @@ class ToggleSink(Sink):
     def perform(self, payload):
         return self.toggle(payload)
     def toggle(self, state):
-        raise Exception("Unimplemented for {}".format(self.name))
+        raise Exception("Unimplemented for {}".format(self.kind))
 
 class RunnerSink(Sink):
     def perform(self, payload):
         self.run()
     def run(self):
-        raise Exception("Unimplemented for {}".format(self.name))
+        raise Exception("Unimplemented for {}".format(self.kind))
 
 
 class FlowSink(Sink, OnDemandMixin):
@@ -113,7 +113,7 @@ class FlowSink(Sink, OnDemandMixin):
 
     @property
     def description_data(self):
-        return {self.name: {
+        return {self.kind: {
             'target': self.target_name
         }}
         
