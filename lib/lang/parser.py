@@ -59,7 +59,7 @@ class ActuatorExpressionMixin:
             instruction = "var"
             parseargs = False
         elif self.flexer.peek() == SYM_FLOWREF:
-            args = [self.parse_flowref().reference]
+            args = [self.parse_flowref()]
             instruction = "_flowref"
             parseargs = False
         elif self.flexer.peek().startswith('"') or self.flexer.peek().startswith("'"):

@@ -78,7 +78,7 @@ class FlowSink(Sink, OnDemandMixin):
     #we'll have everything we need to wire flows together
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._target_name = args[0]
+        self._target_name = args[0].reference
            
     #Once the context is set, we have everything we need to look up
     #The target flow. This allows us to wire earlier
