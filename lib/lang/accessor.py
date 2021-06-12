@@ -44,7 +44,12 @@ def compose(*args):
     return reduce(_compose, args)
     
 def accessor(access_string):
-    strings = access_string.split(".")
+    if isinstance(access_string, str):
+        strings = access_string.split(".")
+    elif isinstance(access_string, list):
+        strings = access_string[:]
+    else:
+        raise Exception("Unknown input format")
     
     components = []
     for s in strings:
@@ -70,6 +75,6 @@ def listmap(fn, lst):
 
 def mapper(fn):
     from functools import partial
-    if not callable(fn) and not fn == None: 
+    if not callable(fn) and not fn == None:
         fn = extractor(fn)
     return partial(listmap, fn) 

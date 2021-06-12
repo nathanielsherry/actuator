@@ -170,7 +170,7 @@ class ActuatorExpressionMixin:
         self.flexer.pop(SYM_GETSTART)
         parts = []
         while True:
-            part = self.parse_value()
+            part = self.flexer.pop()
             parts.append(part)
             if not self.flexer.pop_if(SYM_GETSEP) == SYM_GETSEP:
                 break
@@ -199,11 +199,11 @@ class FlowReference(Reference):
 
 class AccessorReference(Reference):
     def dereference(self, flowctx):
-        from actuator.lang.accessor import compose
+        from actuator.lang.accessor import accessor
         from actuator.lang.flexer import Symbol
         parts = [p.name if isinstance(p, Symbol) else p for p in self.reference]
-        composed = compose(*parts)
-        return composed
+        getter = accessor(parts)
+        return getter
 
 
 class ActuatorParser(FlexParser, SequenceParserMixin, PrimitivesParserMixin, ActuatorExpressionMixin):
