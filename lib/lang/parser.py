@@ -73,12 +73,12 @@ class ActuatorExpressionMixin:
                 
         if parseargs:
             while True:
-                if self.flexer.peek() == '[':
-                    args = self.parse_list()
-                    continue
                 if self.flexer.peek() == '(':
-                    kwargs = self.parse_keyvalue()
+                    args, kwargs = self.parse_args()
                     continue
+                #if self.flexer.peek() == '(':
+                #    kwargs = self.parse_keyvalue()
+                #    continue
                 break
             
         if not kwargs: 

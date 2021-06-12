@@ -16,7 +16,7 @@ flow h2 from "hello" to @named;
 flow w2 from "world" to @named;
 
 flow named
-  from inflows(named)
+  from inflows(named=True)
   to @out;
 
 

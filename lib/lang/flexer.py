@@ -187,6 +187,26 @@ class SequenceParserMixin(object):
         self.parse_sequence("(", ")", on_entry)
         return items
 
+    #Parses (value, key=value, ...) items.
+    def parse_args(self):
+        args = []
+        kwargs = {}
+        def on_entry():
+            first = self.parse_value()
+            kvmode = self.flexer.pop_if("=") == "="
+            if kvmode:
+                key = first
+                if isinstance(key, Symbol): key = key.name
+                if not isinstance(key, str): raise Exception("Key must be a string")
+                value = self.parse_value()
+                if key in kwargs: raise Exception("Parameter '%s' already specified" % key)
+                kwargs[key] = value
+            else:
+                args.append(first)
+
+        self.parse_sequence("(", ")", on_entry)
+        return (args, kwargs)
+
     #Parses a list of items.
     def parse_list(self):
         items = []
@@ -226,6 +246,11 @@ class PrimitivesParserMixin(object):
             lambda t: self.is_float(t),
             lambda: float(self.pop())
         )
+        self._add_value_hook(
+            "primitive.boolean",
+            lambda t: self.is_bool(t),
+            lambda: self.parse_bool(self.pop())
+        )
 
 
     def is_int(self, s):
@@ -241,6 +266,12 @@ class PrimitivesParserMixin(object):
             return True
         except:
             return False
+
+    def is_bool(self, s):
+        return s in ['True', 'False']
+
+    def parse_bool(self, s):
+        return s == 'True'
 
 
 class Symbol(object):
