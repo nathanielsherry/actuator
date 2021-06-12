@@ -1,0 +1,16 @@
+#!/usr/local/bin/act
+
+#Prints "[[1, 2, 3, 4], [5, 6, 7, 8]]" once
+
+flow toints on call
+  via split[","] | lst.ints;
+
+from "1,2,3,4"
+  via @toints
+  to @out;
+
+from "5, 6, 7, 8"
+  via @toints
+  to @out;
+
+flow out from inflow;
