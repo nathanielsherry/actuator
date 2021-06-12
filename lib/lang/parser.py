@@ -6,7 +6,7 @@ from actuator.package import REGISTRY
 SYM_SEP = ';'
 SYM_VARSTART = '$'
 SYM_VARSEP = '.'
-SYM_OUTFLOW = '@'
+SYM_FLOWREF = '@'
 KW_SINK = "to"
 KW_MONITOR = "on"
 KW_SOURCE = "from"
@@ -56,9 +56,9 @@ class ActuatorExpressionMixin:
         elif self.flexer.peek() == SYM_VARSTART:
             args = [self.parse_var().reference]
             instruction = "var"
-        elif self.flexer.peek() == SYM_OUTFLOW:
-            self.flexer.pop(SYM_OUTFLOW)
-            instruction = "outflow"
+        elif self.flexer.peek() == SYM_FLOWREF:
+            self.flexer.pop(SYM_FLOWREF)
+            instruction = "_flowref"
             parseargs = False
             args = [self.flexer.pop()]
         elif self.flexer.peek().startswith('"') or self.flexer.peek().startswith("'"):
@@ -215,12 +215,23 @@ def makeflowset(parts):
 
 def makeflow(kv):
     operator = kv.get(KW_OPERATOR, REGISTRY.build_operator('noop', {}))
-    sink = kv.get(KW_SINK, REGISTRY.build_sink('sh.stdout', {}) )
-    source = kv.get(KW_SOURCE, REGISTRY.build_source('sh.stdin', {'split': 'false'}))
+    sink = kv.get(KW_SINK, None)
+    source = kv.get(KW_SOURCE, None)
     name = kv.get(KW_FLOW, None)
     monitor = kv.get(KW_MONITOR, None)
-    #First see if the sink has a preferred monitor, then pick a default
-    if not monitor: monitor = sink.custom_monitor()
+
+    #If a monitor has been defined but source/sink hasn't, give the monitor
+    #a chance to make a suggestion
+    if not source and monitor: source = monitor.suggest_source()
+    if not sink and monitor: sink = monitor.suggest_sink()
+
+    #If the monitor declines, fall back to defaults for shell
+    if not sink: sink = REGISTRY.build_sink('sh.stdout', {})
+    if not source: source = REGISTRY.build_source('sh.stdin', {'split': 'false'})
+
+    #If the *monitor* wasn't defined, see if the sink has a preferred monitor,
+    #then pick a default
+    if not monitor: monitor = sink.suggest_monitor()
     if not monitor: monitor = REGISTRY.build_monitor('start', {})
     
     return flow.Flow(source, sink, operator, monitor, name)

@@ -23,6 +23,7 @@ def instructions():
         'str': Str,
         'int': Int,
         'float': Float,
+        '_flowref': SubFlow,
     }
     
     
@@ -161,7 +162,33 @@ class SinkOperator(Operator):
             'sink': self.sink.description_data
         }}
 
-        
+class SubFlow(Operator):
+    #Stash the target name early, so that once the context is set
+    #we'll have everything we need to wire flows together
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._subflow_name = args[0]
+        self._subflow = None
+
+    @property
+    def subflow_name(self): return self._subflow_name
+
+    #Once the context is set, we have everything we need to look up
+    #The target flow. This allows us to wire earlier
+    def set_context(self, context):
+        from actuator.components import monitor as mod_monitor
+        super().set_context(context)
+        flow = self.context
+        flowset = flow.context
+        self._subflow = flowset.get_flow(self.subflow_name)
+        if not isinstance(self._subflow.monitor, mod_monitor.OnCallMonitor):
+            raise Exception("Given flow {} is not callable".format(self._subflow.kind))
+
+    @property
+    def value(self):
+        return self._subflow.monitor.call(self.upstream.value)
+
+
 #Eliminates jitter from a value flapping a bit. The state starts as False and
 #will switch when consistently the opposite for `delay[state]` seconds.
 #delay is a dict with integer values for keys True and False

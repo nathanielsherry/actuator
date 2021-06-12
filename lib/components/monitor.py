@@ -2,7 +2,7 @@
 
 import time
 from actuator import log, util
-from actuator.components import component
+from actuator.components import component, source as mod_source, sink as mod_sink
 
 
 def instructions():
@@ -12,6 +12,7 @@ def instructions():
         "start": OnceMonitor,
         "demand": OnDemandMonitor,
         "counter": CountMonitor,
+        "call": OnCallMonitor,
     }
     
 
@@ -36,6 +37,11 @@ class Monitor(component.Component):
     
     @property
     def operator(self): return self.context.operator
+
+    def suggest_source(self):
+        return None
+    def suggest_sink(self):
+        return None
     
     
     
@@ -164,3 +170,47 @@ class OnDemandMonitor(Monitor, MonitorSleepMixin):
     def active_sinks(self):
         return [s for s in self.context.sinks if s.active]
     
+
+class OnCallMonitor(Monitor, MonitorSleepMixin):
+
+    class OnCallSource(mod_source.Source):
+        def __init__(self):
+            super().__init__()
+            self._value = None
+
+        @property
+        def value(self):
+            return self._value
+
+        def set_value(self, value): self._value = value
+
+    class OnCallSink(mod_sink.Sink):
+        def __init__(self):
+            super().__init__()
+
+
+    def set_context(self, context):
+        super().set_context(context)
+        if not isinstance(context.source, OnCallMonitor.OnCallSource):
+            raise Exception("{kind} cannot be used with a defined source".format(kind=self.kind))
+        if not isinstance(context.sink, OnCallMonitor.OnCallSink):
+            raise Exception("{kind} cannot be used with a defined sink".format(kind=self.kind))
+
+
+    def start(self): pass
+        #Done, sleep has been interrupted or all sinks are inactive
+
+    def stop(self):
+        self.stop_sleep()
+
+    def call(self, payload):
+        self.source.set_value(payload)
+        result = self.operator.value
+        self.source.set_value(None)
+        return result
+
+    def suggest_source(self):
+        return OnCallMonitor.OnCallSource()
+
+    def suggest_sink(self):
+        return OnCallMonitor.OnCallSink()

@@ -5,7 +5,7 @@ from actuator.components import component
 
 def instructions():
     return {
-        "outflow": FlowSink
+        "_flowref": FlowSink
     }
     
     
@@ -32,7 +32,7 @@ class Sink(component.Component):
     #There are cases where the sink may want to provide
     #its own monitor so that pull-based sink implementations
     #such as a web server may fetch data more effectively
-    def custom_monitor(self):
+    def suggest_monitor(self):
         return None
 
 
@@ -105,7 +105,7 @@ class FlowSink(Sink, OnDemandMixin):
     @property
     def target(self): return self._target
     
-    def custom_monitor(self):
+    def suggest_monitor(self):
         return self.ondemand_monitor
     
     def perform(self, payload):
