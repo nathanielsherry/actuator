@@ -26,59 +26,48 @@ def twosplit(s, delim):
         second = parts[1]
     return first, second
 
+class Reference:
+    def __init__(self, reference):
+        self._reference = reference
+
+    @property
+    def reference(self): return self._reference
+
+    def dereference(self, flowctx):
+        raise Exception("Unimplemented")
+
 
 from actuator.lang.flexer import FlexParser, SequenceParserMixin, PrimitivesParserMixin
 
 
 
 #A Sequence PARSER for reading values or sequences of values
-class ActuatorExpressionMixin:
+class ComponentParserMixin:
     def __init__(self):
         if not '`' in self.flexer.lexer.quotes: self.flexer.lexer.quotes += '`'
         self._add_token_hook("act.source", lambda t: t == KW_SOURCE, lambda: self.parse_source())
         self._add_token_hook("act.sink", lambda t: t == KW_SINK, lambda: self.parse_sink())
         self._add_token_hook("act.monitor", lambda t: t == KW_MONITOR, lambda: self.parse_monitor())
         self._add_token_hook("act.operator", lambda t: t == KW_OPERATOR, lambda: self.parse_operator())
-        self._add_token_hook("act.flow", lambda t: t == KW_FLOW, lambda: self.parse_flow())
         self._add_token_hook("act.expsep", lambda t: t == SYM_SEP, lambda: self.parse_expsep())
 
-        self._add_value_hook("act.variable", lambda t: t == SYM_VARSTART, lambda: self.parse_var())
-        self._add_value_hook("act.flowref", lambda t: t == SYM_FLOWREF, lambda: self.parse_flowref())
-    
     def parse_component(self, key, valid_instruction, build):
         from actuator.lang.flexer import Symbol
         if key: key = self.flexer.pop(key)
-        
+
         parseargs = True
         args = None
         kwargs = None
         instruction = None
-        #custom parsing for inline shell commands
-        if self.flexer.peek().startswith('`'):
-            args = [self.flexer.pop()[1:-1]]
-            instruction = "sh"
-            parseargs = False
-        elif self.flexer.peek() == SYM_VARSTART:
-            args = [self.parse_var().reference]
-            instruction = "var"
-            parseargs = False
-        elif self.flexer.peek() == SYM_FLOWREF:
-            args = [self.parse_flowref()]
-            instruction = "_flowref"
-            parseargs = False
-        elif self.flexer.peek().startswith('"') or self.flexer.peek().startswith("'"):
-            args = [self.flexer.pop()[1:-1]] 
-            instruction = "str"
-            parseargs = False
-        elif self.flexer.peek() == SYM_GETSTART:
-            args = [self.parse_accessor()]
-            instruction = "get"
-            parseargs = False
+
+        special = self.parse_special_syntax()
+        if special:
+            instruction, args, kwargs, parseargs = special
         else:
             instruction = self.parse_packagename()
             if not valid_instruction(instruction):
                 raise Exception("Invalid: '{}'".format(instruction))
-                
+
         if parseargs:
             if self.flexer.peek() == '(':
                 args, kwargs = self.parse_args()
@@ -86,8 +75,7 @@ class ActuatorExpressionMixin:
         if not kwargs: kwargs = {}
         if not args: args = []
         return build(instruction, *args, **kwargs)
-    
-        
+
     def parse_packagename(self):
         topname = self.parse_value().name
         if self.flexer.pop_if('.') == PKG_SEP:
@@ -142,8 +130,19 @@ class ActuatorExpressionMixin:
             return self.parse_opchain(operator)
         else:
             return operator
-               
-               
+
+    def parse_expsep(self):
+        self.flexer.pop(SYM_SEP)
+        return (SYM_SEP, None)
+
+
+
+
+class FlowParserMixin:
+    def __init__(self):
+        self._add_token_hook("act.flow", lambda t: t == KW_FLOW, lambda: self.parse_flow())
+        self._add_value_hook("act.flowref", lambda t: t == SYM_FLOWREF, lambda: self.parse_flowref())
+
     def parse_flow(self):
         self.flexer.pop(KW_FLOW)
         name = self.flexer.pop()
@@ -154,9 +153,16 @@ class ActuatorExpressionMixin:
         name = self.flexer.pop()
         return FlowReference(name)
 
-    def parse_expsep(self):
-        self.flexer.pop(SYM_SEP)
-        return (SYM_SEP, None)
+class FlowReference(Reference):
+    def dereference(self, flowctx):
+        return flowctx.get_flow(self.reference)
+
+
+
+
+class VariableParserMixin:
+    def __init__(self):
+        self._add_value_hook("act.variable", lambda t: t == SYM_VARSTART, lambda: self.parse_var())
         
     def parse_var(self):
         self.flexer.pop(SYM_VARSTART)
@@ -167,15 +173,16 @@ class ActuatorExpressionMixin:
                 break
         
         return VariableReference(".".join(keys))
-        
+
+class VariableReference(Reference):
+    def dereference(self, flowctx):
+        return flowctx.scope.get(self.reference)
+
 
 
 
 #An Accessor PARSER for reading accessor strings
-class AccessorParserMixin(object):
-    def __init__(self):
-        pass
-
+class AccessorParserMixin:
     def parse_accessor(self):
         self.flexer.pop(SYM_GETSTART)
         parts = []
@@ -198,25 +205,6 @@ class AccessorParserMixin(object):
             part += ']'
         return part
 
-
-class Reference:
-    def __init__(self, reference):
-        self._reference = reference
-        
-    @property
-    def reference(self): return self._reference
-
-    def dereference(self, flowctx):
-        raise Exception("Unimplemented")
-
-class VariableReference(Reference):
-    def dereference(self, flowctx):
-        return flowctx.scope.get(self.reference)
-    
-class FlowReference(Reference):
-    def dereference(self, flowctx):
-        return flowctx.get_flow(self.reference)
-
 class AccessorReference(Reference):
     def dereference(self, flowctx):
         from actuator.lang.accessor import accessor
@@ -226,10 +214,34 @@ class AccessorReference(Reference):
         return getter
 
 
-class ActuatorParser(FlexParser, SequenceParserMixin, PrimitivesParserMixin, ActuatorExpressionMixin, AccessorParserMixin):
+
+
+
+class ActuatorParser(
+        FlexParser,
+        SequenceParserMixin,
+        PrimitivesParserMixin,
+        ComponentParserMixin,
+        AccessorParserMixin,
+        VariableParserMixin,
+        FlowParserMixin
+    ):
     def __init__(self, exp):
         super().__init__(exp)
-        
+
+    def parse_special_syntax(self):
+        #custom parsing for inline shell commands
+        if self.flexer.peek().startswith('`'):
+            return ("sh", [self.flexer.pop()[1:-1]], {}, False)
+        elif self.flexer.peek() == SYM_VARSTART:
+            return ("var", [self.parse_var().reference], {}, False)
+        elif self.flexer.peek() == SYM_FLOWREF:
+            return ("_flowref", [self.parse_flowref()], {}, False)
+        elif self.flexer.peek().startswith('"') or self.flexer.peek().startswith("'"):
+            return ("str", [self.flexer.pop()[1:-1]], {}, False)
+        elif self.flexer.peek() == SYM_GETSTART:
+            return ("get", [self.parse_accessor()], {}, False)
+        return None
 
 
 def parse_actuator_expression(exp, default_source=None, default_sink=None): 
