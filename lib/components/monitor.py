@@ -38,6 +38,11 @@ class Monitor(component.Component):
     @property
     def operator(self): return self.context.operator
 
+    @property
+    def threaded(self):
+        #In general, monitors require a thread to run their flow
+        return True
+
     def suggest_source(self):
         return None
     def suggest_sink(self):
@@ -171,7 +176,7 @@ class OnDemandMonitor(Monitor, MonitorSleepMixin):
         return [s for s in self.context.sinks if s.active]
     
 
-class OnCallMonitor(Monitor, MonitorSleepMixin):
+class OnCallMonitor(Monitor):
 
     class OnCallSource(mod_source.Source):
         def __init__(self):
@@ -197,11 +202,10 @@ class OnCallMonitor(Monitor, MonitorSleepMixin):
             raise Exception("{kind} cannot be used with a defined sink".format(kind=self.kind))
 
 
-    def start(self): pass
-        #Done, sleep has been interrupted or all sinks are inactive
-
-    def stop(self):
-        self.stop_sleep()
+    @property
+    def threaded(self): return False
+    def start(self): return
+    def stop(self): return
 
     def call(self, payload):
         self.source.set_value(payload)

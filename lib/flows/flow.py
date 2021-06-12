@@ -23,7 +23,8 @@ class FlowContext(component.Component):
     
     def startup_wait(self): self._started.wait()
 
-    def join(self): self._thread.join()
+    def join(self):
+        if self._thread: self._thread.join()
 
 class Flow(FlowContext):
     STATE_INIT = 0
@@ -87,8 +88,11 @@ class Flow(FlowContext):
         self._state = Flow.STATE_WIRED
 
     def start(self):
-        self._thread = threading.Thread(target=lambda: self.run(), daemon=True)
-        self._thread.start()
+        if self.monitor.threaded:
+            self._thread = threading.Thread(target=lambda: self.run(), daemon=True)
+            self._thread.start()
+        else:
+            self.run()
         
     def stop(self):
         if self.state >= Flow.STATE_ENDING: return
