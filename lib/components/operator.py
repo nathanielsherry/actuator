@@ -105,13 +105,17 @@ class Float(Operator):
 class Get(Operator):
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
-        from actuator.lang import accessor
-        self._accessor = accessor.accessor(args[0])
+        from actuator.lang import accessor, parser
+        acc = args[0]
+        if not isinstance(acc, parser.AccessorReference):
+            acc = parser.AccessorReference(accessor.accessor(acc.split(".")))
+        self._accessor = acc
         
     @property
     def value(self):
         value = self.upstream.value
-        return self._accessor(value)
+        getter = self._accessor.dereference(self.context)
+        return getter(value)
         
 
 class Has(Operator):

@@ -7,6 +7,8 @@ SYM_SEP = ';'
 SYM_VARSTART = '$'
 SYM_VARSEP = '.'
 SYM_FLOWREF = '@'
+SYM_GETSTART = '~'
+SYM_GETSEP = '.'
 KW_SINK = "to"
 KW_MONITOR = "on"
 KW_SOURCE = "from"
@@ -65,6 +67,10 @@ class ActuatorExpressionMixin:
         elif self.flexer.peek().startswith('"') or self.flexer.peek().startswith("'"):
             args = [self.flexer.pop()[1:-1]] 
             instruction = "str"
+            parseargs = False
+        elif self.flexer.peek() == SYM_GETSTART:
+            args = [self.parse_accessor()]
+            instruction = "get"
             parseargs = False
         else:
             instruction = self.parse_packagename()
@@ -160,9 +166,18 @@ class ActuatorExpressionMixin:
         
         return VariableReference(".".join(keys))
         
-        
-        
-        
+    def parse_accessor(self):
+        self.flexer.pop(SYM_GETSTART)
+        parts = []
+        while True:
+            part = self.parse_value()
+            parts.append(part)
+            if not self.flexer.pop_if(SYM_GETSEP) == SYM_GETSEP:
+                break
+        return AccessorReference(parts)
+
+
+
 
 class Reference:
     def __init__(self, reference):
@@ -182,7 +197,13 @@ class FlowReference(Reference):
     def dereference(self, flowctx):
         return flowctx.get_flow(self.reference)
 
-
+class AccessorReference(Reference):
+    def dereference(self, flowctx):
+        from actuator.lang.accessor import compose
+        from actuator.lang.flexer import Symbol
+        parts = [p.name if isinstance(p, Symbol) else p for p in self.reference]
+        composed = compose(*parts)
+        return composed
 
 
 class ActuatorParser(FlexParser, SequenceParserMixin, PrimitivesParserMixin, ActuatorExpressionMixin):
