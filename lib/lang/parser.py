@@ -72,21 +72,11 @@ class ActuatorExpressionMixin:
                 raise Exception("Invalid: '{}'".format(instruction))
                 
         if parseargs:
-            while True:
-                if self.flexer.peek() == '(':
-                    args, kwargs = self.parse_args()
-                    continue
-                #if self.flexer.peek() == '(':
-                #    kwargs = self.parse_keyvalue()
-                #    continue
-                break
-            
-        if not kwargs: 
-            kwargs = {}
-        
-        if not args:
-            args = []
-            
+            if self.flexer.peek() == '(':
+                args, kwargs = self.parse_args()
+
+        if not kwargs: kwargs = {}
+        if not args: args = []
         return build(instruction, *args, **kwargs)
     
         
