@@ -13,4 +13,4 @@ from "5, 6, 7, 8"
   via @toints
   to @out;
 
-flow out from inflow;
+flow out from inflows;

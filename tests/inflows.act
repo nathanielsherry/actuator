@@ -6,7 +6,7 @@ flow h from "hello" to @target;
 flow w from "world" to @target;
 
 flow target
-  from inflow
+  from inflows
   to @out
   on start;
 
@@ -16,8 +16,8 @@ flow h2 from "hello" to @named;
 flow w2 from "world" to @named;
 
 flow named
-  from inflow(named)
+  from inflows(named)
   to @out;
 
 
-flow out from inflow;
+flow out from inflows;

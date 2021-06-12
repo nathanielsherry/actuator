@@ -9,7 +9,7 @@ def instructions():
         'str': StringSource,
         'int': IntegerSource,
         'bool': BooleanSource,
-        'inflow': FlowSource,
+        'inflows': FlowSource,
     }
 
 def build(instruction, kwargs):

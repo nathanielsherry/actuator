@@ -9,5 +9,5 @@ flow B to $global.person.lastname from "Doe";
 
 flow C from $person.firstname to @out;
 flow D from $person.lastname to @out;
-flow out from inflow;
+flow out from inflows;
 
