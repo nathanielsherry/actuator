@@ -1,11 +1,23 @@
 #!/usr/local/bin/act
 
-#This flowset should print "['hello', 'world']" once
+#This flowset should print "[['hello', 'world'], {'h2': 'hello', 'w2': 'world'}]" once
 
 flow h from "hello" to @target;
 flow w from "world" to @target;
 
 flow target
   from inflow
-  to sh.stdout
+  to @out
   on start;
+
+
+
+flow h2 from "hello" to @named;
+flow w2 from "world" to @named;
+
+flow named
+  from inflow(named)
+  to @out;
+
+
+flow out from inflow;

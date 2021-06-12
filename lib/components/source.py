@@ -66,6 +66,7 @@ class FlowSource(Source):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._inflows = []
+        self._named = util.parse_bool(kwargs.get('named', False))
         
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
@@ -85,7 +86,10 @@ class FlowSource(Source):
         #one inflow, return the payload
         if len(self.inflows) == 1: return self.inflows[0].get_payload()
         #more than one inflow, return a list of payloads
-        return [i.get_payload() for i in self.inflows]
+        if self._named:
+            return {i.context.name: i.get_payload() for i in self.inflows}
+        else:
+            return [i.get_payload() for i in self.inflows]
             
     @property
     def description_data(self):
