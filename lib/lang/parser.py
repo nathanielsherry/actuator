@@ -39,6 +39,7 @@ class ActuatorExpressionMixin:
         self._add_token_hook("act.expsep", lambda t: t == SYM_SEP, lambda: self.parse_expsep())
 
         self._add_value_hook("act.variable", lambda t: t == SYM_VARSTART, lambda: self.parse_var())
+        self._add_value_hook("act.flowref", lambda t: t == SYM_FLOWREF, lambda: self.parse_flowref())
     
     def parse_instruction(self, key, valid_instruction, build):
         from actuator.lang.flexer import Symbol
@@ -56,11 +57,11 @@ class ActuatorExpressionMixin:
         elif self.flexer.peek() == SYM_VARSTART:
             args = [self.parse_var().reference]
             instruction = "var"
+            parseargs = False
         elif self.flexer.peek() == SYM_FLOWREF:
-            self.flexer.pop(SYM_FLOWREF)
+            args = [self.parse_flowref().reference]
             instruction = "_flowref"
             parseargs = False
-            args = [self.flexer.pop()]
         elif self.flexer.peek().startswith('"') or self.flexer.peek().startswith("'"):
             args = [self.flexer.pop()[1:-1]] 
             instruction = "str"
@@ -149,7 +150,12 @@ class ActuatorExpressionMixin:
         self.flexer.pop(KW_FLOW)
         name = self.flexer.pop()
         return (KW_FLOW, name)
-        
+
+    def parse_flowref(self):
+        self.flexer.pop(SYM_FLOWREF)
+        name = self.flexer.pop()
+        return FlowReference(name)
+
     def parse_expsep(self):
         self.flexer.pop(SYM_SEP)
         return (SYM_SEP, None)
@@ -167,18 +173,27 @@ class ActuatorExpressionMixin:
         
         
         
-        
-class VariableReference:
+
+class Reference:
     def __init__(self, reference):
         self._reference = reference
         
     @property
     def reference(self): return self._reference
-    
+
+    def dereference(self, flowctx):
+        raise Exception("Unimplemented")
+
+class VariableReference(Reference):
     def dereference(self, flowctx):
         return flowctx.scope.get(self.reference)
     
-    
+class FlowReference(Reference):
+    def dereference(self, flowctx):
+        return flowctx.get_flow(self.reference)
+
+
+
 
 class ActuatorParser(FlexParser, SequenceParserMixin, PrimitivesParserMixin, ActuatorExpressionMixin):
     def __init__(self, exp):

@@ -24,6 +24,8 @@ def instructions():
         'int': Int,
         'float': Float,
         '_flowref': SubFlow,
+        'map': MapFlow,
+        'filter': FilterFlow,
     }
     
     
@@ -167,27 +169,39 @@ class SubFlow(Operator):
     #we'll have everything we need to wire flows together
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._subflow_name = args[0]
+        self._flowref = args[0]
+        self._subflow_name = args[0].reference
         self._subflow = None
 
     @property
     def subflow_name(self): return self._subflow_name
+
+    @property
+    def subflow(self): return self._subflow
 
     #Once the context is set, we have everything we need to look up
     #The target flow. This allows us to wire earlier
     def set_context(self, context):
         from actuator.components import monitor as mod_monitor
         super().set_context(context)
-        flow = self.context
-        flowset = flow.context
-        self._subflow = flowset.get_flow(self.subflow_name)
-        if not isinstance(self._subflow.monitor, mod_monitor.OnCallMonitor):
-            raise Exception("Given flow {} is not callable".format(self._subflow.kind))
+        self._subflow = self._flowref.dereference(context.context)
+        if not isinstance(self.subflow.monitor, mod_monitor.OnCallMonitor):
+            raise Exception("Given flow {} is not callable".format(self.subflow.kind))
 
     @property
     def value(self):
-        return self._subflow.monitor.call(self.upstream.value)
+        return self.subflow.monitor.call(self.upstream.value)
 
+
+class MapFlow(SubFlow):
+    @property
+    def value(self):
+        return [self.subflow.monitor.call(v) for v in self.upstream.value]
+
+class FilterFlow(SubFlow):
+    @property
+    def value(self):
+        return [v for v in self.upstream.value if self.subflow.monitor.call(v)]
 
 #Eliminates jitter from a value flapping a bit. The state starts as False and
 #will switch when consistently the opposite for `delay[state]` seconds.
