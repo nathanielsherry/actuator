@@ -85,8 +85,9 @@ class ComponentParserMixin:
             return topname
 
     #Parses a list of items.
-    def parse_source(self):
-        source = self.parse_component(KW_SOURCE, lambda t: t in REGISTRY.source_names, REGISTRY.build_source)
+    def parse_source(self, inline=False):
+        key = None if inline else KW_SOURCE
+        source = self.parse_component(key, lambda t: t in REGISTRY.source_names, REGISTRY.build_source)
         return (KW_SOURCE, source)
     
     def parse_sink(self, inline=False):
@@ -94,12 +95,13 @@ class ComponentParserMixin:
         sink = self.parse_component(key, lambda t: t in REGISTRY.sink_names, REGISTRY.build_sink)
         return (KW_SINK, sink)
     
-    def parse_monitor(self):
-        monitor = self.parse_component(KW_MONITOR, lambda t: t in REGISTRY.monitor_names, REGISTRY.build_monitor)
+    def parse_monitor(self, inline=False):
+        key = None if inline else KW_MONITOR
+        monitor = self.parse_component(key, lambda t: t in REGISTRY.monitor_names, REGISTRY.build_monitor)
         return (KW_MONITOR, monitor)
         
-    def parse_operator(self):
-        self.flexer.pop(KW_OPERATOR)
+    def parse_operator(self, inline=False):
+        if not inline: self.flexer.pop(KW_OPERATOR)
         operator = self.parse_opchain()
         return (KW_OPERATOR, operator)
                
@@ -143,8 +145,8 @@ class FlowParserMixin:
         self._add_token_hook("act.flow", lambda t: t == KW_FLOW, lambda: self.parse_flow())
         self._add_value_hook("act.flowref", lambda t: t == SYM_FLOWREF, lambda: self.parse_flowref())
 
-    def parse_flow(self):
-        self.flexer.pop(KW_FLOW)
+    def parse_flow(self, inline=False):
+        if not inline: self.flexer.pop(KW_FLOW)
         name = self.flexer.pop()
         return (KW_FLOW, name)
 
@@ -272,25 +274,11 @@ def makeflowset(parts):
         
 
 def makeflow(kv):
-    operator = kv.get(KW_OPERATOR, REGISTRY.build_operator('noop', {}))
+    operator = kv.get(KW_OPERATOR, None)
     sink = kv.get(KW_SINK, None)
     source = kv.get(KW_SOURCE, None)
     name = kv.get(KW_FLOW, None)
     monitor = kv.get(KW_MONITOR, None)
-
-    #If a monitor has been defined but source/sink hasn't, give the monitor
-    #a chance to make a suggestion
-    if not source and monitor: source = monitor.suggest_source()
-    if not sink and monitor: sink = monitor.suggest_sink()
-
-    #If the monitor declines, fall back to defaults for shell
-    if not sink: sink = REGISTRY.build_sink('sh.stdout', {})
-    if not source: source = REGISTRY.build_source('sh.stdin', {'split': 'false'})
-
-    #If the *monitor* wasn't defined, see if the sink has a preferred monitor,
-    #then pick a default
-    if not monitor: monitor = sink.suggest_monitor()
-    if not monitor: monitor = REGISTRY.build_monitor('start', {})
     
     return flow.Flow(source, sink, operator, monitor, name)
     

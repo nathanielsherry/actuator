@@ -1,6 +1,7 @@
 from actuator import util
 from actuator.components import component
 from actuator.flows.scope import NamespacedScope
+from actuator.package import REGISTRY
 import threading
 
 
@@ -42,11 +43,32 @@ class Flow(FlowContext):
         self._source = source
         self._sink = sink
         self._monitor = monitor
-        from actuator.naming import get_random_name
-        self._name = flowname or get_random_name()
+        self._name = flowname
+
+        self._interpolate()
 
         self._state = Flow.STATE_INIT
 
+    def _interpolate(self):
+        if not self.operator: self._operator = REGISTRY.build_operator('noop', {})
+
+        #If a monitor has been defined but source/sink hasn't, give the monitor
+        #a chance to make a suggestion
+        if not self.source and self.monitor: self._source = self.monitor.suggest_source()
+        if not self.sink and self.monitor: self._sink = self.monitor.suggest_sink()
+
+        #If the monitor declines, fall back to defaults for shell
+        if not self.sink: self._sink = REGISTRY.build_sink('sh.stdout', {})
+        if not self.source: self._source = REGISTRY.build_source('sh.stdin', {'split': 'false'})
+
+        #If the *monitor* wasn't defined, see if the sink has a preferred monitor,
+        #then pick a default
+        if not self.monitor: self._monitor = self.sink.suggest_monitor()
+        if not self.monitor: self._monitor = REGISTRY.build_monitor('start', {})
+        
+        from actuator.naming import get_random_name
+        if not self.name: self._name = get_random_name()
+        
     
     #Set up the context that this flow is operating in, both the flowset and
     #the variable scope hierarchy, followed by recursing into our components
