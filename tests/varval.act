@@ -2,5 +2,5 @@
 
 #This flowset should print "['$a', 'c']"
 
-from "b" to $global.delim;
-from "$abc" via split($delim);
+flow A from "b" to $global.delim;
+flow B from "$abc" via split($delim);

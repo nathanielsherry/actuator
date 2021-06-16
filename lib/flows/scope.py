@@ -32,7 +32,7 @@ class Scope:
         errmsg = "Undefined: '{}'".format(key)
         if domain:
             errmsg += " from domain {}".format(domain)
-        raise Exception(errstd)
+        raise Exception(errmsg)
     def set(self, key, value, domain=None, claim=False):
         if claim:
             if not self.claim(key, initial=value, domain=domain):

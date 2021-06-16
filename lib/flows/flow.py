@@ -45,11 +45,12 @@ class Flow(FlowContext):
         self._monitor = monitor
         self._name = flowname
 
-        self._interpolate()
+        self.interpolate()
 
         self._state = Flow.STATE_INIT
 
-    def _interpolate(self):
+    def interpolate(self):
+       
         if not self.operator: self._operator = REGISTRY.build_operator('noop', {})
 
         #If a monitor has been defined but source/sink hasn't, give the monitor
@@ -57,9 +58,10 @@ class Flow(FlowContext):
         if not self.source and self.monitor: self._source = self.monitor.suggest_source()
         if not self.sink and self.monitor: self._sink = self.monitor.suggest_sink()
 
+
         #If the monitor declines, fall back to defaults for shell
-        if not self.sink: self._sink = REGISTRY.build_sink('sh.stdout', {})
         if not self.source: self._source = REGISTRY.build_source('sh.stdin', {'split': 'false'})
+        if not self.sink: self._sink = REGISTRY.build_sink('sh.stdout', {})
 
         #If the *monitor* wasn't defined, see if the sink has a preferred monitor,
         #then pick a default
@@ -74,6 +76,7 @@ class Flow(FlowContext):
     #the variable scope hierarchy, followed by recursing into our components
     def set_context(self, context):
         super().set_context(context)
+        
         self._scope = NamespacedScope(context.scope, self)
         self.scope.set('global', context.scope, claim=True)
         if self.name: context.scope.set(self.name, self.scope, claim=True)
@@ -193,12 +196,15 @@ class Flow(FlowContext):
     
     @property
     def components(self):
+        #NOTE: Because this can be called before all components are finalised, 
+        #we try to be forgiving of components that are still None
         cs = [] 
-        cs.extend(self.operator.upstreams)
-        cs.append(self.monitor)
-        cs.append(self.sink)
-        if cs[0] != self.source:
-            cs = [self.source] + cs
+        if self.operator: cs.extend(self.operator.upstreams)
+        if self.monitor: cs.append(self.monitor)
+        if self.sink: cs.append(self.sink)
+        if self.source:
+            if not self.source in cs:
+                cs = [self.source] + cs
         return cs
             
     @property
