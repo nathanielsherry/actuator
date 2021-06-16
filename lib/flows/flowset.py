@@ -1,6 +1,6 @@
 from actuator.flows.flow import FlowContext
 from actuator.flows.scope import NamespacedScope
-import threading
+import threading, time
 
 class FlowSet(FlowContext):
     def __init__(self, flows):
@@ -17,25 +17,30 @@ class FlowSet(FlowContext):
                 return flow
         return None
     
-    def setup(self):
+    def setup(self, delay=0):
         for flow in self.flows:
             flow.set_context(self)
+            if delay: time.sleep(delay)
         for flow in self.flows:
             flow.wire()
+            if delay: time.sleep(delay)
     
-    def start(self):
-        self._thread = threading.Thread(target=lambda: self.run(), daemon=True)
+    def start(self, delay=0):
+        self._thread = threading.Thread(target=lambda: self.run(delay), daemon=True)
         self._thread.start()
     
-    def run(self):
+    def run(self, delay=0):
         try:
             for flow in self.flows:
                 flow.start()
+                if delay: time.sleep(delay)
             for flow in self.flows:
                 flow.startup_wait()
+                if delay: time.sleep(delay)
             self._started.set()
             for flow in self.flows:
                 flow.join()
+                if delay: time.sleep(delay)
         except KeyboardInterrupt:
             try:
                 for flow in self.flows:
