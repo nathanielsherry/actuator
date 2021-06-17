@@ -1,0 +1,6 @@
+#!/usr/local/bin/act --delay=0.1
+
+flow pre;
+flow A from "A" to @pre;
+flow B from "B" to @pre;
+

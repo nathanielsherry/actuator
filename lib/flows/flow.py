@@ -45,8 +45,6 @@ class Flow(FlowContext):
         self._monitor = monitor
         self._name = flowname
 
-        self.interpolate()
-
         self._state = Flow.STATE_INIT
 
     def interpolate(self):
@@ -58,8 +56,11 @@ class Flow(FlowContext):
         if not self.source and self.monitor: self._source = self.monitor.suggest_source()
         if not self.sink and self.monitor: self._sink = self.monitor.suggest_sink()
 
+        #Then try our own suggestions
+        from actuator.components.source import FlowSource
+        if not self.source and self.inflows: self._source = FlowSource()
 
-        #If the monitor declines, fall back to defaults for shell
+        #If the monitor and flow declines, fall back to defaults for shell
         if not self.source: self._source = REGISTRY.build_source('sh.stdin', {'split': 'false'})
         if not self.sink: self._sink = REGISTRY.build_sink('sh.stdout', {})
 
@@ -76,6 +77,8 @@ class Flow(FlowContext):
     #the variable scope hierarchy, followed by recursing into our components
     def set_context(self, context):
         super().set_context(context)
+        
+        self.interpolate()
         
         self._scope = NamespacedScope(context.scope, self)
         self.scope.set('global', context.scope, claim=True)
@@ -135,9 +138,12 @@ class Flow(FlowContext):
         #exists, it may take a noticable amount of time.
         self.setup()
         
+        #Enter a Started state. We set the state value, then set the event, then
+        #start the monitor. This way monitors that block do not prevent the set
+        #event from firing during startup
         self._state = Flow.STATE_STARTED
-        self.monitor.start()
         self._started.set()
+        self.monitor.start()
         
         #monitor has exited, that means we're done
         self.stop()

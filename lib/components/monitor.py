@@ -169,6 +169,11 @@ class OnDemandMonitor(Monitor, MonitorSleepMixin):
         self.stop_sleep()
         
     def demand(self):
+        #Unlike most monitors, this monitor serves requests from elsewhere. This
+        #means that, because we may not be the first flow started, we may 
+        #receive requests before we're ready. We must block those requests until
+        #we're started
+        self.context.startup_wait()
         return self.operator.value
     
     @property
