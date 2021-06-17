@@ -1,6 +1,9 @@
-#!/usr/local/bin/act
+#!/usr/local/bin/act --delay=0.1
+#We want this delay left in because we want to make the delay between
+#trying to use this variable in B and claiming/defining it in A to be
+#large enough that it always plays out in the same order
 
 #This flowset should print "['$a', 'c']"
 
-flow A from "b" to $global.delim;
 flow B from "$abc" via split($delim);
+flow A from "b" to $global.delim;
