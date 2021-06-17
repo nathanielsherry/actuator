@@ -81,7 +81,7 @@ class Curses(sink.DedicatedThreadSink):
     def set_dedicated_state(self, payload): 
         self.dedicated.set_buffer(payload)
     
-    def custom_monitor(self):
+    def suggest_monitor(self):
         from actuator import monitor
         if not self._monitor: 
             self._monitor = monitor.IntervalMonitor({}) 
