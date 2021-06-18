@@ -10,7 +10,7 @@ def extract(o, key, _default=None):
         try:
             return o[key]
         except:
-            log.debug("Index '%s' out of range for list '%s'\n" % (key, o))
+            log.error("Index '%s' out of range for list '%s'\n" % (key, o))
             raise
     
     if isinstance(key, six.string_types) and hasattr(o, key): return getattr(o, key)
@@ -48,7 +48,6 @@ def accessor(access_string):
         strings = access_string.split(".")
     elif isinstance(access_string, list):
         strings = access_string[:]
-        if not strings: return lambda x:x
     else:
         raise Exception("Unknown input format")
     
