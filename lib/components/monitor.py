@@ -4,6 +4,7 @@ import time
 from actuator import log, util
 from actuator.components import component, source as mod_source, sink as mod_sink
 
+ROLE_MONITOR = "monitor"
 
 def instructions():
     return {
@@ -48,7 +49,9 @@ class Monitor(component.Component):
     def suggest_sink(self):
         return None
     
-    
+    #Identifies this component as part of a flow
+    @property
+    def role(self): return ROLE_MONITOR
     
 
 class MonitorSleepMixin(component.ComponentMixin):

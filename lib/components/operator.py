@@ -2,6 +2,9 @@ from actuator import util
 from actuator.components import component
 
 
+ROLE_OPERATOR = "operator"
+
+
 def instructions():
     return {
         'hash': Hash,
@@ -22,7 +25,7 @@ def instructions():
         'any': Any,
         'str': Str,
         'int': Int,
-        'float': Float,
+        'real': Float,
         '_flowref': SubFlow,
         'map': MapFlow,
         'filter': FilterFlow,
@@ -55,11 +58,14 @@ class Operator(component.Component):
         
     @property
     def description_data(self):
-        if self.upstream:
-            return [self.upstream.description_data, self.kind]
-        else:
-            return self.kind
-        
+        d = super().description_data
+        if self.upstream: d[self.kind]["operator-upstream"] = self.upstream.description_data
+        return d
+    
+    #Identifies this component as part of a flow
+    @property
+    def role(self): return ROLE_OPERATOR
+    
 
 class Noop(Operator):
     @property
@@ -164,9 +170,10 @@ class SinkOperator(Operator):
 
     @property
     def description_data(self):
-        return {self.kind: {
-            'sink': self.sink.description_data
-        }}
+        d = super().description_data
+        if self.sink: d[self.kind]["sinkoperator-target"] = self.sink.description_data
+        return d
+
 
 class SubFlow(Operator):
     #Stash the target name early, so that once the context is set

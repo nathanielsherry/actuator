@@ -49,10 +49,10 @@ def run_expression(expression, delay):
     util.set_global('expression', expression)
     
     flowset.setup(delay=delay)
+    log.debug("Loaded flows:\n---\n {}".format(flowset.description))
     try:
         flowset.start(delay=delay)
         flowset.startup_wait()
-        log.debug("Loaded flows:\n---\n {}".format(flowset.description))
         flowset.join()
     except BrokenPipeError:
         pass

@@ -5,6 +5,9 @@ from actuator.package import REGISTRY
 import threading
 
 
+ROLE_FLOW = "flow"
+
+
 class FlowContext(component.Component):
     def __init__(self):
         super().__init__()
@@ -49,7 +52,7 @@ class Flow(FlowContext):
 
     def interpolate(self):
        
-        if not self.operator: self._operator = REGISTRY.build_operator('noop', {})
+        if not self.operator: self._operator = REGISTRY.build_operator('noop')
 
         #If a monitor has been defined but source/sink hasn't, give the monitor
         #a chance to make a suggestion
@@ -62,12 +65,12 @@ class Flow(FlowContext):
 
         #If the monitor and flow declines, fall back to defaults for shell
         if not self.source: self._source = REGISTRY.build_source('sh.stdin', {'split': 'false'})
-        if not self.sink: self._sink = REGISTRY.build_sink('sh.stdout', {})
+        if not self.sink: self._sink = REGISTRY.build_sink('sh.stdout')
 
         #If the *monitor* wasn't defined, see if the sink has a preferred monitor,
         #then pick a default
         if not self.monitor: self._monitor = self.sink.suggest_monitor()
-        if not self.monitor: self._monitor = REGISTRY.build_monitor('start', {})
+        if not self.monitor: self._monitor = REGISTRY.build_monitor('start')
         
         from actuator.naming import get_random_name
         if not self.name: self._name = get_random_name()
@@ -177,6 +180,10 @@ class Flow(FlowContext):
     @property
     def kind(self):
         return "{}<{}>".format(self.name, super().kind)
+
+    #Identifies this component as part of a flow
+    @property
+    def role(self): return ROLE_FLOW
     
     @property
     def name(self):
@@ -218,13 +225,12 @@ class Flow(FlowContext):
     
     @property
     def description_data(self):
-        data = {self.name: {
-            'source': self.source.description_data,
-            'operator': self.operator.description_data,
-            'sink': self.sink.description_data,
-            'monitor': self.monitor.description_data
-        }}
-        return data
+        d = super().description_data
+        d[self.kind]['flow-source']   = self.source.description_data
+        d[self.kind]['flow-sink']     = self.sink.description_data
+        d[self.kind]['flow-operator'] = self.operator.description_data
+        d[self.kind]['flow-monitor']  = self.monitor.description_data
+        return d
     
         
 

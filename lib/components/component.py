@@ -1,8 +1,8 @@
 
 class Component:
     def __init__(self, *args, **kwargs):
-        self.__component_args = args
-        self.__component_kwargs = kwargs
+        self.__component_args = list(args)
+        self.__component_kwargs = dict(kwargs)
         
         
         #Run mixin init methods if this is the first superclass 
@@ -51,9 +51,14 @@ class Component:
     @property
     def name(self): return None
     
+    #Returns information about the specific class this object belongs to
     @property
     def kind(self):
         return type(self).__name__
+    
+    #Identifies this component as part of a flow
+    @property
+    def role(self): return None
     
     def __repr__(self):
         return "<{name}>".format(name=self.kind)
@@ -68,7 +73,11 @@ class Component:
     
     @property
     def description_data(self):
-        return self.kind
+        return {self.kind: {
+            "role": self.role,
+            "args": self.__component_args,
+            "kwargs": dict(self.__component_kwargs),
+        }}
 
     @property
     def description(self):

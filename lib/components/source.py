@@ -3,11 +3,16 @@ import subprocess
 from actuator import log, util
 from actuator.components import operator
 
+
+ROLE_SOURCE = "source"
+
+
 def instructions():
     return {
         'counter': CounterSource,
         'str': StringSource,
         'int': IntegerSource,
+        'real': RealSource,
         'bool': BooleanSource,
         'inflows': FlowSource,
     }
@@ -31,6 +36,10 @@ class Source(operator.Operator):
     @property
     def value(self):
         raise Exception("Unimplemented for {}".format(self.kind))
+    
+    #Identifies this component as part of a flow
+    @property
+    def role(self): return ROLE_SOURCE
     
 
 
@@ -93,9 +102,9 @@ class FlowSource(Source):
             
     @property
     def description_data(self):
-        return {self.kind: {
-            'inflows': [i.kind for i in self.inflows]
-        }}
+        d = super().description_data
+        d[self.kind]["source-inflows"] = [{"name": i.name, "kind": i.kind} for i in self.inflows]
+        return d
     
     
 class StringSource(Source):
@@ -106,26 +115,27 @@ class StringSource(Source):
     @property
     def value(self):
         return self._value
-    @property
-    def description_data(self):
-        return {self.kind: {
-            'value': self.value
-        }}
+
 
 class IntegerSource(Source):
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
-        self._value = int(kwargs.get('value', '1'))
+        self._value = int(kwargs.get('value', 1))
         
     @property
     def value(self):
         return self._value
 
+
+class RealSource(Source):
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
+        self._value = float(kwargs.get('value', 1.0))
+        
     @property
-    def description_data(self):
-        return {self.kind: {
-            'value': self.value
-        }}
+    def value(self):
+        return self._value
+
 
 class BooleanSource(Source):
     def initialise(self, *args, **kwargs):
@@ -136,11 +146,6 @@ class BooleanSource(Source):
     def value(self):
         return self._value
 
-    @property
-    def description_data(self):
-        return {self.kind: {
-            'value': self.value
-        }}
 
 
 class CounterSource(Source):

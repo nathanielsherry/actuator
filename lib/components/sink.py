@@ -3,6 +3,11 @@
 from actuator import log, util
 from actuator.components import component
 
+
+ROLE_SINK = "sink"
+
+
+
 def instructions():
     return {
         "_flowref": FlowSink
@@ -34,6 +39,10 @@ class Sink(component.Component):
     #such as a web server may fetch data more effectively
     def suggest_monitor(self):
         return None
+
+    #Identifies this component as part of a flow
+    @property
+    def role(self): return ROLE_SINK
 
 
 class OnDemandMixin(component.ComponentMixin):
@@ -113,9 +122,9 @@ class FlowSink(Sink, OnDemandMixin):
 
     @property
     def description_data(self):
-        return {self.kind: {
-            'target': self.target_name
-        }}
+        d = super().description_data
+        if self.target: d[self.kind]["sink-target"] = {"name": self.target.name, "kind": self.target.kind}
+        return d
         
         
 
