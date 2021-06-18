@@ -18,6 +18,7 @@ KEYWORDS = [KW_SOURCE, KW_SINK, KW_MONITOR, KW_OPERATOR, KW_FLOW]
 
 PKG_SEP = '.' 
 
+
 def twosplit(s, delim):
     parts = s.split(delim, maxsplit=1)
     first = parts[0]
@@ -26,15 +27,40 @@ def twosplit(s, delim):
         second = parts[1]
     return first, second
 
-class Reference:
+class StandIn:
+    @property
+    def name(self):
+        raise Exception("Unimplemented")
+
+    @property
+    def kind(self):
+        return type(self).__name__
+    
+    def __repr__(self):
+        return "<{kind}: {name}>".format(kind=self.kind, name=self.name)
+    def __str__(self):
+        return self.kind
+    
+
+
+
+
+#A reference to something 'elsewhere' A variable, a flow, etc
+class Reference(StandIn):
     def __init__(self, reference):
         self._reference = reference
 
     @property
     def reference(self): return self._reference
 
+    @property
+    def name(self): return self.reference
+
     def dereference(self, flowctx):
         raise Exception("Unimplemented")
+
+
+
 
 
 from actuator.lang.flexer import FlexParser, SequenceParserMixin, PrimitivesParserMixin
@@ -279,7 +305,6 @@ def makeflow(kv):
     source = kv.get(KW_SOURCE, None)
     name = kv.get(KW_FLOW, None)
     monitor = kv.get(KW_MONITOR, None)
-    
     return flow.Flow(source, sink, operator, monitor, name)
     
 
