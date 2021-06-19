@@ -74,6 +74,7 @@ class Component:
     @property
     def description_data(self):
         return {self.kind: {
+            "name": self.name,
             "role": self.role,
             "args": self.__component_args,
             "kwargs": dict(self.__component_kwargs),
