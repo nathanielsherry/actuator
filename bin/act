@@ -43,7 +43,7 @@ def run_expression(expression, delay):
     from actuator import log, util
     from actuator.lang import parser
     import sys
-    flowset = parser.parse_actuator_expression(expression)
+    flowset = parser.parse_flowset(expression)
 
     
     util.set_global('expression', expression)

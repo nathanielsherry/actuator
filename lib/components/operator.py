@@ -111,9 +111,9 @@ class Float(Operator):
 class Get(Operator):
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
-        from actuator.lang import accessor, parser
+        from actuator.lang import accessor, construct
         acc = args[0]
-        if not isinstance(acc, parser.AccessorReference):
+        if not isinstance(acc, construct.AccessorReference):
             acc = parser.AccessorReference(accessor.accessor(acc.split(".")))
         self._accessor = acc
         

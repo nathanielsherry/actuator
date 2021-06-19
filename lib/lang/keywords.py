@@ -1,0 +1,5 @@
+SINK = "to"
+MONITOR = "on"
+SOURCE = "from"
+OPERATOR = "via"
+FLOW = "flow"
