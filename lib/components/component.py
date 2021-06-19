@@ -24,7 +24,7 @@ class Component:
         kwargs = dict(self.__component_kwargs)
         
         def deref(o):
-            from actuator.lang.parser import VariableReference
+            from actuator.lang.construct import VariableReference
             if isinstance(o, VariableReference): 
                 return o.dereference(self.context.context)
             else:

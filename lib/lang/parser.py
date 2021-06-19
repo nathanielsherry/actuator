@@ -27,41 +27,6 @@ def twosplit(s, delim):
         second = parts[1]
     return first, second
 
-class Construct:
-    @property
-    def name(self):
-        raise Exception("Unimplemented for {}".format(self.kind))
-
-    @property
-    def kind(self):
-        return type(self).__name__
-    
-    def __repr__(self):
-        return "<{kind}: {name}>".format(kind=self.kind, name=self.name)
-    def __str__(self):
-        return self.kind
-    
-
-
-
-
-#A reference to something 'elsewhere' A variable, a flow, etc
-class Reference(Construct):
-    def __init__(self, reference):
-        self._reference = reference
-
-    @property
-    def reference(self): return self._reference
-
-    @property
-    def name(self): return self.reference
-
-    def dereference(self, flowctx):
-        raise Exception("Unimplemented")
-
-
-
-
 
 from actuator.lang.flexer import FlexParser, SequenceParserMixin, PrimitivesParserMixin
 
@@ -181,9 +146,6 @@ class FlowParserMixin:
         name = self.flexer.pop()
         return FlowReference(name)
 
-class FlowReference(Reference):
-    def dereference(self, flowctx):
-        return flowctx.get_flow(self.reference)
 
 
 
@@ -201,10 +163,6 @@ class VariableParserMixin:
                 break
         
         return VariableReference(".".join(keys))
-
-class VariableReference(Reference):
-    def dereference(self, flowctx):
-        return flowctx.scope.get(self.reference)
 
 
 
