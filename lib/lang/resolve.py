@@ -196,7 +196,7 @@ def build_comp_parameters(ts):
 PS_COMP_PARAMETERS = (
     Suppress("(") + 
     PS_COMP_PARAMETER + 
-    ZeroOrMore("," + PS_COMP_PARAMETER) + 
+    ZeroOrMore(Suppress(",") + PS_COMP_PARAMETER) + 
     Suppress(")")
 ).setParseAction(build_comp_parameters)
 
@@ -276,6 +276,17 @@ PS_COMP = Or([
     PS_SUGAR_COMP
 ])
 
+PS_COMP_CHAIN = And([
+    PS_COMP,
+    ZeroOrMore(
+        Or(['|', '>']) + 
+        PS_COMP
+    )
+]).addParseAction(
+    lambda ts: [ts]   
+)
+
+
 log.debug("-------------------------------")
 log.debug(PS_COMP.parseString("@flow"))
 log.debug(PS_COMP.parseString("$var.foo.bar.baz"))
@@ -312,9 +323,30 @@ PS_SEG_SOURCE = (Keyword(KW_SOURCE) + PS_COMP).setParseAction(
     lambda ts: [[ts[0], ts[1].build(ts[0])]]
 )
 
-PS_SEG_OPERATOR = (Keyword(KW_OPERATOR) + PS_COMP).setParseAction(
-    lambda ts: [[ts[0], ts[1].build(ts[0])]]
-)
+def build_seg_operator(ts):
+    kw = ts[0]
+    opchain = ts[1][:]
+    
+    op = opchain.pop(0).build(kw)
+    code = None
+    
+    while opchain:
+        code = opchain.pop(0)
+        cb = opchain.pop(0)
+        if code == "|" or code == None:
+            newop = cb.build(kw)
+        elif code == ">" and op != None:
+            sink = cb.build(KW_SINK)
+            newop = SinkOperator(sink)
+        else:
+            raise Exception("Faield to construct operator pipeline") 
+        if op: newop.set_upstream(op)
+        op = newop
+        
+    return [[kw, op]]
+                
+PS_SEG_OPERATOR = (Keyword(KW_OPERATOR) + PS_COMP_CHAIN).setParseAction(build_seg_operator)
+
 
 PS_SEG_SINK = (Keyword(KW_SINK) + PS_COMP).setParseAction(
     lambda ts: [[ts[0], ts[1].build(ts[0])]]
