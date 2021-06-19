@@ -27,10 +27,10 @@ def twosplit(s, delim):
         second = parts[1]
     return first, second
 
-class StandIn:
+class Construct:
     @property
     def name(self):
-        raise Exception("Unimplemented")
+        raise Exception("Unimplemented for {}".format(self.kind))
 
     @property
     def kind(self):
@@ -46,7 +46,7 @@ class StandIn:
 
 
 #A reference to something 'elsewhere' A variable, a flow, etc
-class Reference(StandIn):
+class Reference(Construct):
     def __init__(self, reference):
         self._reference = reference
 
