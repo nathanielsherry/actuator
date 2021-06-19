@@ -1,4 +1,3 @@
-from actuator import log
 from actuator.lang import symbols, keywords, values, components
 
 from pyparsing import Or, MatchFirst, Keyword, ZeroOrMore, OneOrMore, Suppress, Optional, StringEnd
@@ -73,12 +72,6 @@ PS_SEG = Or([
 ])
 
 
-log.debug("-------------------------------")
-log.debug(PS_SEG.parseString("from `ls /`"))
-log.debug(PS_SEG.parseString("via fmt.tojson(pretty=True)"))
-log.debug(PS_SEG.parseString("to var('asdf')"))
-
-
 def build_flow(ts):
     from actuator.flows.flow import Flow
     kv = dict(list(ts))
@@ -91,9 +84,6 @@ def build_flow(ts):
     
 PS_FLOW_EXPRESSION = OneOrMore(PS_SEG).setParseAction(build_flow)
 
-log.debug("-------------------------------")
-log.debug(PS_FLOW_EXPRESSION.parseString("flow a from `ls /` via fmt.fromjson to $var on start"))
-
 PS_FLOWSET_EXPRESSION = (
     PS_FLOW_EXPRESSION +
     ZeroOrMore(
@@ -102,9 +92,25 @@ PS_FLOWSET_EXPRESSION = (
     Optional(Suppress(symbols.FLOWSEP)) + 
     StringEnd()
 )
-log.debug("-------------------------------")
-log.debug(PS_FLOWSET_EXPRESSION.parseString("flow a from `ls /` via fmt.fromjson to @out on start; flow out;"))
 
 
+import unittest
+class FlowTests(unittest.TestCase):
+    
+    def test_seg_from(self):
+        kw, c = PS_SEG.parseString("from 'asdf'")[0]
+        self.assertEqual(kw, keywords.SOURCE)
 
+    def test_seg_via(self):
+        from actuator.components.component import Component
+        kw, c = PS_SEG.parseString("via fmt.tojson(pretty=True)")[0]
+        self.assertEqual(kw, keywords.OPERATOR)
+        self.assertTrue(isinstance(c, Component))
 
+    def test_seg_to(self):
+        kw, c = PS_SEG.parseString("to var('asdf')")[0]
+        self.assertEqual(kw, keywords.SINK)
+        
+    def test_seg_on(self):
+        kw, c = PS_SEG.parseString("on start")[0]
+        self.assertEqual(kw, keywords.MONITOR)

@@ -57,6 +57,10 @@ class ComponentBlueprint(Construct):
     def package(self):
         return self._package
     
+    @property
+    def parameters(self):
+        return self._params
+    
     #Build the component. Here, 'role' represents the part of the flow
     #expression this component will be, source, sink, operator, monitor
     def build(self, role):
@@ -73,8 +77,8 @@ class ComponentBlueprint(Construct):
         if not builder:
             raise Exception("Could not build {name}".format(name=self.package.path))
         
-        args = self._params.args
-        kwargs = self._params.kwargs
+        args = self.parameters.args
+        kwargs = self.parameters.kwargs
         component = builder(*args, **kwargs)
         
         return component

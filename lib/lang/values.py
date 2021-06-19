@@ -1,4 +1,4 @@
-from actuator import util, log
+from actuator import util
 from actuator.lang import symbols
 from actuator.lang.construct import FlowReference, VariableReference
 
@@ -62,12 +62,28 @@ PS_VALUE = Or([
 ])
 
 
-log.debug(PS_VALUE.parseString("'asdf'"))
-log.debug(PS_VALUE.parseString("1"))
-log.debug(PS_VALUE.parseString("1.1"))
-log.debug(PS_VALUE.parseString("-1"))
-log.debug(PS_VALUE.parseString("-1.1"))
-log.debug(PS_VALUE.parseString("False"))
-log.debug(PS_VALUE.parseString("@flow"))
-log.debug(PS_VALUE.parseString("$var.bar"))
+import unittest
+class ValueTests(unittest.TestCase):
+    
+    def test_string(self):
+        self.assertEqual(PS_VALUE.parseString("'asdf'")[0], 'asdf')
+        
+    def test_int(self):
+        self.assertEqual(PS_VALUE.parseString("1")[0], 1)
+        self.assertEqual(PS_VALUE.parseString("-1")[0], -1)
+
+    def test_float(self):
+        self.assertEqual(PS_VALUE.parseString("1.1")[0], 1.1)
+        self.assertEqual(PS_VALUE.parseString("-1.1")[0], -1.1)
+
+    def test_bool(self):
+        self.assertEqual(PS_VALUE.parseString("True")[0], True)
+        self.assertEqual(PS_VALUE.parseString("False")[0], False)
+
+    def test_flow(self):
+        self.assertEqual(PS_VALUE.parseString("@flow")[0].reference, "flow")
+
+    def test_var(self):
+        self.assertEqual(PS_VALUE.parseString("$var.bar")[0].reference, "var.bar")
+
 
