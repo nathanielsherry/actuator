@@ -87,7 +87,7 @@ class FlowSink(Sink, OnDemandMixin):
     #we'll have everything we need to wire flows together
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._target_name = args[0].reference
+        self._target_ref = args[0]
            
     #Once the context is set, we have everything we need to look up
     #The target flow. This allows us to wire earlier
@@ -95,7 +95,7 @@ class FlowSink(Sink, OnDemandMixin):
         super().set_context(context)
         flow = self.context
         flowset = flow.context
-        self._target = flowset.get_flow(self.target_name)
+        self._target = self._target_ref.dereference(flowset)
         
     #Everything has already been done by __init__ and set_context
     def initialise(self, *args, **kwargs):
@@ -109,7 +109,7 @@ class FlowSink(Sink, OnDemandMixin):
         return self.target.state == Flow.STATE_STARTED
     
     @property
-    def target_name(self): return self._target_name
+    def target_name(self): return self._target_ref.reference
     
     @property
     def target(self): return self._target
@@ -123,7 +123,10 @@ class FlowSink(Sink, OnDemandMixin):
     @property
     def description_data(self):
         d = super().description_data
-        if self.target: d[self.kind]["sink-target"] = {"name": self.target.name, "kind": self.target.kind}
+        if self.target: 
+            d[self.kind]["flowsink-target"] = {"name": self.target.name, "kind": self.target.kind}
+        elif self.target_name:
+            d[self.kind]["flowsink-targetname"] = self.target.name
         return d
         
         
