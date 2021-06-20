@@ -48,6 +48,9 @@ class Component:
     def initialise(self, *args, **kwargs):
         return
 
+    def start(self): return
+    def stop(self): return
+
     @property
     def name(self): return None
     

@@ -128,8 +128,14 @@ class Flow(FlowContext):
     def stop(self):
         if self.state >= Flow.STATE_ENDING: return
         self._state = Flow.STATE_ENDING
+        
+        #Stop all components, stopping the pipeline in order, but stopping monitor
+        #first instead of last
         self.monitor.stop()
+        self.source.stop()
+        [c.stop() for c in self.operator.upstreams]
         self.sink.stop()
+        
         self._state = Flow.STATE_ENDED
         
         
@@ -146,7 +152,13 @@ class Flow(FlowContext):
         #event from firing during startup
         self._state = Flow.STATE_STARTED
         self._started.set()
+        
+        #Start all components, the order is [source, op, sink, mon]
+        self.source.start()
+        [c.start() for c in self.operator.upstreams]
+        self.sink.start()
         self.monitor.start()
+
         
         #monitor has exited, that means we're done
         self.stop()
@@ -211,13 +223,14 @@ class Flow(FlowContext):
     def components(self):
         #NOTE: Because this can be called before all components are finalised, 
         #we try to be forgiving of components that are still None
+        
         cs = [] 
         if self.operator: cs.extend(self.operator.upstreams)
-        if self.monitor: cs.append(self.monitor)
-        if self.sink: cs.append(self.sink)
         if self.source:
             if not self.source in cs:
                 cs = [self.source] + cs
+        if self.sink: cs.append(self.sink)
+        if self.monitor: cs.append(self.monitor)
         return cs
             
     @property

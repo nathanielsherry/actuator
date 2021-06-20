@@ -22,11 +22,7 @@ def build(instruction, kwargs):
 class Sink(component.Component):
     def perform(self, payload):
         raise Exception("Unimplemented for {}".format(self.kind))
-    
-    def stop(self):
-        #By default, a sink does not run any threads
-        return
-    
+       
     @property
     def active(self):
         #by default, sinks are passive, accepting input as it arrives
@@ -142,11 +138,12 @@ class DedicatedThreadSink(Sink):
         
     @property
     def active(self): return self._active
-        
+    
+    def start(self):
+        self._dedicated = self.make_dedicated()
+        self.dedicated.start()
+    
     def perform(self, payload):
-        if not self._dedicated:
-            self._dedicated = self.make_dedicated()
-            self.dedicated.start()
         self.set_dedicated_state(payload)
 
     @property
@@ -165,8 +162,8 @@ class DedicatedThreadSink(Sink):
 
 
 class DedicatedThread(threading.Thread):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__()
         self._terminated = threading.Event()
     
     #Called when the thread starts by the thread itself

@@ -161,8 +161,6 @@ class ChangeMonitor(Monitor, MonitorSleepMixin):
 #allowing the sink to override the default, not the user
 class OnDemandMonitor(Monitor, MonitorSleepMixin):
     def start(self):
-        #Call sink.perform once in case there's any one-time setup needed
-        self.sink.perform(self.demand())
         #Block the monitor thread so long as there are sinks showing as active
         while self.active_sinks:
             if not self.sleep(): break
