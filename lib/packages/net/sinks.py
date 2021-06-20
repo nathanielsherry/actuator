@@ -8,7 +8,6 @@ class WebServerSink(sink.DedicatedThreadSink, sink.OnDemandMixin):
         super().initialise(*args, **kwargs)
         self._port = int(kwargs.get('port', '8080'))
         self._address = kwargs.get('address', '')
-        self._monitor = None
 
     def make_dedicated(self): 
         return WebServerSink.HTTPServerThread(self)
@@ -29,7 +28,7 @@ class WebServerSink(sink.DedicatedThreadSink, sink.OnDemandMixin):
         def run(self):
             import socketserver
             self._server = WebServerSink.SinkRequestServer((self._sink._address, self._sink._port), WebServerSink.SinkRequestHandler)
-            self._server.set_payload_fn(lambda: self._sink.get_payload())
+            self._server.set_sink(self._sink)
             self._server.serve_forever(poll_interval=0.25)
             self._server.server_close()
             self._server.socket.close()
@@ -45,16 +44,17 @@ class WebServerSink(sink.DedicatedThreadSink, sink.OnDemandMixin):
     class SinkRequestServer(socketserver.TCPServer):
         allow_reuse_address = True
         
-        def set_payload_fn(self, fn):
-            setattr(self, 'sink_payload_fn', fn)
-                    
-        def get_sink_payload(self):
-            return getattr(self, 'sink_payload_fn')()
+        def set_sink(self, sink):
+            setattr(self, '_sink', sink)
+        
+        @property        
+        def sink(self):
+            return getattr(self, '_sink')
         
 
     class SinkRequestHandler(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
-            contents = self.server.get_sink_payload()
+            contents = self.server.sink.get_payload()
             self.send_response(200)
             self.send_header("Content-type", "text")
             self.end_headers()
