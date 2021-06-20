@@ -16,7 +16,7 @@ class WebServerSink(sink.DedicatedThreadSink, sink.OnDemandMixin):
     def set_dedicated_state(self, payload):
         self.set_payload(payload)
     
-    def custom_monitor(self):
+    def suggest_monitor(self):
         return self.ondemand_monitor
             
     class HTTPServerThread(sink.DedicatedThread):
