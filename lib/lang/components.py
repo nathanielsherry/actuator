@@ -75,7 +75,10 @@ PS_COMP_SUGAR_SHELL = QuotedString(quoteChar='`').setParseAction(
 )
 
 
-PS_COMP_SUGAR_ACCESSOR_ELEMENT = Word(srange("[a-zA-Z0-9_]"))
+PS_COMP_SUGAR_ACCESSOR_ELEMENT = Or([
+    values.PS_IDENTIFIER,
+    values.PS_INT,
+])
 PS_COMP_SUGAR_ACCESSOR = (
     Suppress(symbols.GETSTART) +
     PS_COMP_SUGAR_ACCESSOR_ELEMENT + 
@@ -84,7 +87,7 @@ PS_COMP_SUGAR_ACCESSOR = (
         PS_COMP_SUGAR_ACCESSOR_ELEMENT
     )
 ).setParseAction(
-    lambda ts: ComponentBlueprint(PackageConstruct("get", None), ParametersConstruct(".".join(ts)))
+    lambda ts: ComponentBlueprint(PackageConstruct("get", None), ParametersConstruct(list(ts)))
 )
 
 PS_COMP_SUGAR_STRING = values.PS_STRING.copy().addParseAction(
@@ -161,7 +164,7 @@ class ComponentTests(unittest.TestCase):
     def test_sugar_accessor(self):
         cb = PS_COMP.parseString("~a.0.b")[0]
         self.assertEqual(cb.package.path, "get")
-        self.assertEqual(cb.parameters.args[0], "a.0.b")
+        self.assertEqual(cb.parameters.args[0], ['a', 0, 'b'])
         c = cb.build(keywords.OPERATOR)
         
     def test_sugar_shell(self):

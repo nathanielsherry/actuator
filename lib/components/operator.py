@@ -112,16 +112,12 @@ class Get(Operator):
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
         from actuator.lang import accessor, construct
-        acc = args[0]
-        if not isinstance(acc, construct.AccessorReference):
-            acc = parser.AccessorReference(accessor.accessor(acc.split(".")))
-        self._accessor = acc
+        self._accessor = accessor.accessor(*args)
         
     @property
     def value(self):
         value = self.upstream.value
-        getter = self._accessor.dereference(self.context)
-        return getter(value)
+        return self._accessor(value)
         
 
 class Has(Operator):

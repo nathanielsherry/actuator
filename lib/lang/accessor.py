@@ -43,32 +43,34 @@ def compose(*args):
     from functools import reduce
     return reduce(_compose, args)
     
-def accessor(access_string):
-    if isinstance(access_string, str):
-        strings = access_string.split(".")
-    elif isinstance(access_string, list):
-        strings = access_string[:]
+def accessor(access_elements):
+    print(access_elements)
+    if isinstance(access_elements, str):
+        strings = access_elements.split(".")
+    elif isinstance(access_elements, (list, tuple)):
+        strings = access_elements[:]
     else:
         raise Exception("Unknown input format")
     
     components = []
     for s in strings:
-        if s.isnumeric():
-            components.append(int(s))
-        elif s[0] == '[' and s[-1] == ']':
-            s = s[1:-1]
-            if '=' in s:
-                key, value = s.split('=', maxsplit=1)
-                components.append(dicts_filterer(key, value))
-            else:    
-                components.append(mapper(s))
-        else:
+        if isinstance(s, int):
             components.append(s)
+        elif isinstance(s, str):
+            if s[0] == '[' and s[-1] == ']':
+                s = s[1:-1]
+                if '=' in s:
+                    key, value = s.split('=', maxsplit=1)
+                    components.append(dicts_filterer(key, value))
+                else:    
+                    components.append(mapper(s))
+            else:
+                components.append(s)
 
     return compose(*components)
 
-def access(obj, access_string):
-    return accessor(access_string)(obj)
+def access(obj, access_elements):
+    return accessor(access_elements)(obj)
  
 def listmap(fn, lst):
     return list(map(fn, lst))
