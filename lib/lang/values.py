@@ -52,13 +52,17 @@ PS_BOOL = Or(["True", "False"]).setParseAction(
     lambda ts: util.parse_bool(ts[0])
 )
 
-PS_VALUE = Or([
-    PS_FLOW,
-    PS_VAR,
+PS_PRIMITIVE = Or([
     PS_INT,
     PS_REAL,
     PS_STRING,
     PS_BOOL,
+])
+
+PS_VALUE = Or([
+    PS_FLOW,
+    PS_VAR,
+    PS_PRIMITIVE
 ])
 
 

@@ -44,7 +44,6 @@ def compose(*args):
     return reduce(_compose, args)
     
 def accessor(access_elements):
-    print(access_elements)
     if isinstance(access_elements, str):
         strings = access_elements.split(".")
     elif isinstance(access_elements, (list, tuple)):
@@ -56,16 +55,16 @@ def accessor(access_elements):
     for s in strings:
         if isinstance(s, int):
             components.append(s)
-        elif isinstance(s, str):
-            if s[0] == '[' and s[-1] == ']':
-                s = s[1:-1]
-                if '=' in s:
-                    key, value = s.split('=', maxsplit=1)
-                    components.append(dicts_filterer(key, value))
-                else:    
-                    components.append(mapper(s))
+        elif isinstance(s, list):
+            if len(s) == 1:
+                components.append(mapper(s[0]))
+            elif len(s) == 2:
+                key, value = s
+                components.append(dicts_filterer(key, value))
             else:
-                components.append(s)
+                raise Exception("List accessor elements must have one or two items")
+        elif isinstance(s, str):
+            components.append(s)
 
     return compose(*components)
 
@@ -80,3 +79,42 @@ def mapper(fn):
     if not callable(fn) and not fn == None:
         fn = extractor(fn)
     return partial(listmap, fn) 
+    
+    
+from pyparsing import Or, Suppress, ZeroOrMore
+from actuator.lang import symbols, values
+from actuator.lang.construct import PackageConstruct, ParametersConstruct, ComponentBlueprint
+
+PS_ACCESSOR_ELEMENT = Or([
+    values.PS_IDENTIFIER,
+    values.PS_INT,
+])
+
+PS_ACCESSOR_COLLECTION = (
+    Suppress('[') + 
+    Or([
+        #Map
+        PS_ACCESSOR_ELEMENT,
+        #Filter
+        PS_ACCESSOR_ELEMENT + Suppress('=') + values.PS_PRIMITIVE
+    ]) + 
+    Suppress(']')
+).setParseAction(
+    lambda ts: [list(ts)]
+)
+
+PS_ACCESSOR_COMPONENT = Or([
+    PS_ACCESSOR_ELEMENT,
+    PS_ACCESSOR_COLLECTION
+])
+
+PS_ACCESSOR = (
+    Suppress(symbols.GETSTART) +
+    PS_ACCESSOR_COMPONENT + 
+    ZeroOrMore(
+        Suppress(symbols.IDSEP) + 
+        PS_ACCESSOR_COMPONENT
+    )
+).setParseAction(
+    lambda ts: list(ts)
+)

@@ -1,5 +1,5 @@
 from actuator.lang.construct import PackageConstruct, ParametersConstruct, ComponentBlueprint
-from actuator.lang import symbols, keywords, values
+from actuator.lang import symbols, keywords, values, accessor
 
 from pyparsing import srange, Word, Or, And, Suppress, ZeroOrMore, OneOrMore, QuotedString
 
@@ -74,20 +74,8 @@ PS_COMP_SUGAR_SHELL = QuotedString(quoteChar='`').setParseAction(
     lambda ts: ComponentBlueprint(PackageConstruct("sh", None), ParametersConstruct(ts[0]))
 )
 
-
-PS_COMP_SUGAR_ACCESSOR_ELEMENT = Or([
-    values.PS_IDENTIFIER,
-    values.PS_INT,
-])
-PS_COMP_SUGAR_ACCESSOR = (
-    Suppress(symbols.GETSTART) +
-    PS_COMP_SUGAR_ACCESSOR_ELEMENT + 
-    ZeroOrMore(
-        Suppress(symbols.IDSEP) + 
-        PS_COMP_SUGAR_ACCESSOR_ELEMENT
-    )
-).setParseAction(
-    lambda ts: ComponentBlueprint(PackageConstruct("get", None), ParametersConstruct(list(ts)))
+PS_COMP_SUGAR_ACCESSOR = accessor.PS_ACCESSOR.copy().setParseAction(
+    lambda ts: ComponentBlueprint(PackageConstruct("get", None), ParametersConstruct(*list(ts)))
 )
 
 PS_COMP_SUGAR_STRING = values.PS_STRING.copy().addParseAction(
@@ -164,7 +152,7 @@ class ComponentTests(unittest.TestCase):
     def test_sugar_accessor(self):
         cb = PS_COMP.parseString("~a.0.b")[0]
         self.assertEqual(cb.package.path, "get")
-        self.assertEqual(cb.parameters.args[0], ['a', 0, 'b'])
+        self.assertEqual(cb.parameters.args, ['a', 0, 'b'])
         c = cb.build(keywords.OPERATOR)
         
     def test_sugar_shell(self):
