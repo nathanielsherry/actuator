@@ -112,7 +112,7 @@ class Get(Operator):
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
         from actuator.lang import accessor, construct
-        self._accessor = accessor.accessor(*args)
+        self._accessor = accessor.accessor(args)
         
     @property
     def value(self):
