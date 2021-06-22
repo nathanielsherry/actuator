@@ -112,9 +112,7 @@ PS_COMP_CHAIN = And([
         Or(['|', '>']) + 
         PS_COMP
     )
-]).addParseAction(
-    lambda ts: [ts]   
-)
+])
 
 
 import unittest

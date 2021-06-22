@@ -92,6 +92,8 @@ class Flow(FlowContext):
         #components to access not just the Flow but also the FlowSet
         #and related variable scopes
         for c in self.components:
+            if not isinstance(c, component.Component):
+                raise Exception("'{}' is not a component".format(c))
             c.set_context(self)
             
         self._state = Flow.STATE_CONTEXT

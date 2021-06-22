@@ -6,29 +6,17 @@ from pyparsing import Or, MatchFirst, Keyword, ZeroOrMore, OneOrMore, Suppress, 
 # FLOW EXPRESSION PARSING #
 ###########################
 
-PS_SEG = (
-    Or([
-        MatchFirst([
-            keywords.SOURCE,
-            keywords.OPERATOR,
-            keywords.SINK,
-            keywords.MONITOR
-        ]) + components.PS_COMP
-        ,
-        keywords.FLOW + values.PS_IDENTIFIER
-    ])
-).setParseAction(
-    lambda ts: [[ts[0], ts[1] if ts[0] == keywords.FLOW else ts[1].build(ts[0])]]
+
+PS_SEG_SOURCE_VALUE = components.PS_COMP.copy().setParseAction(
+    lambda ts: ts[0].build(keywords.SOURCE)
+)
+PS_SEG_SOURCE = (Suppress(Keyword(keywords.SOURCE)) + PS_SEG_SOURCE_VALUE).setParseAction(
+    lambda ts: [[keywords.SOURCE, ts[0]]]
 )
 
-PS_SEG_SOURCE = (Keyword(keywords.SOURCE) + components.PS_COMP).setParseAction(
-    lambda ts: [[ts[0], ts[1].build(ts[0])]]
-)
+def build_seg_operator(kw, ts):
+    opchain = ts[:]
 
-def build_seg_operator(ts):
-    kw = ts[0]
-    opchain = ts[1][:]
-    
     op = opchain.pop(0).build(kw)
     code = None
     
@@ -45,21 +33,38 @@ def build_seg_operator(ts):
         if op: newop.set_upstream(op)
         op = newop
         
-    return [[kw, op]]
-                
-PS_SEG_OPERATOR = (Keyword(keywords.OPERATOR) + components.PS_COMP_CHAIN).setParseAction(build_seg_operator)
+    return op
 
-
-PS_SEG_SINK = (Keyword(keywords.SINK) + components.PS_COMP).setParseAction(
-    lambda ts: [[ts[0], ts[1].build(ts[0])]]
+PS_SEG_OPERATOR_VALUE = components.PS_COMP_CHAIN.copy().addParseAction(
+    lambda ts: build_seg_operator(keywords.OPERATOR, ts)
+)
+PS_SEG_OPERATOR = (Suppress(Keyword(keywords.OPERATOR)) + PS_SEG_OPERATOR_VALUE).setParseAction(
+    lambda ts: [[keywords.OPERATOR, ts[0]]]
 )
 
 
-PS_SEG_MONITOR = (Keyword(keywords.MONITOR) + components.PS_COMP).setParseAction(
-    lambda ts: [[ts[0], ts[1].build(ts[0])]]
+
+PS_SEG_SINK_VALUE = components.PS_COMP.copy().setParseAction(
+    lambda ts: ts[0].build(keywords.SINK)
+)
+PS_SEG_SINK = (Suppress(Keyword(keywords.SINK)) + PS_SEG_SINK_VALUE).setParseAction(
+    lambda ts: [[keywords.SINK, ts[0]]]
 )
 
-PS_SEG_NAME = (Keyword(keywords.FLOW) + values.PS_IDENTIFIER).setParseAction(
+
+PS_SEG_MONITOR_VALUE = components.PS_COMP.copy().setParseAction(
+    lambda ts: ts[0].build(keywords.MONITOR)
+)
+PS_SEG_MONITOR = (Suppress(Keyword(keywords.MONITOR)) + PS_SEG_MONITOR_VALUE).setParseAction(
+    lambda ts: [[keywords.MONITOR, ts[0]]]
+)
+
+
+
+PS_SEG_NAME_VALUE = values.PS_IDENTIFIER.copy().setParseAction(
+    lambda ts: ts
+)
+PS_SEG_NAME = (Keyword(keywords.FLOW) + PS_SEG_NAME_VALUE).setParseAction(
     lambda ts: [ts]
 )
 

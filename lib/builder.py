@@ -1,5 +1,5 @@
 from actuator.flows.flow import Flow
-from actuator.lang.parser import ActuatorParser
+from actuator.lang import parser
 from actuator.components.sink import Sink
 from actuator.components.source import Source
 from actuator.components.monitor import Monitor
@@ -18,32 +18,32 @@ class FlowBuilder:
         if isinstance(s, Source):
             self._source = s
         else:
-            self._source = ActuatorParser(s).parse_source(inline=True)[1]
+            self._source = parser.parse_source(s)
         return self
 
     def to(self, s):
         if isinstance(s, Sink):
             self._sink = s
         else:
-            self._sink = ActuatorParser(s).parse_sink(inline=True)[1]
+            self._sink = parser.parse_sink(s)
         return self
         
     def on(self, s):
         if isinstance(s, Monitor):
             self._monitor = s
         else:
-            self._monitor = ActuatorParser(s).parse_monitor(inline=True)[1]
+            self._monitor = parser.parse_monitor(s)
         return self
         
     def via(self, s):
         if isinstance(s, Operator):
             self._operator = s
         else:
-            self._operator = ActuatorParser(s).parse_operator(inline=True)[1]
+            self._operator = parser.parse_operator(s)
         return self
         
     def flow(self, s):
-        self._name = s
+        self._name = parser.parse_name(s)
         return self
         
     def build(self):            
