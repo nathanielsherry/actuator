@@ -10,7 +10,8 @@ ROLE_SINK = "sink"
 
 def instructions():
     return {
-        "_flowref": FlowSink
+        "_flowref": FlowSink,
+        "none": NoneSink,
     }
     
     
@@ -176,7 +177,9 @@ class DedicatedThread(threading.Thread):
     def terminate(self): raise Exception("Unimplemented")
 
 
-
+class NoneSink(Sink):
+    def perform(self, payload):
+        pass
 
 
 

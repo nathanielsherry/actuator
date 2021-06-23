@@ -59,11 +59,6 @@ class StdoutMsg(sink.RunnerSink):
         print(self._msg, flush=True)
 
 
-class Null(sink.Sink):
-    def perform(self, payload):
-        pass
-
-
 class JsonSink(sink.Sink):
     def perform(self, payload):
         import json

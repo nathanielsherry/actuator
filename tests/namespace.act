@@ -3,7 +3,7 @@
 
 #Prints "['John', 'Doe']" once
 
-flow person from sh.null to sh.null;
+flow person from none to none;
 flow A to $global.person.firstname from "John"; 
 flow B to $global.person.lastname from "Doe";
 

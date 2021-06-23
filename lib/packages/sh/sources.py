@@ -53,12 +53,4 @@ class JsonSource(source.Source):
             if not line: return None
             return json.loads(line.strip())
             
-            
 
-class NullSource(source.Source):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        
-    @property
-    def value(self):
-        return None

@@ -15,6 +15,7 @@ def instructions():
         'real': RealSource,
         'bool': BooleanSource,
         'inflows': FlowSource,
+        'none': NoneSource,
     }
 
 def build(instruction, kwargs):
@@ -160,7 +161,10 @@ class CounterSource(Source):
         return value
 
 
-
+class NoneSource(Source):
+    @property
+    def value(self):
+        return None
 
 
 
