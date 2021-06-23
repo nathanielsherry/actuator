@@ -14,6 +14,7 @@ def instructions():
         "demand": OnDemandMonitor,
         "counter": CountMonitor,
         "call": OnCallMonitor,
+        "input": OnInputMonitor,
     }
     
 
@@ -100,7 +101,7 @@ class OnceMonitor(Monitor):
         pass
 
 
-#Just runs once and exits. Good starter Monitor.
+#Just runs n times and exits. Good starter Monitor.
 class CountMonitor(Monitor):
     def initialise(self, *args, **kwargs):
         self._count = int(args[0])
@@ -111,6 +112,19 @@ class CountMonitor(Monitor):
             self.sink.perform(self.operator.value)
     def stop(self):
         self._terminate = True
+
+
+#Runs until terminated
+class OnInputMonitor(Monitor):
+    def initialise(self, *args, **kwargs):
+        self._terminate = False
+    def start(self):
+        while True:
+            if self._terminate: return
+            self.sink.perform(self.operator.value)
+    def stop(self):
+        self._terminate = True
+
 
 #The interval monitor runs repeatedly with a delay, optionally exiting on a 
 #None or, also optionally, False
@@ -181,7 +195,7 @@ class OnDemandMonitor(Monitor, MonitorSleepMixin):
     def active_sinks(self):
         return [s for s in self.context.sinks if s.active]
     
-
+    
 class OnCallMonitor(Monitor):
 
     class OnCallSource(mod_source.Source):
