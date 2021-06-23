@@ -9,7 +9,7 @@ def parse_flowset(expression):
 
 def parse_sink(expression):
     from actuator.lang import flows as flowsparser
-    return flowsparser.SEG_SINK_VALUE.parseString(expression)[0]
+    return flowsparser.PS_SEG_SINK_VALUE.parseString(expression)[0]
     
 def parse_source(expression):
     from actuator.lang import flows as flowsparser
