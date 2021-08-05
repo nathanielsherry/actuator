@@ -1,6 +1,6 @@
 # Actuator
 
-Actuator is a purpose-built programming language built to go beyond the standard pipeline model of unix shells by using a source/sink component model which allows features like polling, rich data manipulation, and multiple flows of data.
+Actuator is a purpose-built programming language intended to go beyond the standard pipeline model of unix shells by using a source/sink component model which allows features like polling & events, rich data manipulation, inlining of shell commands, and multiple flows of data.
 
 ## Expressions
 
