@@ -31,7 +31,7 @@ If no monitor is specified, the Sink is given the opportunity to provide one. Th
 
 Individual components can accept both named and positional arguments. They are provided in the following way:
 
-    component(named="value")["positional"]
+    component("positional", named="value")
     
 Named arguments may be provided without quotes in some occations. Because of limitations of the parser, floats and negative numbers must be provided in quotes for the time being.
 
@@ -51,7 +51,7 @@ As with the previous example, the Sink provides the Monitor, this time an Interv
 
 Poll a URL and watch for changes, printing 'True' when detected:
 
-    act 'from net.url["http://www.example.com"] via change on interval(sleep=120)'
+    act 'from net.url("http://www.example.com") via change on interval(sleep=120)'
     
 This example does not specify a Sink, so the default of writing to standard out is used.
     
