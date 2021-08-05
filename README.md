@@ -1,6 +1,6 @@
 # Actuator
 
-Actuator attempts to go beyond the pipeline model of unix processes by using a source/sink component model which allows features like polling and rich data manipulation.
+Actuator is a purpose-built programming language built to go beyond the standard pipeline model of unix shells by using a source/sink component model which allows features like polling, rich data manipulation, and multiple flows of data.
 
 ## Expressions
 
@@ -31,9 +31,9 @@ If no monitor is specified, the Sink is given the opportunity to provide one. Th
 
 Individual components can accept both named and positional arguments. They are provided in the following way:
 
-    component(named="value")["positional"]
+    component("positional", named="value")
     
-Named arguments may be provided without quotes in some occations. Because of limitations of the parser, floats and negative numbers must be provided in quotes for the time being.
+Named argument values may be provided without quotes for a limited subset of strings without spaces or certain punctuation marks. 
 
 ## Examples
 
@@ -51,7 +51,7 @@ As with the previous example, the Sink provides the Monitor, this time an Interv
 
 Poll a URL and watch for changes, printing 'True' when detected:
 
-    act 'from net.url["http://www.example.com"] via change on interval(sleep=120)'
+    act 'from net.url("http://www.example.com") via change on interval(sleep=120)'
     
 This example does not specify a Sink, so the default of writing to standard out is used.
     
