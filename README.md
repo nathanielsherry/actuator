@@ -33,7 +33,7 @@ Individual components can accept both named and positional arguments. They are p
 
     component("positional", named="value")
     
-Named arguments may be provided without quotes in some occations. Because of limitations of the parser, floats and negative numbers must be provided in quotes for the time being.
+Named argument values may be provided without quotes for a limited subset of strings without spaces or certain punctuation marks. 
 
 ## Examples
 
