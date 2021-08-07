@@ -12,7 +12,7 @@ Actuator expressions connect different types of components together, and take th
 A Flow's name is a unique identifier that can be used to reference it elsewhere. If you do not intend to reference this flow, a name is not required.
 
 ### Source
-A Source supplies some kind of input to the processing pipeline on demand. If no source is specified in an Actuator expression, the default is to read the entirety of stdin.
+A Source supplies some kind of input to the processing pipeline on demand. If no source is specified in an Actuator expression, the default is to read inflows from other expressions or, if none exist, the entirety of stdin.
 
 ### Operator
 An Operator performs intermediate transformations on the input provided by a Source. The kind of operations used depends on the kind of data being introduced into the pipeline. No operators are required, however, as a source is a special type of operator, and the expression is valid without them.
