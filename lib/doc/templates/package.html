@@ -1,25 +1,25 @@
 {% macro enumerate_components(name, components) %}
-  <div class='content-package-components'>
-    <span class='component-type-header'>
-      <a href='#{{name}}'>{{ name }}</a>
-    </span>
-    <div>
-      {% if components != None %}
-      {% for cmp_name, cmp_cls in components.items() %}
-      <div class='component-definition'>
-        <div class='technical-name component-name'>
-          {{ cmp_name if cmp_name != None else '&lt;default&gt;'}}         
+  {% if components != None and components.items() %}
+    <div class='content-package-components'>
+      <span class='component-type-header'>
+        <a href='#{{name}}'>{{ name }}</a>
+      </span>
+      <div>
+        {% for cmp_name, cmp_cls in components.items() %}
+        <div class='component-definition'>
+          <div class='technical-name component-name'>
+            {{ cmp_name if cmp_name != None else '&lt;default&gt;'}}         
+          </div>
+          {% if cmp_cls.__doc__ != None %}
+            <span class='component-doc'>
+              {{cmp_cls.__doc__}}
+            </span>
+          {% endif %}
         </div>
-        {% if cmp_cls.__doc__ != None %}
-          <span class='component-doc'>
-            {{cmp_cls.__doc__}}
-          </span>
-        {% endif %}
+        {% endfor %}
       </div>
-      {% endfor %}
-      {% endif %}
     </div>
-  </div>
+  {% endif %}
 {% endmacro %}
 
 
