@@ -8,12 +8,7 @@
       {% for cmp_name, cmp_cls in components.items() %}
       <div class='component-definition'>
         <div class='technical-name component-name'>
-          {% if cmp_name == None %}
-            &lt;default&gt;
-          {% else %}
-            {{cmp_name}}
-          {% endif %}
-          
+          {{ cmp_name if cmp_name != None else '&lt;default&gt;'}}         
         </div>
         {% if cmp_cls.__doc__ != None %}
           <span class='component-doc'>
@@ -29,6 +24,29 @@
 
 
 
+{% macro header() %}
+  <div id='header'>
+    <span id='header-wordmark'>
+      Actuator
+    </span>
+  </div>
+{% endmacro %}
+
+
+
+{% macro sidebar() %}
+  <div id='sidebar'>
+    Packages
+    <ul id='sidebar-packages-list'>
+    {% for p in pkgs %}
+      <li><a class='technical-name' href='pkg-{{p.name}}.html'>{{p.name if p.name != None else '&lt;builtin&gt;'}}</a></li>
+    {% endfor %}
+    </ul>
+  </div>
+{% endmacro %}
+
+
+
 <html>
   <head>
     <title>
@@ -37,24 +55,13 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <div id='header'>
-      <span id='header-wordmark'>
-        Actuator
-      </span>
-    </div>
+    {{ header() }}
     <div id='page'>
-      <div id='sidebar'>
-        Packages
-        <ul id='sidebar-packages-list'>
-        {% for p in pkgs %}
-          <li><a class='technical-name' href='pkg-{{p.name}}.html'>{{p.name}}</a></li>
-        {% endfor %}
-        </ul>
-      </div>
+      {{ sidebar() }}
       <div id='content'>
-        <span id='content-title'>
-          Package <span class='technical-name'>{{pkg.name}}</span>  
-        </span>
+        <div id='content-title'>
+          Package <span class='technical-name'>{{pkg.name if pkg.name != None else '&lt;builtin&gt;'}}</span>  
+        </div>
         {% if pkg.__doc__ != None %}
           {{pkg.__doc__}}
         {% endif %}

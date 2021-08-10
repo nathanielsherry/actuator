@@ -3,6 +3,7 @@
 SEP = "."
 
 from actuator import log
+from collections import OrderedDict
 
 #Generic class for storing namespaced key value items
 #This class should be used/composed rather than extended
@@ -15,7 +16,9 @@ class Archive():
     def name(self): return self._name
     
     @property
-    def contents(self): return dict(self._items)
+    def contents(self):
+        sorted_keys = sorted(self._items.keys(), key=lambda k: k if k else '') 
+        return OrderedDict((key, self._items[key]) for key in sorted_keys)
 
     def get(self, name):
         #name = self.expand(name)
@@ -102,6 +105,7 @@ class Registry:
         for loader in loaders:
             for packagename, package in loader.packages.contents.items():
                 ps.append(package)
+        ps = sorted(ps, key=lambda k: k.name if k and k.name else '')
         return ps
     
     def get_package(self, name):

@@ -57,6 +57,8 @@ body {
 
 #content-title {
   font-size: 25pt;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .technical-name {
