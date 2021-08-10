@@ -139,9 +139,12 @@ class RealSource(Source):
 
 
 class BooleanSource(Source):
+    """
+    Emits the given boolean value
+    """
     def initialise(self, *args, **kwargs):
         super().initialise(*args, **kwargs)
-        self._value = util.parse_bool(wkargs.get('value', True))
+        self._value = util.parse_bool(kwargs.get('value', True))
         
     @property
     def value(self):

@@ -19,7 +19,7 @@ def create(path):
         template_package(path, package)
         
     colours = {
-        'header_colour': '#faf2e1',
+        'header_colour': '#faf0e1',
         'header_border_colour': '#6b5b3b',
         'theme_colour': '#006f5c',
         'sidebar_colour': '#fff',
