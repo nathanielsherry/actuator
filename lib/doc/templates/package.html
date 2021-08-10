@@ -36,12 +36,14 @@
 
 {% macro sidebar() %}
   <div id='sidebar'>
-    Packages
-    <ul id='sidebar-packages-list'>
-    {% for p in pkgs %}
-      <li><a class='technical-name' href='pkg-{{p.name}}.html'>{{p.name if p.name != None else '&lt;builtin&gt;'}}</a></li>
-    {% endfor %}
-    </ul>
+    <div id='sidebar-packages'>
+      <span id='sidebar-packages-title'>Packages</span>
+      <ul id='sidebar-packages-list'>
+      {% for p in pkgs %}
+        <li><a class='technical-name' href='pkg-{{p.name}}.html'>{{p.name if p.name != None else '&lt;builtin&gt;'}}</a></li>
+      {% endfor %}
+      </ul>
+    </div>
   </div>
 {% endmacro %}
 

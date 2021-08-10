@@ -29,15 +29,12 @@ body {
 #sidebar {
   width: 200px;
   background-color: #ddd;
-  padding: 5px;
+  padding: 10px;
   border-right: 1px solid #bbb;
 }
 
 #sidebar ul {
   list-style: none;
-  padding-left: 10px;
-  margin-top: 10px;
-  margin-bottom: 0px;
 }
 
 #sidebar ul a {
@@ -45,7 +42,17 @@ body {
   color: #0075AD;
 }
 
+#sidebar-packages {
+  padding-left: 
+}
+
+#sidebar-packages-title {
+  font-weight: 700;
+}
+
 #sidebar-packages-list {
+  margin-top: 5px;
+  padding-left: 0px;
 }
 
 #content {
