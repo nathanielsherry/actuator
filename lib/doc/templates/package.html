@@ -25,17 +25,19 @@
 
 
 {% macro header() %}
+  <div id='header-outer'>
   <div id='header'>
     <span id='header-wordmark'>
       Actuator
     </span>
+  </div>
   </div>
 {% endmacro %}
 
 
 
 {% macro sidebar() %}
-  <div id='sidebar'>
+  <div id='sidebar' class='column'>
     <div id='sidebar-packages'>
       <span id='sidebar-packages-title'>Packages</span>
       <ul id='sidebar-packages-list'>
@@ -58,9 +60,10 @@
   </head>
   <body>
     {{ header() }}
+    <div id='page-outer'>
     <div id='page'>
       {{ sidebar() }}
-      <div id='content'>
+      <div id='content' class='column'>
         <div id='content-title'>
           Package <span class='technical-name'>{{pkg.name if pkg.name != None else '&lt;builtin&gt;'}}</span>  
         </div>
@@ -75,6 +78,7 @@
         
         
       </div>
+    </div>
     </div>
     <div id='footer'></div>
   </body>

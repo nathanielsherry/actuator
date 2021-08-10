@@ -7,14 +7,25 @@ body {
   background-color: {{ body_colour }}
 }
 
+#header-outer {
+  width: 1100px;
+  text-align: center;
+  margin: 0 auto;
+  position: sticky;
+  top: 0;
+}
+
 #header {
   background-color: {{ header_colour }};
   height: 32px;
   margin: 0px;
   padding: 10px;
-  box-shadow: 0px 1px 6px 0px {{ header_shadow_colour }};
-  position: sticky;
-  top: 0;
+  box-shadow: 0px 3px 6px -3px {{ header_border_colour }};
+  border: 2px solid {{ header_border_colour }};
+  border-top: 0px;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+  text-align: left;
 }
 
 #header-wordmark {
@@ -24,16 +35,26 @@ body {
   font-style: italic;
 }
 
+#page-outer {
+  text-align: center;
+}
+
 #page {
   display: flex;
-  height: calc( 100vh - 53px );
+  /*height: calc( 100vh - 53px );*/
+  width: 1000px;
+  text-align: left;
+  margin: 0 auto;
 }
 
 #sidebar {
-  width: 200px;
+  flex: 0 1 auto;
   background-color: {{ sidebar_colour }};
-  padding: 10px;
-  border-right: 1px solid {{ sidebar_border }};
+  padding: 20px;
+  border: 1px solid {{ sidebar_border }};
+  border-top: 0px;
+  border-radius: 4px;
+  text-align: right;
 }
 
 #sidebar ul {
@@ -42,7 +63,7 @@ body {
 
 #sidebar ul a {
   text-decoration: none;
-  color: #0075AD;
+  color: {{ link_colour }};
 }
 
 #sidebar-packages {
@@ -71,6 +92,12 @@ body {
   margin-bottom: 10px;
 }
 
+.column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .technical-name {
   font-family: 'Courier Prime', monospace;
 }
@@ -82,7 +109,7 @@ body {
 .component-type-header {
   font-size: 16pt;
   display: inline-block;
-  width: calc(100% - 30px);
+  width: calc(100%);
   color: #fff;
   background: {{ theme_colour }};
   padding-left: 4px;
@@ -99,17 +126,16 @@ body {
 .component-definition {
   border-left: 2px solid {{ theme_colour }};
   border-radius: 5px;
-  box-shadow: 0px 0px 4px 0px #ccc;
+  box-shadow: -4px 0px 4px -4px {{ theme_colour }};
   margin: 10px 0px 30px 30px;
-  width: calc(100% - 60px);
+  width: calc(100% - 30px);
 }
 
 .component-name {
   padding: 3px;
   font-size: 14pt;
   font-weight: 700;
-  border-top: 1px solid {{ theme_colour }};
-  border-radius: 5px;
+  
 }
 
 .component-doc {
