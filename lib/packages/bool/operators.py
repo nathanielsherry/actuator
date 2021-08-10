@@ -11,6 +11,9 @@ def tobool(o):
         return False
 
 class Not(operator.Operator):
+    """
+    Applies a boolean 'not' to a payload
+    """
     @property
     def value(self):
         import json
@@ -19,6 +22,9 @@ class Not(operator.Operator):
     
     
 class Any(operator.Operator):
+    """
+    Applies to a list payload. The result is True if any value in the list is truthy, False otherwise.
+    """
     @property
     def value(self):
         import json
@@ -28,6 +34,9 @@ class Any(operator.Operator):
         return any(value)
         
 class All(operator.Operator):
+    """
+    Applies to a list payload. The result is True if all values in the list are truthy, False otherwise.
+    """
     @property
     def value(self):
         import json

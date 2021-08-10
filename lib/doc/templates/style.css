@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Georama:ital,wght@0,500;0,700;1,500;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: "Georama", sans-serif;
+}
+
+#header {
+  background-color: #333;
+  height: 32px;
+  margin: 0px;
+  padding: 10px;
+  box-shadow: 0px 1px 6px 0px #aaa;
+}
+
+#header-wordmark {
+  color: #fb8c00;
+  font-size: 20pt;
+  font-weight: 700;
+  font-style: italic;
+}
+
+#page {
+  display: flex;
+  height: calc( 100vh - 53px );
+}
+
+#sidebar {
+  width: 200px;
+  background-color: #ddd;
+  padding: 5px;
+  border-right: 1px solid #bbb;
+}
+
+#sidebar ul {
+  list-style: none;
+  padding-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 0px;
+}
+
+#sidebar ul a {
+  text-decoration: none;
+  color: #0075AD;
+}
+
+#sidebar-packages-list {
+}
+
+#content {
+  flex: 1 0 auto;
+  padding: 5px;
+  padding-left: 20px;
+}
+
+
+#content-title {
+  font-size: 25pt;
+}
+
+.technical-name {
+  font-family: 'Courier Prime', monospace;
+}
+
+.content-package-components {
+
+}
+
+.component-type-header {
+  font-size: 16pt;
+  display: inline-block;
+  width: calc(100% - 30px);
+  color: #fff;
+  background: #FB8C00;
+  padding-left: 4px;
+  border-radius: 3px;
+  margin-top: 5px;
+  margin-bottom: 1px;
+}
+
+.component-type-header a {
+  text-decoration: none;
+  color: fff;
+}
+
+.component-definition {
+  border-left: 2px solid #FB8C00;
+  border-radius: 5px;
+  box-shadow: 0px 0px 4px 0px #ccc;
+  margin: 10px 0px 30px 30px;
+  width: calc(100% - 60px);
+}
+
+.component-name {
+  padding: 3px;
+  font-size: 14pt;
+  font-weight: 700;
+  border-top: 1px solid #FB8C00;
+  border-radius: 5px;
+}
+
+.component-doc {
+  padding: 0px 4px 4px 4px;
+  font-size: 10pt;
+  display: inline-block;
+}

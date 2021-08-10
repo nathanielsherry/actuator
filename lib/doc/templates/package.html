@@ -1,0 +1,72 @@
+{% macro enumerate_components(name, components) %}
+  <div class='content-package-components'>
+    <span class='component-type-header'>
+      <a href='#{{name}}'>{{ name }}</a>
+    </span>
+    <div>
+      {% if components != None %}
+      {% for cmp_name, cmp_cls in components.items() %}
+      <div class='component-definition'>
+        <div class='technical-name component-name'>
+          {% if cmp_name == None %}
+            &lt;default&gt;
+          {% else %}
+            {{cmp_name}}
+          {% endif %}
+          
+        </div>
+        {% if cmp_cls.__doc__ != None %}
+          <span class='component-doc'>
+            {{cmp_cls.__doc__}}
+          </span>
+        {% endif %}
+      </div>
+      {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+{% endmacro %}
+
+
+
+<html>
+  <head>
+    <title>
+      Package: {{pkg.name}}
+    </title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div id='header'>
+      <span id='header-wordmark'>
+        Actuator
+      </span>
+    </div>
+    <div id='page'>
+      <div id='sidebar'>
+        Packages
+        <ul id='sidebar-packages-list'>
+        {% for p in pkgs %}
+          <li><a class='technical-name' href='pkg-{{p.name}}.html'>{{p.name}}</a></li>
+        {% endfor %}
+        </ul>
+      </div>
+      <div id='content'>
+        <span id='content-title'>
+          Package <span class='technical-name'>{{pkg.name}}</span>  
+        </span>
+        {% if pkg.__doc__ != None %}
+          {{pkg.__doc__}}
+        {% endif %}
+        
+        {{ enumerate_components('Sources', pkg.sources.contents) }}
+        {{ enumerate_components('Operators', pkg.operators.contents) }}
+        {{ enumerate_components('Sinks', pkg.sinks.contents) }}
+        {{ enumerate_components('Monitors', pkg.monitors.contents) }}
+        
+        
+      </div>
+    </div>
+    <div id='footer'></div>
+  </body>
+</html>
