@@ -17,9 +17,30 @@ def create(path):
     
     for package in REGISTRY.packages:
         template_package(path, package)
+
+    orange = {
+        'header_colour': '#333',
+        'header_shadow_colour': '#aaa',
+        'theme_colour': '#fb8c00',
+        'sidebar_colour': '#eee',
+        'sidebar_border': '#bbb',
+        'body_colour': '#fff',
+    }
         
-    
-    shutil.copy('{}/templates/style.css'.format(TEMPLATE_DIR), '{}/style.css'.format(path))
+    purple = {
+        'header_colour': '#fff',
+        'header_shadow_colour': '#aaa',
+        'theme_colour': '#461A99',
+        'sidebar_colour': '#eee',
+        'sidebar_border': '#bbb',
+        'body_colour': '#fff',
+    }
+        
+    template_file(        
+        '{}/templates/style.css'.format(TEMPLATE_DIR),
+        '{}/style.css'.format(path),
+        purple
+    )
 
 def template_package(path, package):
     values = {
