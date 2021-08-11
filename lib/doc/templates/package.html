@@ -25,15 +25,21 @@
 
 
 {% macro header() %}
-  <div id='header-outer'>
   <div id='header'>
     <span id='header-wordmark'>
       Actuator
     </span>
   </div>
-  </div>
 {% endmacro %}
 
+
+{% macro footer() %}
+  <div id='footer'>
+    <span id='header-wordmark'>
+      Actuator
+    </span>
+  </div>
+{% endmacro %}
 
 
 {% macro sidebar() %}
@@ -51,6 +57,26 @@
 
 
 
+{% macro page() %}
+  <div id='page'>
+    {{ sidebar() }}
+    <div id='content' class='column'>
+      <div id='content-title'>
+        Package <span class='technical-name'>{{pkg.name if pkg.name != None else '&lt;builtin&gt;'}}</span>  
+      </div>
+      {% if pkg.__doc__ != None %}
+        {{pkg.__doc__}}
+      {% endif %}
+      
+      {{ enumerate_components('Sources', pkg.sources.contents) }}
+      {{ enumerate_components('Operators', pkg.operators.contents) }}
+      {{ enumerate_components('Sinks', pkg.sinks.contents) }}
+      {{ enumerate_components('Monitors', pkg.monitors.contents) }}
+      
+    </div>
+  </div>
+{% endmacro %}
+
 <html>
   <head>
     <title>
@@ -59,27 +85,18 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    {{ header() }}
+    
+    <div id='header-outer'>
+      {{ header() }}
+    </div>
+    
     <div id='page-outer'>
-    <div id='page'>
-      {{ sidebar() }}
-      <div id='content' class='column'>
-        <div id='content-title'>
-          Package <span class='technical-name'>{{pkg.name if pkg.name != None else '&lt;builtin&gt;'}}</span>  
-        </div>
-        {% if pkg.__doc__ != None %}
-          {{pkg.__doc__}}
-        {% endif %}
-        
-        {{ enumerate_components('Sources', pkg.sources.contents) }}
-        {{ enumerate_components('Operators', pkg.operators.contents) }}
-        {{ enumerate_components('Sinks', pkg.sinks.contents) }}
-        {{ enumerate_components('Monitors', pkg.monitors.contents) }}
-        
-        
-      </div>
+      {{ page() }}
     </div>
+    
+    <div id='footer-outer'>
+      {{ footer() }}
     </div>
-    <div id='footer'></div>
+    
   </body>
 </html>

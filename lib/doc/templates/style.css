@@ -4,24 +4,31 @@
 body {
   margin: 0;
   font-family: "Georama", sans-serif;
-  background-color: {{ body_colour }}
+  background-color: {{ background_colour }};
+  max-height: 100%;
+  min-height: 100vh;
+  height: auto;
+  display: flex;
+  flex-direction: column;
 }
 
+
+
 #header-outer {
-  width: 1100px;
+  width: 1050px;
   text-align: center;
-  margin: 0 auto;
   position: sticky;
+  margin: 0 auto;
   top: 0;
+  flex: 0 0 52px;
 }
 
 #header {
-  background-color: {{ header_colour }};
-  height: 32px;
+  background-color: {{ page_colour }};
   margin: 0px;
   padding: 10px;
-  box-shadow: 0px 3px 6px -3px {{ header_border_colour }};
-  border: 2px solid {{ header_border_colour }};
+  box-shadow: 0px 3px 6px -3px {{ accent_colour }};
+  border: 2px solid {{ accent_colour }};
   border-top: 0px;
   border-bottom-right-radius: 5px;
   border-bottom-left-radius: 5px;
@@ -35,23 +42,60 @@ body {
   font-style: italic;
 }
 
+
+
+
+
+#footer-outer {
+  width: 1050px;
+  text-align: center;
+  margin: 0 auto;
+  position: sticky;
+  bottom: 0;
+  flex: 0 0 52px;
+}
+
+#footer {
+  background-color: {{ page_colour }};
+  margin: 0px;
+  padding: 10px;
+  box-shadow: 0px 3px 6px -3px {{ accent_colour }};
+  border: 2px solid {{ accent_colour }};
+  border-bottom: 0px;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+  text-align: left;
+}
+
+
+
+
 #page-outer {
   text-align: center;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
 }
 
 #page {
+  flex: 1 0 auto;
   display: flex;
-  /*height: calc( 100vh - 53px );*/
+  height: 100%;
   width: 1000px;
   text-align: left;
   margin: 0 auto;
+  background-color: {{ page_colour }};
+  border-left: 1px solid {{ accent_colour }};
+  border-right: 1px solid {{ accent_colour }};
+  box-shadow: 0px 0px 6px -2px {{ accent_colour }};
+  
 }
 
 #sidebar {
   flex: 0 1 auto;
-  background-color: {{ sidebar_colour }};
-  padding: 20px;
-  border: 1px solid {{ sidebar_border }};
+  background-color: {{ transparent }};
+  margin: 25px;
+  border: 1px solid {{ transparent }};
   border-top: 0px;
   border-radius: 4px;
   text-align: right;
@@ -63,7 +107,7 @@ body {
 
 #sidebar ul a {
   text-decoration: none;
-  color: {{ link_colour }};
+  color: {{ theme_colour }};
 }
 
 #sidebar-packages {
@@ -81,14 +125,14 @@ body {
 
 #content {
   flex: 1 0 auto;
-  padding: 5px;
-  padding-left: 20px;
+  margin: 25px;
+  margin-left: 0px;
 }
 
 
 #content-title {
   font-size: 25pt;
-  margin-top: 10px;
+  margin-top: 0px;
   margin-bottom: 10px;
 }
 
@@ -109,7 +153,7 @@ body {
 .component-type-header {
   font-size: 16pt;
   display: inline-block;
-  width: calc(100%);
+  width: 100%;
   color: #fff;
   background: {{ theme_colour }};
   padding-left: 4px;
@@ -127,8 +171,8 @@ body {
   border-left: 2px solid {{ theme_colour }};
   border-radius: 5px;
   box-shadow: -4px 0px 4px -4px {{ theme_colour }};
-  margin: 10px 0px 30px 30px;
-  width: calc(100% - 30px);
+  margin: 12.5px 0px 25px 25px;
+  width: calc(100% - 50px);
 }
 
 .component-name {
