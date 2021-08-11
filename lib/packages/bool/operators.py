@@ -16,7 +16,6 @@ class Not(operator.Operator):
     """
     @property
     def value(self):
-        import json
         value = tobool(self.upstream.value)
         return not value
     
@@ -27,7 +26,6 @@ class Any(operator.Operator):
     """
     @property
     def value(self):
-        import json
         value = self.upstream.value
         if not isinstance(value, (list, tuple)):
             value = list(value)
@@ -39,7 +37,6 @@ class All(operator.Operator):
     """
     @property
     def value(self):
-        import json
         value = self.upstream.value
         if not isinstance(value, (list, tuple)):
             value = list(value)
