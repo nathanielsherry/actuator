@@ -200,6 +200,7 @@ body {
   padding: 0px 4px 4px 4px;
   font-size: 10pt;
   display: inline-block;
+  font-family: 'Courier Prime', monospace;
 }
 
 
@@ -236,7 +237,8 @@ a.page-link {
   overflow-x: auto;
   border-left: 1px solid {{ accent_colour }};
   border-radius: 5px;
-  color: {{ accent_colour }}
+  color: {{ accent_colour }};
+  padding: 12.5px;
 }
 
 .code-expander {
