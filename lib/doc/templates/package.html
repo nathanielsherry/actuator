@@ -1,3 +1,51 @@
+  
+{% macro script_expander() %}
+<script>
+  
+  var coll = document.getElementsByClassName('expander-toggle');
+  var i;
+  
+  for (i = 0; i < coll.length; i++) {
+    coll[i].addEventListener("click", function() {
+      this.classList.toggle("expander-toggle-ative");
+      var content = this.nextElementSibling;
+      if (content.style.maxHeight){
+        content.style.maxHeight = null;
+      } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+      }
+    });
+  }
+</script>
+{% endmacro %}
+
+{% macro scripts() %}
+  {{ script_expander() }}
+{% endmacro %}
+
+{% macro expander(title, contents, cls) %}
+  <div class='expander-box {{cls}}'>
+    <div class='expander-toggle'>
+      <a href='javascript:;'>{{ title }}</a>
+    </div>
+    <div class='expander-target'>
+      {{ contents }}
+    </div>
+  </div>
+{% endmacro %}
+  
+
+{% macro source_widget(obj) %}
+  <div class='code-snippet'>
+    {{ fn_source(obj) }}
+  </div>
+{% endmacro %}
+  
+{% macro source(obj) %}
+  {{ expander('source', source_widget(obj), 'code-expander') }}
+{% endmacro %}
+
+
 {% macro component_header(name) %}
   <span class='component-type-header'>
     <a class='component-type-anchor' id='{{name}}'></a>
@@ -5,7 +53,7 @@
     <a class='component-type-toplink' href='#'>↑</a>
   </span>
 {% endmacro %}
-
+ 
 {% macro enumerate_components(name, components) %}
   {% if components != None and components.items() %}
     <div class='content-package-components'>
@@ -13,14 +61,20 @@
       <div>
         {% for cmp_name, cmp_cls in components.items() %}
         <div class='component-definition'>
+          {% set cmp_name = cmp_name if cmp_name != None else '&lt;default&gt;' %}   
+          
           <div class='technical-name component-name'>
-            {{ cmp_name if cmp_name != None else '&lt;default&gt;'}}         
+            {{ cmp_name }}         
           </div>
+          
           {% if cmp_cls.__doc__ != None %}
             <span class='component-doc'>
               {{cmp_cls.__doc__}}
             </span>
           {% endif %}
+          
+          {{ source(cmp_cls) }}
+          
         </div>
         {% endfor %}
       </div>
@@ -99,6 +153,10 @@
   </div>
 {% endmacro %}
 
+
+
+
+  
 <html>
   <head>
     <title>
@@ -120,5 +178,10 @@
       {{ footer() }}
     </div>
     
+    {{ scripts() }}
+    
   </body>
+    
+
+  
 </html>

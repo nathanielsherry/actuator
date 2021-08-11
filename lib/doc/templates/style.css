@@ -208,3 +208,40 @@ a.page-link {
   text-decoration: none;
   font-size: 8pt;
 }
+
+
+
+.expander-box {
+  padding: 5px;
+}
+.expander-toggle {
+  color: {{ accent_colour }};
+  font-size: 10pt;
+}
+.expander-toggle a {
+  text-decoration: none;
+  color: {{ accent_colour }};
+}
+.expander-target {
+  overflow: auto;
+  max-height: 0px;
+}
+
+
+
+.code-snippet {
+  white-space: pre;
+  font-family: 'Courier Prime', monospace;
+  width: 750px;
+  overflow-x: auto;
+  border-left: 1px solid {{ accent_colour }};
+  border-radius: 5px;
+  color: {{ accent_colour }}
+}
+
+.code-expander {
+
+}
+
+
+

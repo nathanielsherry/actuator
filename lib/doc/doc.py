@@ -1,6 +1,6 @@
 from actuator.package import REGISTRY
 import jinja2
-import os, shutil
+import os, shutil, inspect
 
 TEMPLATE_DIR = os.path.dirname(__file__)
 
@@ -36,6 +36,7 @@ def template_package(path, package):
     values = {
         'pkg': package,
         'pkgs': REGISTRY.packages,
+        'fn_source': inspect.getsource,
     }
     template_file(
         '{}/templates/package.html'.format(TEMPLATE_DIR),
