@@ -1,9 +1,15 @@
+{% macro component_header(name) %}
+  <span class='component-type-header'>
+    <a class='component-type-anchor' id='{{name}}'></a>
+    <a class='component-type-name' href='#{{name}}'>{{ name }}</a>
+    <a class='component-type-toplink' href='#'>↑</a>
+  </span>
+{% endmacro %}
+
 {% macro enumerate_components(name, components) %}
   {% if components != None and components.items() %}
     <div class='content-package-components'>
-      <span class='component-type-header'>
-        <a href='#{{name}}'>{{ name }}</a>
-      </span>
+      {{ component_header(name) }}
       <div>
         {% for cmp_name, cmp_cls in components.items() %}
         <div class='component-definition'>
@@ -56,6 +62,19 @@
 {% endmacro %}
 
 
+{% macro page_link(name) %}
+<a class='page-link' href='#{{name}}'>{{name}}</a>
+{% endmacro %}
+
+{% macro page_links() %}
+  <div class='page-links'>
+    {{ page_link('Sources') if pkg.sources.contents.items() else "" }}
+    {{ page_link('Operators') if pkg.operators.contents.items() else "" }}
+    {{ page_link('Sinks') if pkg.sinks.contents.items() else "" }}
+    {{ page_link('Monitors') if pkg.monitors.contents.items() else "" }}
+  </div>
+{% endmacro %}
+
 
 {% macro page() %}
   <div id='page'>
@@ -64,6 +83,9 @@
       <div id='content-title'>
         Package <span class='technical-name'>{{pkg.name if pkg.name != None else '&lt;builtin&gt;'}}</span>  
       </div>
+      
+      {{ page_links() }}
+      
       {% if pkg.__doc__ != None %}
         {{pkg.__doc__}}
       {% endif %}
