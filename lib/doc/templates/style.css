@@ -124,7 +124,7 @@ body {
 }
 
 #content {
-  flex: 1 0 auto;
+  /* flex: 1 0 auto; */
   margin: 25px;
   margin-left: 0px;
 }
@@ -156,7 +156,7 @@ body {
   width: 100%;
   color: #fff;
   background: {{ theme_colour }};
-  padding-left: 5px;
+  padding: 5px;
   border-radius: 5px;
   margin-top: 5px;
   margin-bottom: 1px;
@@ -182,26 +182,133 @@ body {
 }
 
 .component-definition {
-  border-left: 2px solid {{ theme_colour }};
+  border-left: 4px solid {{ accent_colour }};
   border-radius: 5px;
-  box-shadow: -4px 0px 4px -4px {{ theme_colour }};
+  
   margin: 12.5px 0px 25px 25px;
   width: calc(100% - 50px);
 }
 
 .component-name {
-  padding: 3px;
+  padding: 5px 0px 0px 10px;
   font-size: 14pt;
   font-weight: 700;
   
 }
 
 .component-doc {
-  padding: 0px 4px 4px 4px;
-  font-size: 10pt;
+  padding: 0px 5px 5px 10px;
   display: inline-block;
+}
+
+.component-doc-literalblock {
+  font-family: 'Courier Prime', monospace;
+  white-space: pre;
+}
+
+.component-doc-problematic {
+  font-family: 'Courier Prime', monospace;
+  white-space: pre;
+  color: #a40000;
+  border: 1px solid #a40000;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+
+
+
+.component-doc-note {
+  border: 2px solid {{ theme_colour }};
+  margin: 5px;
+  border-radius: 5px;
+}
+
+.component-doc-note-title {
+  background: {{ theme_colour }};
+  color: {{ page_colour }};
+  padding: 5px;
+}
+
+.component-doc-note-body {
+  font-family: 'Courier Prime', monospace;
+  border-radius: 3px;
+  display: inline-block;
+  margin: 5px;
+  
+}
+
+.component-doc-note-body p {
+  margin: 0px;
+}
+
+
+
+
+
+.component-doc-warning {
+  border: 2px solid #a40000;
+  margin: 5px;
+  border-radius: 5px;
+}
+
+.component-doc-warning-title {
+  background: #a40000;
+  color: {{ page_colour }};
+  padding: 5px;
+}
+
+.component-doc-warning-body {
+  font-family: 'Courier Prime', monospace;
+  border-radius: 3px;
+  display: inline-block;
+  margin: 5px;
+  
+}
+
+.component-doc-warning-body p {
+  margin: 0px;
+}
+
+
+
+.component-signature {
+  border: 2px solid {{ theme_colour }};
+  margin: 5px 0px 5px 0px;
+  border-radius: 5px;
+}
+
+.component-signature p {
+  margin: 0px;
+}
+
+.component-signature-title {
+  background: {{ theme_colour }};
+  color: {{ page_colour }};
+  padding: 5px;
+}
+
+.component-signature-params {
+
+}
+
+.component-signature-params td {
+  padding: 5px;
+}
+
+.component-signature-param-name {
+  font-family: 'Courier Prime', monospace;
+  font-weight: 700;
+}
+
+.component-signature-param-type {
   font-family: 'Courier Prime', monospace;
 }
+
+.component-signature-param-desc {
+
+}
+
 
 
 a.page-link {

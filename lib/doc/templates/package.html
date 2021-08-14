@@ -66,14 +66,13 @@
           <div class='technical-name component-name'>
             {{ cmp_name }}         
           </div>
+
+          <span class='component-doc'>
+            {{ parse(cmp_cls) }}
+            {{ source(cmp_cls) }}
+          </span>
+                    
           
-          {% if cmp_cls.__doc__ != None %}
-            <span class='component-doc'>
-              {{cmp_cls.__doc__}}
-            </span>
-          {% endif %}
-          
-          {{ source(cmp_cls) }}
           
         </div>
         {% endfor %}
@@ -140,9 +139,7 @@
       
       {{ page_links() }}
       
-      {% if pkg.__doc__ != None %}
-        {{pkg.__doc__}}
-      {% endif %}
+      {{parse(pkg)}}
       
       {{ enumerate_components('Sources', pkg.sources.contents) }}
       {{ enumerate_components('Operators', pkg.operators.contents) }}

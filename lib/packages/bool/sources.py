@@ -1,16 +1,18 @@
 from actuator.components import source
 
 class TrueSource(source.Source):
-    """
-    Emits a boolean True
+    """    
+    :output: True
+    :outtype: bool
     """
     @property
     def value(self):
         return True
     
 class FalseSource(source.Source):
-    """
-    Emits a boolean False
+    """    
+    :output: False
+    :outtype: bool
     """
     @property
     def value(self):

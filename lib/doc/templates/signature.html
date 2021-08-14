@@ -1,0 +1,31 @@
+<div class='component-signature'>
+  {% if params %}
+  <div class='component-signature-title'>Construction</div>
+  <table class='component-signature-params'>
+  {% for name, param in params.items() %}
+    <tr class='component-signature-param'>
+      <td class='component-signature-param-name'>{{ name }}</td>
+      <td class='component-signature-param-type'>{{ param['type'] }}</td>
+      <td class='component-signature-param-desc'>{{ param['desc'] }}</td>
+    </tr>
+  {% endfor %}
+  </table>
+  {% endif %}
+  <div class='component-signature-title'>Operation</div>
+  <table class='component-signature-params'>
+    {% if intype or inval %}
+    <tr class='component-signature-param'>
+      <td class='component-signature-param-name'>Input</td>
+      <td class='component-signature-param-type'>{{ intype }}</td>
+      <td class='component-signature-param-desc'>{{ inval }}</td>
+    </tr>
+    {% endif %}
+    {% if outtype or outval %}
+    <tr class='component-signature-param'>
+      <td class='component-signature-param-name'>Output</td>
+      <td class='component-signature-param-type'>{{ outtype }}</td>
+      <td class='component-signature-param-desc'>{{ outval }}</td>
+    </tr>
+    {% endif %}
+  </table>
+</div>

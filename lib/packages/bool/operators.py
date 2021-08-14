@@ -11,8 +11,12 @@ def tobool(o):
         return False
 
 class Not(operator.Operator):
-    """
-    Applies a boolean 'not' to a payload
+    """  
+    :input: A value which can be interpereted as a boolean
+    :intype: bool, str
+    
+    :output: The opposite boolean value
+    :outtype: bool
     """
     @property
     def value(self):
@@ -21,8 +25,12 @@ class Not(operator.Operator):
     
     
 class Any(operator.Operator):
-    """
-    Applies to a list payload. The result is True if any value in the list is truthy, False otherwise.
+    """    
+    :input: List of values
+    :intype: list
+    
+    :output: True if any value in the list is truthy, False otherwise.
+    :outtype: bool
     """
     @property
     def value(self):
@@ -32,8 +40,12 @@ class Any(operator.Operator):
         return any(value)
         
 class All(operator.Operator):
-    """
-    Applies to a list payload. The result is True if all values in the list are truthy, False otherwise.
+    """    
+    :input: List of values
+    :intype: list
+    
+    :output: True if all values in the list are truthy, False otherwise.
+    :outtype: bool
     """
     @property
     def value(self):
