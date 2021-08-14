@@ -182,7 +182,7 @@ body {
 }
 
 .component-definition {
-  border-left: 4px solid {{ accent_colour }};
+  border-left: 4px solid {{ accent_colour }}40;
   border-radius: 5px;
   
   margin: 12.5px 0px 25px 25px;
@@ -273,7 +273,9 @@ body {
 
 
 .component-signature {
-  border: 2px solid {{ theme_colour }};
+  width: -moz-fit-content;
+  width: fit-content;
+  border: 2px solid {{ theme_colour }}40;
   margin: 5px 0px 5px 0px;
   border-radius: 5px;
 }
@@ -283,9 +285,8 @@ body {
 }
 
 .component-signature-title {
-  background: {{ theme_colour }};
-  color: {{ page_colour }};
-  padding: 5px;
+  background: {{ theme_colour }}40;
+  padding: 3px;
 }
 
 .component-signature-params {
@@ -293,7 +294,7 @@ body {
 }
 
 .component-signature-params td {
-  padding: 5px;
+  padding: 3px;
 }
 
 .component-signature-param-name {
