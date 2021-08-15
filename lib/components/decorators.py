@@ -136,12 +136,13 @@ class InputDescription(IODescription):
     pass
 
 def input(ptype, desc=None):
+    d = InputDescription(ptype, desc)
     def inner(cls):
         def constructor(*args, **kwargs):
             instance = cls(*args, **kwargs)
-            d = InputDescription(ptype, desc)
             instance._add_input_description(d)
             return instance
+        register(cls, d)
         return constructor
     return inner
 
@@ -149,11 +150,12 @@ class OutputDescription(IODescription):
     pass
 
 def output(ptype, desc=None):
+    d = OutputDescription(ptype, desc)
     def inner(cls):
         def constructor(*args, **kwargs):
             instance = cls(*args, **kwargs)
-            d = OutputDescription(ptype, desc)
             instance._add_output_description(d)
             return instance
+        register(cls, d)
         return constructor
     return inner
