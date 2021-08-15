@@ -41,7 +41,7 @@ def template_package(path, package):
         'pkg': package,
         'pkgs': REGISTRY.packages,
         'fn_source': inspect.getsource,
-        'parse': makeparse(path, package).parse,
+        'parse': lambda n: makeparse(path, package).parse(n),
     }
     template_file(
         '{}/templates/package.html'.format(TEMPLATE_DIR),
@@ -114,9 +114,9 @@ class DocParser:
             
             return inner
         
-        def titled(title, nested=None):
+        def titled(title, nested=None, kind=None):
             if not nested: nested = default
-            kind=title.lower()
+            if not kind: kind=title.lower()
             def inner(n):
                 source = nested(n)
                 return "<div class='component-doc-{kind}'><div class='component-doc-{kind}-title'>{title}</div><div class='component-doc-{kind}-body'>{source}</div></div>".format(
@@ -134,12 +134,15 @@ class DocParser:
             decl = node_name.children[0].split(' ')
             desc = default(node_body)
             
-            print(decl)
-            print(self._fieldlist)
+            
             
             fieldtype = decl[0]
             fieldname = None
             if len(decl) >= 2: fieldname = decl[1]
+            
+            fieldtype = fieldtype.lower()
+            
+            #print((fieldtype, fieldname))
             
             if fieldtype == 'param':
                 if not fieldname: return default(n)
@@ -158,8 +161,11 @@ class DocParser:
             elif fieldtype == 'intype':
                 self._fieldlist.set_inputtype(desc)
             
+            elif fieldtype == 'example':
+                self._fieldlist.set_example(desc)
+            
             else:
-                return default(n)
+                return titled(node_name.children[0], tag('div'), kind='field')(node_body)
             
             return ""
             
@@ -179,7 +185,7 @@ class DocParser:
             "#text": default,
         }
 
-        print((doc.tagname in tags, doc.tagname, doc))
+        #print((doc.tagname in tags, doc.tagname, doc))
 
         if not doc.tagname in tags:
             return default(doc)
@@ -212,10 +218,11 @@ Return a new empty document object.
 class FieldList:
     def __init__(self):
         self._params = OrderedDict()
-        self._field_input_val=None
-        self._field_input_type=None
-        self._field_output_val=None
-        self._field_output_type=None
+        self._input_val=None
+        self._input_type=None
+        self._output_val=None
+        self._output_type=None
+        self._example = None
 
     @property
     def isempty(self):
@@ -224,23 +231,28 @@ class FieldList:
         if self.inputvalue != None: return False
         if self.outputtype != None: return False
         if self.outputvalue != None: return False
+        if self.example != None: return False
         return True
 
     @property
-    def inputtype(self): return self._field_input_type
-    def set_inputtype(self, itype): self._field_input_type = itype
+    def inputtype(self): return self._input_type
+    def set_inputtype(self, itype): self._input_type = itype
     
     @property
-    def inputvalue(self): return self._field_input_val
-    def set_inputvalue(self, ival): self._field_input_val = ival
+    def inputvalue(self): return self._input_val
+    def set_inputvalue(self, ival): self._input_val = ival
     
     @property
-    def outputtype(self): return self._field_output_type
-    def set_outputtype(self, otype): self._field_output_type = otype
+    def outputtype(self): return self._output_type
+    def set_outputtype(self, otype): self._output_type = otype
     
     @property
-    def outputvalue(self): return self._field_output_val
-    def set_outputvalue(self, oval): self._field_output_val = oval
+    def outputvalue(self): return self._output_val
+    def set_outputvalue(self, oval): self._output_val = oval
+    
+    @property
+    def example(self): return self._example
+    def set_example(self, oval): self._example = oval
     
     def param(self, name):
         if name in self._params:
@@ -271,4 +283,5 @@ class FieldList:
             'inval': self.inputvalue,
             'intype': self.inputtype,
             'params': self.params,
+            'example': self.example,
         })

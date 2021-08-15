@@ -204,6 +204,11 @@ body {
 .component-doc-literalblock {
   font-family: 'Courier Prime', monospace;
   white-space: pre;
+  background: #77777740;
+  border: 2px solid #77777780;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 5px;
 }
 
 .component-doc-problematic {
@@ -269,6 +274,34 @@ body {
 .component-doc-warning-body p {
   margin: 0px;
 }
+
+
+
+
+.component-doc-field {
+  border: 2px solid #777777;
+  margin: 5px;
+  border-radius: 5px;
+}
+
+.component-doc-field-title {
+  background: #777777;
+  color: {{ page_colour }};
+  padding: 5px;
+}
+
+.component-doc-field-body {
+  font-family: 'Courier Prime', monospace;
+  border-radius: 3px;
+  display: inline-block;
+  margin: 5px;
+  
+}
+
+.component-doc-field-body p {
+  margin: 0px;
+}
+
 
 
 
