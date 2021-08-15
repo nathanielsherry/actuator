@@ -1,37 +1,51 @@
 <div class='component-signature'>
-  {% if params %}
-    <div class='component-signature-title'>Construction</div>
+  
+  {# Constructor Signature #}
+  {% if signature.args %}
+    <div class='component-signature-title'>Positional Arguments</div>
     <table class='component-signature-params'>
-    {% for name, param in params.items() %}
+    {% for arg in signature.args %}
       <tr class='component-signature-param'>
-        <td class='component-signature-param-name'>{{ name }}</td>
-        <td class='component-signature-param-type'>{{ param['type'] }}</td>
-        <td class='component-signature-param-desc'>{{ param['desc'] }}</td>
+        <td class='component-signature-param-name'>{{ arg.name }}</td>
+        <td class='component-signature-param-type'>{{ arg.ptype }}</td>
+        <td class='component-signature-param-desc'>{{ arg.description }}</td>
       </tr>
     {% endfor %}
     </table>
   {% endif %}
-  {% if intype or inval or outtype or outval %}
+  {% if signature.params %}
+    <div class='component-signature-title'>Named Arguments</div>
+    <table class='component-signature-params'>
+    {% for param in signature.params %}
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>{{ param.name }}</td>
+        <td class='component-signature-param-type'>{{ param.ptype }}</td>
+        <td class='component-signature-param-desc'>{{ param.description }}</td>
+      </tr>
+    {% endfor %}
+    </table>
+  {% endif %}
+  
+  {# Operational Signature #}
+  {% if signature.input or signature.output %}
     <div class='component-signature-title'>Operation</div>
     <table class='component-signature-params'>
-      {% if intype or inval %}
+      {% if signature.input %}
         <tr class='component-signature-param'>
           <td class='component-signature-param-name'>Input</td>
-          <td class='component-signature-param-type'>{{ intype }}</td>
-          <td class='component-signature-param-desc'>{{ inval }}</td>
+          <td class='component-signature-param-type'>{{ signature.input.ptype }}</td>
+          <td class='component-signature-param-desc'>{{ signature.input.description }}</td>
         </tr>
       {% endif %}
-      {% if outtype or outval %}
+      {% if signature.output %}
         <tr class='component-signature-param'>
           <td class='component-signature-param-name'>Output</td>
-          <td class='component-signature-param-type'>{{ outtype }}</td>
-          <td class='component-signature-param-desc'>{{ outval }}</td>
+          <td class='component-signature-param-type'>{{ signature.output.ptype }}</td>
+          <td class='component-signature-param-desc'>{{ signature.output.description }}</td>
         </tr>
       {% endif %}
     </table>
   {% endif %}
-  {% if example %}
-    <div class='component-signature-title'>Example</div>
-    {{ example }}
-  {% endif %}
+  
+
 </div>

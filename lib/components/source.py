@@ -2,7 +2,7 @@ import time
 import subprocess
 from actuator import log, util
 from actuator.components import operator
-
+from actuator.components.decorators import parameter, argument
 
 ROLE_SOURCE = "source"
 
@@ -14,6 +14,7 @@ def instructions():
         'int': IntegerSource,
         'real': RealSource,
         'bool': BooleanSource,
+        'value': ValueSource,
         'inflows': FlowSource,
         'none': NoneSource,
     }
@@ -24,9 +25,6 @@ def build(instruction, kwargs):
     
 #interface
 class Source(operator.Operator):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-    
     def set_upstream(self, upstream):
         raise Exception("Source cannot have an upstream operator")
 
@@ -106,61 +104,68 @@ class FlowSource(Source):
         d = super().description_data
         d[self.kind]["source-inflows"] = [{"name": i.name, "kind": i.kind} for i in self.inflows]
         return d
+
+@argument('value', 'any', None, desc='Value to emit')
+class ValueSource(Source):
+    """
+    Emits the given value
+    """        
+    @property
+    def value(self):
+        return self.args.value
     
-    
+@argument('value', 'str', "", desc='String value to emit')
 class StringSource(Source):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._value = args[0]
-        
+    """
+    Emits the given value, coerced to a string 
+    """        
     @property
     def value(self):
-        return self._value
+        return str(self.args.value)
 
 
+@argument('value', 'int', 0, desc='Integer value to emit')
 class IntegerSource(Source):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._value = int(kwargs.get('value', 1))
-        
+    """
+    Emits the given value, coerced to an integer
+    """        
     @property
     def value(self):
-        return self._value
+        return int(self.args.value)
 
-
+@argument('value', 'real', 0.0, desc='Real value to emit')
 class RealSource(Source):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._value = float(kwargs.get('value', 1.0))
-        
+    """
+    Emits the given value, coerced to a real (float)
+    """
     @property
     def value(self):
-        return self._value
+        return float(self.args.value)
 
-
+@argument('value', 'bool', False, desc='Boolean value to emit')
 class BooleanSource(Source):
     """
-    Emits the given boolean value
+    Emits the given value, coerced to a boolean
+    """
+    @property
+    def value(self):
+        return util.parse_bool(self.args.value)
+
+
+
+@parameter('start', 'int', 1, desc='Value to start counting at')
+@parameter('increment', 'int', 1, desc='Amount by which to increment')
+class CounterSource(Source):
+    """
+    Emits a number, incrementing the value each time it fires.
     """
     def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._value = util.parse_bool(kwargs.get('value', True))
+        self._counter = self.params.start
         
     @property
     def value(self):
-        return self._value
-
-
-
-class CounterSource(Source):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._value = 0
-        
-    @property
-    def value(self):
-        value = self._value
-        value += 1
+        value = self._counter
+        self._counter += self.params.increment
         return value
 
 

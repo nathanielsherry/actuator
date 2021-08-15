@@ -1,8 +1,21 @@
 
+
 class Component:
     def __init__(self, *args, **kwargs):
         self.__component_args = list(args)
         self.__component_kwargs = dict(kwargs)
+        
+        self.__parameterhooks = []
+        from actuator.components.decorators import ParameterSet
+        self._parameters = ParameterSet()
+        
+        self.__argumenthooks = []
+        from actuator.components.decorators import ArgumentList
+        self._arguments = ArgumentList()
+        
+        self.__input_description = None
+        self.__output_description = None
+        
         
         
         #Run mixin init methods if this is the first superclass 
@@ -32,6 +45,22 @@ class Component:
         
         args = [deref(arg) for arg in args]
         kwargs = {k: deref(v) for k, v in kwargs.items()}
+        
+        for parameter in self.__parameterhooks:
+            if parameter.name in kwargs:
+                param_value = kwargs[parameter.name]
+                self._parameters.put(parameter, param_value)
+            else:
+                self._parameters.default(parameter)
+            del kwargs[parameter.name]
+            
+        for argument in self.__argumenthooks:
+            if len(args):
+                arg_value = args[0]
+                self._arguments.put(argument, arg_value)
+                args = args[1:]
+            else:
+                self._arguments.default(argument)
         
         #Call the standard initialise method
         result = self.initialise(*args, **kwargs)
@@ -88,7 +117,34 @@ class Component:
         import yaml
         return yaml.dump(self.description_data)
         
+    @property
+    def parameters(self): return self._parameters
+    
+    @property
+    def params(self): return self.parameters
+    
+    def _add_parameter_hook(self, parameter):
+        if parameter.name in self.__parameterhooks:
+            raise Exception("Parameter {} already registered", parameter.name)
+        self.__parameterhooks.append(parameter)
         
+    @property
+    def arguments(self): return self._arguments
+    
+    @property
+    def args(self): return self.arguments
+                
+    def _add_argument_hook(self, argument):
+        #Arguments will be processed in reverse order due to 
+        #decorator processing order
+        self.__argumenthooks.insert(0, argument)
+    
+    def _set_input_description(d):
+        self.__input_description = d
+    def _set_output_description(d):
+        self.__output_description = d
+
+    
 class ComponentMixin:
     def __init__(self, *args, **kwargs):
         pass

@@ -1,4 +1,5 @@
 from actuator.package import REGISTRY
+from actuator.components import decorators
 from collections import OrderedDict
 import jinja2
 import os, shutil, inspect
@@ -40,8 +41,9 @@ def template_package(path, package):
     values = {
         'pkg': package,
         'pkgs': REGISTRY.packages,
-        'fn_source': inspect.getsource,
+        'fn_source': lambda cls: inspect.getsource(decorators.undecorate(cls)),
         'parse': lambda n: makeparse(path, package).parse(n),
+        'signature': Signature,
     }
     template_file(
         '{}/templates/package.html'.format(TEMPLATE_DIR),
@@ -56,7 +58,6 @@ class DocParser:
     def __init__(self, path, package):
         self._path = path
         self._package = package
-        self._fieldlist = FieldList()
 
     def parse(self, o):
         import docutils
@@ -72,13 +73,16 @@ class DocParser:
             ).get_default_values()
         document = new_document('', settings)
         
-        if not o.__doc__: return ""
+        #Get the docstring for the component
+        docstring = inspect.getdoc(decorators.undecorate(o))
+        if docstring: docstring = inspect.cleandoc(docstring)
+        if not docstring: return ""
         
         #Parse the input into the document
-        parser.parse(o.__doc__, document)
+        parser.parse(docstring, document)
         
         doc_body = self.render(document)
-        doc_fields = self._fieldlist.render()
+        doc_fields = Signature(o).render()
         
         return doc_fields + doc_body
         
@@ -125,50 +129,7 @@ class DocParser:
                     title=title,
                 )
             return inner
-                   
-        
-        def field(n):
-            if not len(n.children) == 2: return default(n)
-            node_name = n.children[0]
-            node_body = n.children[1]
-            decl = node_name.children[0].split(' ')
-            desc = default(node_body)
-            
-            
-            
-            fieldtype = decl[0]
-            fieldname = None
-            if len(decl) >= 2: fieldname = decl[1]
-            
-            fieldtype = fieldtype.lower()
-            
-            #print((fieldtype, fieldname))
-            
-            if fieldtype == 'param':
-                if not fieldname: return default(n)
-                self._fieldlist.set_param_desc(fieldname, desc)
-            elif fieldtype == 'type':
-                if not fieldname: return default(n)
-                self._fieldlist.set_param_type(fieldname, desc)
-            
-            elif fieldtype == 'output':
-                self._fieldlist.set_outputvalue(desc)
-            elif fieldtype == 'outtype':
-                self._fieldlist.set_outputtype(desc)
-            
-            elif fieldtype == 'input':
-                self._fieldlist.set_inputvalue(desc)
-            elif fieldtype == 'intype':
-                self._fieldlist.set_inputtype(desc)
-            
-            elif fieldtype == 'example':
-                self._fieldlist.set_example(desc)
-            
-            else:
-                return titled(node_name.children[0], tag('div'), kind='field')(node_body)
-            
-            return ""
-            
+                  
         
         tags = {
             "paragraph": tag('p'),
@@ -181,7 +142,6 @@ class DocParser:
             "note": titled('Note'),
             "warning": titled('Warning'),
             "doctest_block": titled('Example', tag('div', raw=True, classes=['component-doc-literalblock'])),
-            "field": field,
             "#text": default,
         }
 
@@ -193,84 +153,41 @@ class DocParser:
             fn = tags[doc.tagname]
             return fn(doc)
 
-        
-            
-    
 
-    
 
-"""
-Return a new empty document object.
-:Parameters:
-    `source_path` : string
-        The path to or description of the source text of the document.
-    `settings` : optparse.Values object
-        Runtime settings.  If none are provided, a default core set will
-        be used.  If you will use the document object with any Docutils
-        components, you must provide their default settings as well.  For
-        example, if parsing rST, at least provide the rst-parser settings,
-        obtainable as follows::
-            settings = docutils.frontend.OptionParser(
-                components=(docutils.parsers.rst.Parser,)
-                ).get_default_values()
-"""
 
-class FieldList:
-    def __init__(self):
-        self._params = OrderedDict()
-        self._input_val=None
-        self._input_type=None
-        self._output_val=None
-        self._output_type=None
-        self._example = None
+class Signature:
+    def __init__(self, cls):
+        self._cls = decorators.undecorate(cls)
 
     @property
     def isempty(self):
-        if len(self._params) > 0: return False
-        if self.inputtype != None: return False
-        if self.inputvalue != None: return False
-        if self.outputtype != None: return False
-        if self.outputvalue != None: return False
-        if self.example != None: return False
+        if len(self.params) > 0: return False
+        if len(self.args) > 0: return False
+        if self.input != None: return False
+        if self.output != None: return False
         return True
 
     @property
-    def inputtype(self): return self._input_type
-    def set_inputtype(self, itype): self._input_type = itype
-    
-    @property
-    def inputvalue(self): return self._input_val
-    def set_inputvalue(self, ival): self._input_val = ival
-    
-    @property
-    def outputtype(self): return self._output_type
-    def set_outputtype(self, otype): self._output_type = otype
-    
-    @property
-    def outputvalue(self): return self._output_val
-    def set_outputvalue(self, oval): self._output_val = oval
-    
-    @property
-    def example(self): return self._example
-    def set_example(self, oval): self._example = oval
-    
-    def param(self, name):
-        if name in self._params:
-            return self._params[name]
-        else:
-            return None
-    
-    def set_param_type(self, name, ptype):
-        if not self.param(name): self._params[name] = {}
-        self.param(name)['type'] = ptype
+    def _hooks(self): return decorators.lookup(self._cls)
 
-    def set_param_desc(self, name, desc):
-        if not self.param(name): self._params[name] = {}
-        self.param(name)['desc'] = desc
-
+    @property
+    def args(self):
+        return [h for h in self._hooks if isinstance(h, decorators.ArgumentHook)]
+    
     @property
     def params(self):
-        return self._params
+        return [h for h in self._hooks if isinstance(h, decorators.ParameterHook)]
+    
+    @property
+    def input(self):
+        found = [h for h in self._hooks if isinstance(h, decorators.InputDescription)]
+        return found[0] if found else None
+    
+    @property
+    def output(self):
+        found = [h for h in self._hooks if isinstance(h, decorators.OutputDescription)]
+        return found[0] if found else None
 
     def render(self):
         if self.isempty: return ""
@@ -278,10 +195,7 @@ class FieldList:
         source = '{}/templates/signature.html'.format(TEMPLATE_DIR)
         with open(source, 'r') as fh: contents = fh.read()
         return template(contents, {
-            'outval': self.outputvalue,
-            'outtype': self.outputtype,
-            'inval': self.inputvalue,
-            'intype': self.inputtype,
-            'params': self.params,
-            'example': self.example,
+            'signature': self,
         })
+
+
