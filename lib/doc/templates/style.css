@@ -331,7 +331,7 @@ a.page-link {
 
 
 .expander-box {
-  padding: 5px;
+  padding: 2px;
 }
 .expander-toggle {
   color: {{ accent_colour }};
@@ -342,26 +342,81 @@ a.page-link {
   color: {{ accent_colour }};
 }
 .expander-target {
-  overflow: auto;
-  max-height: 0px;
-}
-
-
-
-.code-snippet {
-  white-space: pre;
-  font-family: 'Courier Prime', monospace;
-  width: 750px;
+  overflow-y: hidden;
   overflow-x: auto;
-  border-left: 1px solid {{ accent_colour }};
-  border-radius: 5px;
-  color: {{ accent_colour }};
-  padding: 12.5px;
+  max-height: 0px;
+  transition: max-height 0.2s;
 }
+
+
 
 .code-expander {
 
 }
+
+
+
+
+.code-snippet-python {
+  font-family: 'Courier Prime', monospace;
+  width: 750px;
+  overflow-x: auto;
+  border-left: 1px solid {{ accent_colour }};
+  border-bottom-left-radius: 5px;
+  color: #3B3835;
+  padding: 0px;
+  padding-left: 10px;  
+}
+
+/* comments */
+.code-snippet-python .c1 {
+  color: #7A766E;
+}
+
+/* class, def, return, and flow keywords */
+.code-snippet-python .k {
+  color: #006f5c;
+  font-weight: 700;
+}
+
+/* strings */
+.code-snippet-python .s1,
+.code-snippet-python .s2,
+.code-snippet-python .sd { 
+  color: #106DA3; 
+}
+
+/* function definitions and decorations */
+.code-snippet-python .fm,
+.code-snippet-python .nf,
+.code-snippet-python .nd,
+.code-snippet-python .nc {
+  color: #5E4138;
+}
+.code-snippet-python .fm,
+.code-snippet-python .nf,
+.code-snippet-python .nc {
+  font-weight: 700;
+}
+
+
+/* self, super, literals, other lang keywords */
+.code-snippet-python .mi,
+.code-snippet-python .mf,
+.code-snippet-python .nb,
+.code-snippet-python .bp {
+  color: #9d0055;
+}
+
+
+
+
+
+
+
+
+
+
 
 
 

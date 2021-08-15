@@ -56,8 +56,33 @@ class Source:
     def __init__(self, cls):
         self._cls = decorators.undecorate(cls)
 
-    def render(self):
-        return inspect.getsource(self._cls)
+    @property
+    def source(self):
+        source = inspect.getsource(self._cls)
+        
+        #trim leading/tailing blank lines
+        lines = source.split("\n")
+        while lines:
+            if lines[0].strip() == "": 
+                lines = lines[1:]
+            else:
+                break
+        while lines:
+            if lines[-1].strip() == "": 
+                lines = lines[:-1]
+            else:
+                break
+        source = "\n".join(lines)
+        
+        return source
+
+    def render(self):       
+        from pygments import highlight
+        from pygments.lexers import PythonLexer
+        from pygments.formatters import HtmlFormatter
+        html = highlight(self.source, PythonLexer(), HtmlFormatter())
+        
+        return html
 
 class Documentation:
     def __init__(self, cls):
@@ -69,7 +94,7 @@ class Documentation:
         docstring = inspect.getdoc(decorators.undecorate(self._cls))
         if docstring: docstring = inspect.cleandoc(docstring)
         if not docstring: docstring = ""
-        return docstring   
+        return docstring
     
     def render(self):
         #Thanks: https://stackoverflow.com/questions/32167384/how-do-i-convert-a-docutils-document-tree-into-an-html-string
