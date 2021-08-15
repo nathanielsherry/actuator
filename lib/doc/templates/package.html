@@ -37,11 +37,11 @@
 
 {% macro source_widget(obj) %}
   <div class='code-snippet'>
-    {{ fn_source(obj) }}
+    {{ source(obj).render() }}
   </div>
 {% endmacro %}
   
-{% macro source(obj) %}
+{% macro source_view(obj) %}
   {{ expander('source', source_widget(obj), 'code-expander') }}
 {% endmacro %}
 
@@ -68,8 +68,9 @@
           </div>
 
           <span class='component-doc'>
-            {{ parse(cmp_cls) }}
-            {{ source(cmp_cls) }}
+            {{ signature(cmp_cls).render() }}
+            {{ documentation(cmp_cls).render() }}
+            {{ source_view(cmp_cls) }}
           </span>
                     
           
@@ -139,7 +140,7 @@
       
       {{ page_links() }}
       
-      {{parse(pkg)}}
+      {{ documentation(pkg) }}
       
       {{ enumerate_components('Sources', pkg.sources.contents) }}
       {{ enumerate_components('Operators', pkg.operators.contents) }}

@@ -201,7 +201,16 @@ body {
   display: inline-block;
 }
 
-.component-doc-literalblock {
+.component-doc dd {
+  margin: 0px;
+}
+
+.component-doc blockquote {
+  margin: 10px 10px 10px 20px;
+}
+
+
+.component-doc .literal-block {
   font-family: 'Courier Prime', monospace;
   white-space: pre;
   background: #77777740;
@@ -211,96 +220,64 @@ body {
   margin: 5px;
 }
 
-.component-doc-problematic {
-  font-family: 'Courier Prime', monospace;
-  white-space: pre;
-  color: #a40000;
-  border: 1px solid #a40000;
-  border-radius: 3px;
-  display: inline-block;
-}
 
-
-
-
-.component-doc-note {
-  border: 2px solid {{ theme_colour }};
+.component-doc .admonition {
   margin: 5px;
   border-radius: 5px;
+  padding: 0px;
+}
+.component-doc .admonition > .first {
+  padding: 5px;
+  margin: 0px;
+}
+.component-doc .admonition > .last {
+  
+  border-radius: 3px;
+  display: inline-block;
+  margin: 5px !important;
 }
 
-.component-doc-note-title {
+
+
+.component-doc .note {
+  border: 2px solid {{ theme_colour }};
+}
+.component-doc .note > .first {
   background: {{ theme_colour }};
   color: {{ page_colour }};
-  padding: 5px;
 }
 
-.component-doc-note-body {
-  font-family: 'Courier Prime', monospace;
-  border-radius: 3px;
-  display: inline-block;
-  margin: 5px;
-  
-}
 
-.component-doc-note-body p {
-  margin: 0px;
+.component-doc .warning {
+  border: 2px solid #BD9509;
+}
+.component-doc .warning > .first {
+  background: #BD9509;
+  color: {{ page_colour }};
 }
 
 
 
-
-
-.component-doc-warning {
-  border: 2px solid #a40000;
+.component-doc .system-message {
+  border: 2px solid #BD3600;
   margin: 5px;
   border-radius: 5px;
+  padding: 0px;
 }
-
-.component-doc-warning-title {
-  background: #a40000;
-  color: {{ page_colour }};
+.component-doc .system-message-title {
   padding: 5px;
+  margin: 0px !important;
+  background: #BD3600;
+  color: {{ page_colour }} !important;
 }
-
-.component-doc-warning-body {
-  font-family: 'Courier Prime', monospace;
-  border-radius: 3px;
-  display: inline-block;
+.component-doc .system-message p {
   margin: 5px;
-  
+}
+.component-doc .system-message a {
+  color: {{ page_colour }} !important;
 }
 
-.component-doc-warning-body p {
-  margin: 0px;
-}
 
-
-
-
-.component-doc-field {
-  border: 2px solid #777777;
-  margin: 5px;
-  border-radius: 5px;
-}
-
-.component-doc-field-title {
-  background: #777777;
-  color: {{ page_colour }};
-  padding: 5px;
-}
-
-.component-doc-field-body {
-  font-family: 'Courier Prime', monospace;
-  border-radius: 3px;
-  display: inline-block;
-  margin: 5px;
-  
-}
-
-.component-doc-field-body p {
-  margin: 0px;
-}
 
 
 

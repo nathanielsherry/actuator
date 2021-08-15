@@ -42,8 +42,9 @@ def template_package(path, package):
         'pkg': package,
         'pkgs': REGISTRY.packages,
         'fn_source': lambda cls: inspect.getsource(decorators.undecorate(cls)),
-        'parse': lambda n: makeparse(path, package).parse(n),
+        'source': Source,
         'signature': Signature,
+        'documentation': Documentation,
     }
     template_file(
         '{}/templates/package.html'.format(TEMPLATE_DIR),
@@ -51,110 +52,35 @@ def template_package(path, package):
         values
     )
 
-def makeparse(path, package):
-    return DocParser(path, package)
+class Source:
+    def __init__(self, cls):
+        self._cls = decorators.undecorate(cls)
 
-class DocParser:
-    def __init__(self, path, package):
-        self._path = path
-        self._package = package
+    def render(self):
+        return inspect.getsource(self._cls)
 
-    def parse(self, o):
-        import docutils
-        from docutils.parsers.rst import Parser
-        from docutils.utils import new_document
-        
-        #Create the parser
-        parser = Parser()
-        
-        #Create target document
-        settings = docutils.frontend.OptionParser(
-            components=(docutils.parsers.rst.Parser,)
-            ).get_default_values()
-        document = new_document('', settings)
-        
+class Documentation:
+    def __init__(self, cls):
+        self._cls = decorators.undecorate(cls)
+    
+    @property
+    def docstring(self):
         #Get the docstring for the component
-        docstring = inspect.getdoc(decorators.undecorate(o))
+        docstring = inspect.getdoc(decorators.undecorate(self._cls))
         if docstring: docstring = inspect.cleandoc(docstring)
-        if not docstring: return ""
+        if not docstring: docstring = ""
+        return docstring   
+    
+    def render(self):
+        #Thanks: https://stackoverflow.com/questions/32167384/how-do-i-convert-a-docutils-document-tree-into-an-html-string
+        from docutils.core import publish_doctree, publish_from_doctree
+        #parse the docstring
+        tree = publish_doctree(self.docstring)
         
-        #Parse the input into the document
-        parser.parse(docstring, document)
+        #convert it to html
+        html = publish_from_doctree(tree, writer_name='html').decode()
         
-        doc_body = self.render(document)
-        doc_fields = Signature(o).render()
-        
-        return doc_fields + doc_body
-        
-    def render(self, doc):
-
-        def default(n):
-
-            if isinstance(n, str):
-                return str(n)                
-            if n.children:
-                return "\n".join([self.render(c) for c in n.children])
-            elif hasattr(n, 'rawsource'):
-                return n.rawsource 
-            else:
-                return ""
-        
-        def tag(tag, nested=None, raw=False, classes=None):
-            if not classes: classes = []
-            def inner(n):
-                source = None
-                if nested:
-                    source = nested(n)
-                elif raw:
-                    source = n.rawsource
-                else:
-                    source = default(n)
-                    
-                return "<{tag} class='{classes}'>{source}</{tag}>".format(
-                    source=source,
-                    classes=" ".join(classes),
-                    tag=tag
-                )
-            
-            return inner
-        
-        def titled(title, nested=None, kind=None):
-            if not nested: nested = default
-            if not kind: kind=title.lower()
-            def inner(n):
-                source = nested(n)
-                return "<div class='component-doc-{kind}'><div class='component-doc-{kind}-title'>{title}</div><div class='component-doc-{kind}-body'>{source}</div></div>".format(
-                    source=source,
-                    kind=kind,
-                    title=title,
-                )
-            return inner
-                  
-        
-        tags = {
-            "paragraph": tag('p'),
-            "block_quote": tag('span'),
-            "bullet_list": tag('ul'),
-            "list_item": tag('li'),
-            "strong": tag('b'),
-            "literal_block": tag('div', raw=True, classes=['component-doc-literalblock']),
-            "problematic": tag('div', raw=True, classes=['component-doc-problematic']),
-            "note": titled('Note'),
-            "warning": titled('Warning'),
-            "doctest_block": titled('Example', tag('div', raw=True, classes=['component-doc-literalblock'])),
-            "#text": default,
-        }
-
-        #print((doc.tagname in tags, doc.tagname, doc))
-
-        if not doc.tagname in tags:
-            return default(doc)
-        else:
-            fn = tags[doc.tagname]
-            return fn(doc)
-
-
-
+        return html
 
 class Signature:
     def __init__(self, cls):
