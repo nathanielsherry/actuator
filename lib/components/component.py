@@ -46,21 +46,13 @@ class Component:
         args = [deref(arg) for arg in args]
         kwargs = {k: deref(v) for k, v in kwargs.items()}
         
+        #Process named arguments/parameters
         for parameter in self.__parameterhooks:
-            if parameter.name in kwargs:
-                param_value = kwargs[parameter.name]
-                self._parameters.put(parameter, param_value)
-            else:
-                self._parameters.default(parameter)
-            del kwargs[parameter.name]
-            
+            kwargs = parameter.consume(self._parameters, **kwargs)     
+        #Process positional arguments
         for argument in self.__argumenthooks:
-            if len(args):
-                arg_value = args[0]
-                self._arguments.put(argument, arg_value)
-                args = args[1:]
-            else:
-                self._arguments.default(argument)
+            args = argument.consume(self._arguments, *args)
+
         
         #Call the standard initialise method
         result = self.initialise(*args, **kwargs)

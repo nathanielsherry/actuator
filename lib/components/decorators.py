@@ -58,8 +58,27 @@ class ConstructorHook:
 
 
 
-class ParameterHook(ConstructorHook): pass
 
+class ParameterSet:
+    def __init__(self):
+        self._params = {}
+        
+    def __getattr__(self, key):
+        return self._params[key]
+    
+    def put(self, parameter, value):
+        self._params[parameter.name] = value
+
+class ParameterHook(ConstructorHook):
+    def consume(self, parameterset, **kwargs):
+        if self.name in kwargs:
+            param_value = kwargs[self.name]
+            parameterset.put(self, param_value)
+        else:
+            parameterset.put(self, self.default)
+        del kwargs[self.name]
+        return kwargs
+    
 def parameter(name, ptype, default=None, desc=None):
     p = ParameterHook(name, ptype, default, desc)
     def inner(cls):
@@ -71,33 +90,26 @@ def parameter(name, ptype, default=None, desc=None):
         return constructor
     return inner
 
-class ParameterSet:
-    def __init__(self):
-        self._params = {}
-        
-    def __getattr__(self, key):
-        return self._params[key]
-    
-    def put(self, parameter, value):
-        self._params[parameter.name] = value
-        
-    def default(self, parameter):
-        self._params[parameter.name] = parameter.default
-        
-        
-        
-class ArgumentHook(ConstructorHook): pass
-   
-def argument(name, ptype, default=None, desc=None):
-    a = ArgumentHook(name, ptype, default, desc)
+
+class AllParametersHook(ParameterHook):
+    def __init__(self, name):
+        super().__init__(name, 'dict', {}, 'All remeaining named arguments')
+    def consume(self, parameterset, **kwargs):
+        parameterset.put(self, kwargs)
+        return {}
+
+def allparameters(name):
+    p = AllParametersHook(name)
     def inner(cls):
         def constructor(*args, **kwargs):
             instance = cls(*args, **kwargs)
-            instance._add_argument_hook(a)
+            instance._add_parameter_hook(p)
             return instance
-        register(cls, a)
+        register(cls, p)
         return constructor
     return inner
+        
+
 
 class ArgumentList:
     def __init__(self):
@@ -117,9 +129,49 @@ class ArgumentList:
     def default(self, argument):
         self._args.append(argument.default)
         self._namedargs[argument.name] = argument.default
-        
-        
-        
+
+class ArgumentHook(ConstructorHook):
+    def consume(self, argumentlist, *args):
+        if len(args):
+            arg_value = args[0]
+            argumentlist.put(self, arg_value)
+            args = args[1:]
+        else:
+            argumentlist.put(self, self.default)
+        return args
+   
+def argument(name, ptype, default=None, desc=None):
+    a = ArgumentHook(name, ptype, default, desc)
+    def inner(cls):
+        def constructor(*args, **kwargs):
+            instance = cls(*args, **kwargs)
+            instance._add_argument_hook(a)
+            return instance
+        register(cls, a)
+        return constructor
+    return inner
+
+
+class AllArgumentsHook(ArgumentHook):
+    def __init__(self, name):
+        super().__init__(name, 'list', [], 'All remeaining positional arguments')
+    def consume(self, argumentlist, *args):
+        argumentlist.put(self, args)
+        return []
+   
+def allarguments(name):
+    a = AllArgumentsHook(name)
+    def inner(cls):
+        def constructor(*args, **kwargs):
+            instance = cls(*args, **kwargs)
+            instance._add_argument_hook(a)
+            return instance
+        register(cls, a)
+        return constructor
+    return inner
+
+
+
 
 class IODescription:
     def __init__(self, ptype, description):
