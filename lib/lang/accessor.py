@@ -13,12 +13,27 @@ def extract(o, key, _default=None):
             log.error("Index '%s' out of range for list '%s'\n" % (key, o))
             raise
     
-    if isinstance(key, six.string_types) and hasattr(o, key): return getattr(o, key)
+    #If the key can be converted to an int and the target is integer 
+    #subscribable, try accessing it without making a fuss if it fails
+    if isinstance(o, (list, tuple)) and intable(key):
+        try:
+            return o[int(key)]
+        except:
+            pass
+    
+    if isinstance(key, str) and hasattr(o, key): return getattr(o, key)
     if isinstance(o, dict) and key in o: return o[key]
-    if isinstance(key, six.string_types) and hasattr(o, "__dict__") and hasattr(o.__dict__, key): return o.__dict__.get(key)
+    if isinstance(key, str) and hasattr(o, "__dict__") and hasattr(o.__dict__, key): return o.__dict__.get(key)
     if callable(key): return key(o)
     if hasattr(o, "__getitem__") and key in o: return o[key]
     return _default
+
+def intable(s):
+    try:
+        int(s)
+        return True
+    except:
+        return False
 
 def extractor(key, default=None):
     if isinstance(key, tuple):

@@ -139,9 +139,9 @@ class Component:
         #decorator processing order
         self.__argumenthooks.insert(0, argument)
     
-    def _set_input_description(d):
+    def _set_input_description(self, d):
         self.__input_description = d
-    def _set_output_description(d):
+    def _set_output_description(self, d):
         self.__output_description = d
 
     

@@ -140,7 +140,7 @@ def input(ptype, desc=None):
     def inner(cls):
         def constructor(*args, **kwargs):
             instance = cls(*args, **kwargs)
-            instance._add_input_description(d)
+            instance._set_input_description(d)
             return instance
         register(cls, d)
         return constructor
@@ -154,7 +154,7 @@ def output(ptype, desc=None):
     def inner(cls):
         def constructor(*args, **kwargs):
             instance = cls(*args, **kwargs)
-            instance._add_output_description(d)
+            instance._set_output_description(d)
             return instance
         register(cls, d)
         return constructor

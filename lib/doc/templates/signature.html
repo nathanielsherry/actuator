@@ -6,7 +6,8 @@
     <table class='component-signature-params'>
     {% for arg in signature.args %}
       <tr class='component-signature-param'>
-        <td class='component-signature-param-name'>{{ arg.name }}</td>
+        <td class='component-signature-param-index'>{{ loop.index-1 }}</td>
+        <td class='component-signature-param-name'>{{ arg.name }}={{ arg.default }}</td>
         <td class='component-signature-param-type'>{{ arg.ptype }}</td>
         <td class='component-signature-param-desc'>{{ arg.description }}</td>
       </tr>
@@ -18,7 +19,7 @@
     <table class='component-signature-params'>
     {% for param in signature.params %}
       <tr class='component-signature-param'>
-        <td class='component-signature-param-name'>{{ param.name }}</td>
+        <td class='component-signature-param-name'>{{ param.name }}={{ param.default }}</td>
         <td class='component-signature-param-type'>{{ param.ptype }}</td>
         <td class='component-signature-param-desc'>{{ param.description }}</td>
       </tr>
@@ -34,14 +35,14 @@
         <tr class='component-signature-param'>
           <td class='component-signature-param-name'>Input</td>
           <td class='component-signature-param-type'>{{ signature.input.ptype }}</td>
-          <td class='component-signature-param-desc'>{{ signature.input.description }}</td>
+          <td class='component-signature-param-desc'>{{ signature.input.description if signature.input.description else "" }}</td>
         </tr>
       {% endif %}
       {% if signature.output %}
         <tr class='component-signature-param'>
           <td class='component-signature-param-name'>Output</td>
           <td class='component-signature-param-type'>{{ signature.output.ptype }}</td>
-          <td class='component-signature-param-desc'>{{ signature.output.description }}</td>
+          <td class='component-signature-param-desc'>{{ signature.output.description if signature.output.description else "" }}</td>
         </tr>
       {% endif %}
     </table>

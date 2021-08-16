@@ -9,10 +9,14 @@ def get_url(url):
     return result.text
 
 def parse_bool(s):
-    if isinstance(s, bool): return s
-    if s.lower() in ['true', 'yes', 'on']: return True
-    if s.lower() in ['false', 'no', 'off']: return False
+    if isinstance(s, bool): 
+        return s
+    if isinstance(s, str):
+        if s.lower() in ['true', 'yes', 'on']: return True
+        if s.lower() in ['false', 'no', 'off']: return False
     raise Exception("Could not parse {} as boolean".format(s))
+
+
 
 def short_string(s, length=30):
     s = str(s)

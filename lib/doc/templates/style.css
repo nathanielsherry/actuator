@@ -307,6 +307,11 @@ body {
   padding: 3px;
 }
 
+.component-signature-param-index {
+  font-family: 'Courier Prime', monospace;
+  color: #00000080;
+}
+
 .component-signature-param-name {
   font-family: 'Courier Prime', monospace;
   font-weight: 700;
@@ -314,6 +319,8 @@ body {
 
 .component-signature-param-type {
   font-family: 'Courier Prime', monospace;
+  background: #00000010;
+  border-radius: 5px;
 }
 
 .component-signature-param-desc {
