@@ -37,7 +37,7 @@ Named argument values may be provided without quotes for a limited subset of str
 
 ## Examples
 
-Expose machine status in a YAML document via REST URL:
+Expose machine status in a YAML document over HTTP:
 
     act 'from `lscpu --json` via fmt.fromjson|fmt.toyaml to net.serve'
 
