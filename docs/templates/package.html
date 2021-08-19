@@ -139,9 +139,7 @@
       </div>
       
       {{ page_links() }}
-      
-      {{ documentation(pkg) }}
-      
+           
       {{ enumerate_components('Sources', pkg.sources.contents) }}
       {{ enumerate_components('Operators', pkg.operators.contents) }}
       {{ enumerate_components('Sinks', pkg.sinks.contents) }}
@@ -160,7 +158,7 @@
     <title>
       Package: {{pkg.name}}
     </title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     
