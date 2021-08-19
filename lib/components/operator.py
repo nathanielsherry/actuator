@@ -1,6 +1,6 @@
 from actuator import util
 from actuator.components import component
-
+from actuator.components.decorators import parameter, argument, input, output, allarguments
 
 ROLE_OPERATOR = "operator"
 
@@ -25,7 +25,7 @@ def instructions():
         'any': Any,
         'str': Str,
         'int': Int,
-        'real': Float,
+        'real': Real,
         '_flowref': SubFlow,
         'map': MapFlow,
         'filter': FilterFlow,
@@ -67,79 +67,134 @@ class Operator(component.Component):
     def role(self): return ROLE_OPERATOR
     
 
+@input('any', 'Accepts any input payload')
+@output('any', 'Emits the given payload without modification')
 class Noop(Operator):
     @property
     def value(self):
         return self.upstream.value
 
-
+@input('any', 'Accepts any input payload')
+@output('any', 'Emits the given payload without modification')
+@argument('value', 'any', None, 'Value for comparison')
 class Equals(Operator):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._to = args[0]
-
+    """
+    Compares the payload to a given value and emits the result
+    """
     @property
     def value(self):
         value = self.upstream.value
-        if isinstance(self._to, (list, tuple)):
-            return value in self._to
+        compare = self.args.value
+        if isinstance(compare, (list, tuple)):
+            return value in compare
         else:
-            return value == self._to
+            return value == compare
 
 
+@input('bool', 'Boolean value to negate')
+@output('bool', 'Negated input value')
 class Not(Operator):
+    """
+    The boolean 'not' operator
+    """
     @property
     def value(self):
         value = self.upstream.value
         return not value
 
+@input('any')
+@output('str')
 class Str(Operator):
+    """
+    Convert payload to string
+    """
     @property
     def value(self):
         return str(self.upstream.value)
 
+@input('any')
+@output('int')
 class Int(Operator):
+    """
+    Convert payload to integer
+    """
     @property
     def value(self):
         return int(self.upstream.value)
-        
-class Float(Operator):
+
+@input('any')
+@output('real')
+class Real(Operator):
+    """
+    Convert payload to real
+    """
     @property
     def value(self):
         return float(self.upstream.value)
 
+@input('any', 'Object or data structure')
+@output('any', 'Value accessed from within object or data structure')
+@argument('accessor', 'str, list', [], 'Accessor string or list of keys')
 class Get(Operator):
+    """
+    Given an accessor string or list of keys, looks up a value 
+    from within the payload, the location of which is described by the 
+    accessor.
+    
+    For example, assume we have payloads with the following structure::
+    
+          payload = ['a', 'b', {'c': 'value'}]
+    
+    We can access the string 'value' with the accessor string '2.c'::
+    
+          get('2.c')
+        
+    Or with the list of keys [2, 'c']::
+    
+          get([2, 'c'])
+          
+
+    """
     def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        from actuator.lang import accessor, construct
-        self._accessor = accessor.accessor(args)
+        from actuator.lang.accessor import accessor
+        self._access_function = accessor(self.args.accessor)
         
     @property
     def value(self):
         value = self.upstream.value
-        return self._accessor(value)
+        return self._access_function(value)
         
 
+@input('any', 'Object or data structure')
+@output('bool', 'Indicates if any match was found')
+@allarguments('keys')
 class Has(Operator):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._names = args
-        
+    """
+    Given a list of keys, emit True if any of them are contained within the payload
+    """       
     @property
     def value(self):
         value = self.upstream.value
-        for name in self._names:
-            if name in value: return True
-        return False
+        return any([key in value for key in self.args.keys])
 
-class All(Operator):           
+@input('list', 'Elements to evaluate')
+@output('bool', 'Indicates if all elements evaluate to true or truthy')
+class All(Operator):   
+    """
+    Given a list or iterable, emit True if all elements evaluate to True or truthy
+    """            
     @property
     def value(self):
         value = self.upstream.value
         return all(value)
 
 
+@input('list', 'Elements to evaluate')
+@output('bool', 'Indicates if any elements evaluate to true or truthy')
 class Any(Operator):
+    """
+    Given a list or iterable, emit True if any elements evaluate to True or truthy
+    """ 
     @property
     def value(self):
         value = self.upstream.value

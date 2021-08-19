@@ -2,7 +2,7 @@ import time
 import subprocess
 from actuator import log, util
 from actuator.components import operator
-from actuator.components.decorators import parameter, argument
+from actuator.components.decorators import parameter, argument, input, output
 
 ROLE_SOURCE = "source"
 
@@ -106,6 +106,7 @@ class FlowSource(Source):
         return d
 
 @argument('value', 'any', None, desc='Value to emit')
+@output('any', 'Value provided as argument')
 class ValueSource(Source):
     """
     Emits the given value
@@ -115,6 +116,7 @@ class ValueSource(Source):
         return self.args.value
     
 @argument('value', 'str', "", desc='String value to emit')
+@output('str', 'Value provided as argument')
 class StringSource(Source):
     """
     Emits the given value, coerced to a string 
@@ -125,6 +127,7 @@ class StringSource(Source):
 
 
 @argument('value', 'int', 0, desc='Integer value to emit')
+@output('int', 'Value provided as argument')
 class IntegerSource(Source):
     """
     Emits the given value, coerced to an integer
@@ -134,6 +137,7 @@ class IntegerSource(Source):
         return int(self.args.value)
 
 @argument('value', 'real', 0.0, desc='Real value to emit')
+@output('real', 'Value provided as argument')
 class RealSource(Source):
     """
     Emits the given value, coerced to a real (float)
@@ -143,6 +147,7 @@ class RealSource(Source):
         return float(self.args.value)
 
 @argument('value', 'bool', False, desc='Boolean value to emit')
+@output('bool', 'Value provided as argument')
 class BooleanSource(Source):
     """
     Emits the given value, coerced to a boolean
@@ -153,8 +158,9 @@ class BooleanSource(Source):
 
 
 
-@parameter('start', 'int', 1, desc='Value to start counting at')
-@parameter('increment', 'int', 1, desc='Amount by which to increment')
+@parameter('start', 'int, real', 1, desc='Value to start counting at')
+@parameter('increment', 'int, real', 1, desc='Amount by which to increment')
+@output('int, real', 'Current counter value')
 class CounterSource(Source):
     """
     Emits a number, incrementing the value each time it fires.
@@ -168,8 +174,11 @@ class CounterSource(Source):
         self._counter += self.params.increment
         return value
 
-
+@output('none', 'None')
 class NoneSource(Source):
+    """
+    Emits None (null)
+    """
     @property
     def value(self):
         return None
