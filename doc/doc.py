@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from actuator.package import REGISTRY
 from actuator.components import decorators
 from collections import OrderedDict
@@ -150,3 +152,7 @@ class Signature:
         })
 
 
+
+if __name__ == '__main__':
+    os.makedirs('./html')
+    create('./html/')
