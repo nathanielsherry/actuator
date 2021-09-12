@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import time
+import time, traceback
 from actuator import log, util
 from actuator.components import component, source as mod_source, sink as mod_sink
 
@@ -96,7 +96,10 @@ class ExitOnNoneMixin(component.ComponentMixin):
 #Just runs once and exits. Good starter Monitor.
 class OnceMonitor(Monitor):
     def start(self):
-        self.sink.perform(self.operator.value)
+        try:
+            self.sink.perform(self.operator.value)
+        except:
+            raise
     def stop(self):
         pass
 
@@ -108,8 +111,12 @@ class CountMonitor(Monitor):
         self._terminate = False
     def start(self):
         for i in range(0, self._count):
-            if self._terminate: return
-            self.sink.perform(self.operator.value)
+            try:
+                if self._terminate: return
+                self.sink.perform(self.operator.value)
+            except:
+                log.error(traceback.format_exc())
+                
     def stop(self):
         self._terminate = True
 
@@ -120,8 +127,11 @@ class OnInputMonitor(Monitor):
         self._terminate = False
     def start(self):
         while True:
-            if self._terminate: return
-            self.sink.perform(self.operator.value)
+            try:
+                if self._terminate: return
+                self.sink.perform(self.operator.value)
+            except:
+                log.error(traceback.format_exc())
     def stop(self):
         self._terminate = True
 
@@ -142,7 +152,6 @@ class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
                 #Pass the value to the sink
                 self.sink.perform(value)
             except:
-                import traceback
                 log.error(traceback.format_exc())
             
             #sleep for the specified interval
@@ -160,11 +169,15 @@ class ChangeMonitor(Monitor, MonitorSleepMixin):
         last_state = None
         new_state = None
         while True:
-            new_state = self.operator.value
-            if new_state != last_state:
-                log.info("{kind} yields '{state}' ({result}), running sink.".format(kind=self.kind, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
-                self.sink.perform(new_state)
-                last_state = new_state
+            try:
+                new_state = self.operator.value
+                if new_state != last_state:
+                    log.info("{kind} yields '{state}' ({result}), running sink.".format(kind=self.kind, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
+                    self.sink.perform(new_state)
+                    last_state = new_state
+            except:
+                log.error(traceback.format_exc())
+                
             if not self.sleep(): return
             
     def stop(self):
@@ -189,7 +202,10 @@ class OnDemandMonitor(Monitor, MonitorSleepMixin):
         #receive requests before we're ready. We must block those requests until
         #we're started
         self.context.startup_wait()
-        return self.operator.value
+        try:
+            return self.operator.value
+        except:
+            log.error(traceback.format_exc())
     
     @property
     def active_sinks(self):
@@ -228,10 +244,13 @@ class OnCallMonitor(Monitor):
     def stop(self): return
 
     def call(self, payload):
-        self.source.set_value(payload)
-        result = self.operator.value
-        self.source.set_value(None)
-        return result
+        try:
+            self.source.set_value(payload)
+            result = self.operator.value
+            self.source.set_value(None)
+            return result
+        except:
+            log.error(traceback.format_exc())
 
     def suggest_source(self):
         return OnCallMonitor.OnCallSource()
