@@ -1,16 +1,15 @@
 from actuator.components import operator
 
-class IntervalSource(operator.Operator):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._sleep_interval = float(kwargs.get('sleep', '1'))
-    
-    def sleep(self):
-        import time
-        time.sleep(self._sleep_interval)
-    
+from actuator.components.decorators import parameter, argument, input, output, allarguments
+
+
+@parameter('sleep', 'int', 1, 'Length of interval in seconds')
+class IntervalSource(operator.Operator):   
+    """
+    Sleep for a given interval before returning the upstream payload.
+    """  
     @property
     def value(self):
         import time
-        self.sleep()
+        time.sleep(self.params.sleep)
         return self.upstream.value
