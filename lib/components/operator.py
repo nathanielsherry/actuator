@@ -11,7 +11,6 @@ def instructions():
         'change': Change,
         'cached': Cached,
         'try': Try,
-        'smooth': Smooth,
         'forever': Forever,
         'once': Once,
         'split': Split,
@@ -265,41 +264,6 @@ class FilterFlow(SubFlow):
     def value(self):
         return [v for v in self.upstream.value if self.subflow.monitor.call(v)]
 
-#Eliminates jitter from a value flapping a bit. The state starts as False and
-#will switch when consistently the opposite for `delay[state]` seconds.
-#delay is a dict with integer values for keys True and False
-class Smooth(Operator):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        
-        delay = float(kwargs.get('delay', '10'))
-        delay_true = float(kwargs.get('delay-true', delay))
-        delay_false = float(kwargs.get('delay-false', delay))
-        self._lag = {True: delay_true, False: delay_false}
-        
-        self._last_time = time.time()
-        self._last = False
-        self._state = False
-
-
-    @property
-    def value(self):
-
-        #get the result from the wrapped state
-        new_result = self.upstream.value
-        
-        if new_result != self._last:
-            #reset the last change time last known status
-            self._last_time = time.time()
-            self._last = new_result
-        
-        #If the state doesn't match the last `delay` seconds, flip it
-        time_delta = time.time() - self._last_time
-        if self._last != self._state and self._lag[self._last] >= time_delta:
-            self._state = self._last
-            
-        return self._state
-    
     
 
 class Cached(Operator):

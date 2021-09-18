@@ -1,6 +1,9 @@
 from actuator.components import operator
 from actuator import util
 
+from actuator.components.decorators import parameter, argument, input, output, allarguments
+
+
 def tobool(o):
     if isinstance(o, bool): return o
     if isinstance(o, str): return util.parse_bool(o)
@@ -53,3 +56,47 @@ class All(operator.Operator):
         if not isinstance(value, (list, tuple)):
             value = list(value)
         return all(value)
+        
+
+
+#Eliminates jitter from a value flapping a bit. The state starts as False and
+#will switch when consistently the opposite for `delay[state]` seconds.
+#delay is a dict with integer values for keys True and False
+@parameter('delay', 'int', 10, 'Seconds to delay before switching states')
+@parameter('fast_false', 'boolean', False, 'Flip to False immediately')
+@parameter('fast_true', 'boolean', False, 'Flip to True immediately')
+class Smooth(operator.Operator):
+    def initialise(self, *args, **kwargs):        
+        import time    
+        self._last_time = time.time()
+        self._last = False
+        self._state = False
+
+    def delay_for(self, newstate):
+        if newstate == True: 
+            return 0 if self.params.fast_true else self.params.delay
+        else:
+            return 0 if self.params.fast_false else self.params.delay
+
+    @property
+    def value(self):
+        import time
+        
+        #get the result from the wrapped state
+        new_result = self.upstream.value
+        
+        if new_result != self._last:
+            #reset the last change time last known status
+            self._last_time = time.time()
+            self._last = new_result
+        
+        #If the state doesn't match the last `delay` seconds, flip it
+        time_delta = time.time() - self._last_time
+        differs = self._state != self._last
+        delay = self.delay_for(self._last)
+        stale = delay >= time_delta
+        if differs and stale:
+            self._state = self._last
+            
+        return self._state
+    
