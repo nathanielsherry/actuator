@@ -26,6 +26,6 @@ class Pingable(source.Source):
     @property
     def value(self):
         import subprocess
-        result = subprocess.run(['ping', '-c', '3', self.args.accessor])
-        return result.recurncode == 0
+        result = subprocess.run(['ping', '-c', '3', self.args.address], stdout=subprocess.PIPE)
+        return result.returncode == 0
 
