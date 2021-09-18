@@ -74,9 +74,9 @@ class ParameterHook(ConstructorHook):
         if self.name in kwargs:
             param_value = kwargs[self.name]
             parameterset.put(self, param_value)
+            del kwargs[self.name]
         else:
             parameterset.put(self, self.default)
-        del kwargs[self.name]
         return kwargs
     
 def parameter(name, ptype, default=None, desc=None):
