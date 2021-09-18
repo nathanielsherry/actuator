@@ -35,11 +35,12 @@ def lookup(cls):
 
 
 class ConstructorHook:
-    def __init__(self, name, ptype, default, desc):
+    def __init__(self, name, ptype, default, desc, parser=None):
         self._name = name
         self._ptype = ptype
         self._desc = desc
-        self._default = default    
+        self._default = default
+        self._parser = parser
     
     @property
     def name(self): return self._name
@@ -55,6 +56,9 @@ class ConstructorHook:
     
     @property
     def default(self): return self._default
+    
+    @property
+    def parser(self): return self._parser
 
 
 
@@ -73,14 +77,16 @@ class ParameterHook(ConstructorHook):
     def consume(self, parameterset, **kwargs):
         if self.name in kwargs:
             param_value = kwargs[self.name]
+            if self.parser:
+                param_value = self.parser(param_value)
             parameterset.put(self, param_value)
             del kwargs[self.name]
         else:
             parameterset.put(self, self.default)
         return kwargs
     
-def parameter(name, ptype, default=None, desc=None):
-    p = ParameterHook(name, ptype, default, desc)
+def parameter(name, ptype, default=None, desc=None, parser=None):
+    p = ParameterHook(name, ptype, default, desc, parser)
     def inner(cls):
         def constructor(*args, **kwargs):
             instance = cls(*args, **kwargs)
@@ -134,14 +140,16 @@ class ArgumentHook(ConstructorHook):
     def consume(self, argumentlist, *args):
         if len(args):
             arg_value = args[0]
+            if self.parser:
+                arg_value = self.parser(arg_value)
             argumentlist.put(self, arg_value)
             args = args[1:]
         else:
             argumentlist.put(self, self.default)
         return args
    
-def argument(name, ptype, default=None, desc=None):
-    a = ArgumentHook(name, ptype, default, desc)
+def argument(name, ptype, default=None, desc=None, parser=None):
+    a = ArgumentHook(name, ptype, default, desc, parser)
     def inner(cls):
         def constructor(*args, **kwargs):
             instance = cls(*args, **kwargs)
