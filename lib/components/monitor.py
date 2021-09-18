@@ -3,6 +3,7 @@
 import time, traceback
 from actuator import log, util
 from actuator.components import component, source as mod_source, sink as mod_sink
+from actuator.components.decorators import parameter, argument, input, output, allarguments
 
 ROLE_MONITOR = "monitor"
 
@@ -15,6 +16,7 @@ def instructions():
         "counter": CountMonitor,
         "call": OnCallMonitor,
         "input": OnInputMonitor,
+        "value": OnValueMonitor,
     }
     
 
@@ -182,6 +184,35 @@ class ChangeMonitor(Monitor, MonitorSleepMixin):
             
     def stop(self):
         self.stop_sleep()
+
+
+#Monitors the result of a Source over time, triggering an event (callback) 
+#when the value matches (or changes to match) a given value. Passes the 
+#matched state as the single argument.
+@argument('value', 'any', None, 'Value for comparison')
+@parameter('always', 'bool', False, 'Only fire on a state change')
+class OnValueMonitor(Monitor, MonitorSleepMixin):
+    def start(self):
+        log.info("Starting {kind} with test {source} and sink {sink}".format(kind=self.kind, source=self.operator, sink=self.sink))
+        last_state = None
+        new_state = None
+        while True:
+            try:
+                changed = new_state != last_state
+                new_state = self.operator.value
+                if new_state == self.args.value and (changed or self.params.always):
+                    log.info("{kind} yields '{state}' ({result}), running sink.".format(kind=self.kind, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
+                    self.sink.perform(new_state)
+                    last_state = new_state
+            except:
+                log.error(traceback.format_exc())
+                
+            if not self.sleep(): return
+            
+    def stop(self):
+        self.stop_sleep()
+
+
 
 #NOTE: This monitor is never created through the expression explicitly. Instead
 #this monitor can be returned by a sink when no monitor is specified, effectively
