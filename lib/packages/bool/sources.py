@@ -1,19 +1,20 @@
-from actuator.components import source
+from actuator.components.source import Source
 
-class TrueSource(source.Source):
+from actuator.components.decorators import parameter, argument, input, output, allarguments, source
+
+@output('bool', 'Boolean True')
+@source
+def true():
     """    
-    :output: True
-    :outtype: bool
+    Outputs a boolean True value
     """
-    @property
-    def value(self):
-        return True
-    
-class FalseSource(source.Source):
+    return True
+
+
+@output('bool', 'Boolean False')
+@source
+def false():
     """    
-    :output: False
-    :outtype: bool
+    Outputs a boolean False value
     """
-    @property
-    def value(self):
-        return False
+    return False

@@ -1,7 +1,7 @@
-from actuator.components import operator
+from actuator.components.operator import Operator
 from actuator import util
 
-from actuator.components.decorators import parameter, argument, input, output, allarguments
+from actuator.components.decorators import parameter, argument, input, output, allarguments, operator
 
 
 def tobool(o):
@@ -13,27 +13,34 @@ def tobool(o):
     else:
         return False
 
-class Not(operator.Operator):
+
+@input('any', 'Any payload')
+@output('bool', 'Truthy value of the payload')
+@operator
+def boolean(payload):
     """  
-    :input: A value which can be interpereted as a boolean
-    :intype: bool, str
-    
-    :output: The opposite boolean value
-    :outtype: bool
+    Converts the payload to its own truthy value.
     """
-    @property
-    def value(self):
-        value = tobool(self.upstream.value)
-        return not value
+    return True if payload else False
     
+
+@input('any', 'Any payload')
+@output('bool', 'Negation of the truthy value of the payload')
+@operator
+def negation(payload):
+    """  
+    Negates the truthy value of the payload, returning a boolean value
+    """
+    return not payload
+
     
-class Any(operator.Operator):
+
+@input('list', 'Any list of values')
+@output('bool', 'True if any values in the list are truthy, False otherwise.')
+class Any(Operator):
     """    
-    :input: List of values
-    :intype: list
-    
-    :output: True if any value in the list is truthy, False otherwise.
-    :outtype: bool
+    Accepts a list of items and returns true if any items in the list
+    evaluate to truthy. This is a wrapper around Python's builtin 'all' function.
     """
     @property
     def value(self):
@@ -41,14 +48,13 @@ class Any(operator.Operator):
         if not isinstance(value, (list, tuple)):
             value = list(value)
         return any(value)
-        
-class All(operator.Operator):
+
+@input('list', 'Any list of values')
+@output('bool', 'True if all values in the list are truthy, False otherwise.')
+class All(Operator):
     """    
-    :input: List of values
-    :intype: list
-    
-    :output: True if all values in the list are truthy, False otherwise.
-    :outtype: bool
+    Accepts a list of items and returns true if-and-only-if all items in the list
+    evaluate to truthy. This is a wrapper around Python's builtin 'all' function.
     """
     @property
     def value(self):
@@ -65,7 +71,7 @@ class All(operator.Operator):
 @parameter('delay', 'int', 10, 'Seconds to delay before switching states')
 @parameter('fast_false', 'boolean', False, 'Flip to False immediately')
 @parameter('fast_true', 'boolean', False, 'Flip to True immediately')
-class Smooth(operator.Operator):
+class Smooth(Operator):
     def initialise(self, *args, **kwargs):        
         import time    
         self._last_time = time.time()
