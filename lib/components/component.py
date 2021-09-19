@@ -135,6 +135,18 @@ class Component:
         self.__input_description = d
     def _set_output_description(self, d):
         self.__output_description = d
+        
+    @classmethod
+    def get_source(cls):
+        import inspect
+        return inspect.getsource(cls)
+        
+    @classmethod
+    def get_docstring(cls):
+        import inspect
+        docstring = inspect.getdoc(cls)
+        if docstring: docstring = inspect.cleandoc(docstring)
+        return docstring
 
     
 class ComponentMixin:

@@ -43,7 +43,6 @@ def template_package(path, package):
     values = {
         'pkg': package,
         'pkgs': REGISTRY.packages,
-        'fn_source': lambda cls: inspect.getsource(decorators.undecorate(cls)),
         'source': Source,
         'signature': Signature,
         'documentation': Documentation,
@@ -60,7 +59,7 @@ class Source:
 
     @property
     def source(self):
-        source = inspect.getsource(self._cls)
+        source = self._cls.get_source()
         
         #trim leading/tailing blank lines
         lines = source.split("\n")
@@ -93,8 +92,7 @@ class Documentation:
     @property
     def docstring(self):
         #Get the docstring for the component
-        docstring = inspect.getdoc(decorators.undecorate(self._cls))
-        if docstring: docstring = inspect.cleandoc(docstring)
+        docstring = self._cls.get_docstring()
         if not docstring: docstring = ""
         return docstring
     

@@ -219,3 +219,61 @@ def output(ptype, desc=None):
         register(cls, d)
         return constructor
     return inner
+
+
+
+def source(fn):
+    from actuator.components.source import Source
+    class FunctionSource(Source):
+        @property
+        def value(self):
+            return fn()
+        @classmethod
+        def get_source(cls):
+            import inspect
+            return inspect.getsource(fn)
+        @classmethod
+        def get_docstring(cls):
+            import inspect
+            docstring = inspect.getdoc(fn)
+            if docstring: docstring = inspect.cleandoc(docstring)
+            return docstring
+    return FunctionSource
+
+
+def sink(fn):
+    from actuator.components.sink import Sink
+    class FunctionSink(Sink):
+        @property
+        def perform(self, payload):
+            return fn(payload)
+        @classmethod
+        def get_source(cls):
+            import inspect
+            return inspect.getsource(fn)
+        @classmethod
+        def get_docstring(cls):
+            import inspect
+            docstring = inspect.getdoc(fn)
+            if docstring: docstring = inspect.cleandoc(docstring)
+            return docstring
+    return FunctionSink
+
+
+def operator(fn):
+    from actuator.components.operator import Operator
+    class FunctionOperator(Operator):
+        @property
+        def value(self):
+            return fn(self.upstream.value)
+        @classmethod
+        def get_source(cls):
+            import inspect
+            return inspect.getsource(fn)
+        @classmethod
+        def get_docstring(cls):
+            import inspect
+            docstring = inspect.getdoc(fn)
+            if docstring: docstring = inspect.cleandoc(docstring)
+            return docstring
+    return FunctionOperator
