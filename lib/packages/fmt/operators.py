@@ -1,5 +1,5 @@
 from actuator import util
-from actuator.components import operator
+from actuator.components.operator import Operator
 
 from actuator.components.decorators import parameter, argument, input, output, allarguments, operator
 
@@ -7,7 +7,7 @@ from actuator.components.decorators import parameter, argument, input, output, a
 @input('any', 'Any payload')
 @output('str', 'JSON String')
 @parameter('pretty', 'bool', False, 'Apply formatting to JSON output')
-class ToJson(operator.Operator):
+class ToJson(Operator):
     @property
     def value(self):
         import json
@@ -21,7 +21,7 @@ class ToJson(operator.Operator):
 
 @input('str', 'JSON String')
 @output('any', 'Parsed payload')
-class FromJson(operator.Operator):
+class FromJson(Operator):
     @property
     def value(self):
         import json
@@ -37,7 +37,7 @@ class FromJson(operator.Operator):
 @parameter('unsafe', 'bool', False, 'Use unsafe PyYAML Dumper')
 @parameter('canonical', 'bool', False, 'Dump YAML in canonical format with explicit types')
 @parameter('default_flow_style', 'bool', True, "PyYAML's 'default_flow_style' argument")
-class ToYaml(operator.Operator):
+class ToYaml(Operator):
     @property
     def value(self):
         import yaml
@@ -51,7 +51,7 @@ class ToYaml(operator.Operator):
 @input('str', 'YAML String')
 @output('any', 'Any payload')
 @parameter('unsafe', 'bool', False, 'Use unsafe PyYAML Dumper')
-class FromYaml(operator.Operator):
+class FromYaml(Operator):
     @property
     def value(self):
         import yaml
