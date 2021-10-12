@@ -72,6 +72,10 @@ class ParameterSet:
     
     def put(self, parameter, value):
         self._params[parameter.name] = value
+    
+    @property
+    def as_dict(self):
+        return dict(self._params)
 
 class ParameterHook(ConstructorHook):
     def consume(self, parameterset, **kwargs):
@@ -135,6 +139,11 @@ class ArgumentList:
     def default(self, argument):
         self._args.append(argument.default)
         self._namedargs[argument.name] = argument.default
+    
+    @property
+    def as_list(self): 
+        return self._args[:]
+        
 
 class ArgumentHook(ConstructorHook):
     def consume(self, argumentlist, *args):
@@ -227,7 +236,9 @@ def source(fn):
     class FunctionSource(Source):
         @property
         def value(self):
-            return fn()
+            args = self.args.as_list
+            params = self.params.as_dict
+            return fn(*args, **params)
         @classmethod
         def get_source(cls):
             import inspect
@@ -246,7 +257,9 @@ def sink(fn):
     class FunctionSink(Sink):
         @property
         def perform(self, payload):
-            return fn(payload)
+            args = self.args.as_list
+            params = self.params.as_dict
+            return fn(payload, *args, **params)
         @classmethod
         def get_source(cls):
             import inspect
@@ -265,7 +278,9 @@ def operator(fn):
     class FunctionOperator(Operator):
         @property
         def value(self):
-            return fn(self.upstream.value)
+            args = self.args.as_list
+            params = self.params.as_dict
+            return fn(self.upstream.value, *args, **params)
         @classmethod
         def get_source(cls):
             import inspect
