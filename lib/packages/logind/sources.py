@@ -1,18 +1,14 @@
 from actuator.components.source import Source
 from actuator import log, util
 
-class Info(Source):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        log.debug("{kind} received initial config {config}".format(kind=self.kind, config=(args, kwargs)))
-        self._session = args[0]
+from actuator.components.decorators import parameter, argument, input, output, allarguments, source
 
-    @property
-    def value(self):
+
+def show_session(session):
         import subprocess
-        result = subprocess.run(['loginctl', 'show-session', str(self._session)], capture_output=True)
+        result = subprocess.run(['loginctl', 'show-session', str(session)], capture_output=True)
         if not result.returncode == 0:
-            raise Exception("Cannot get status of service {}:\n{}".format(self._session, result.stderr.decode()))
+            raise Exception("Cannot get status of service {}:\n{}".format(session, result.stderr.decode()))
         data = {}
         for line in result.stdout.decode().split("\n"):
             line = line.strip()
@@ -21,11 +17,18 @@ class Info(Source):
             data[key] = value
         return data
 
-        
-class Locked(Info):
+@output('dict', "Dictionary of values returned by 'loginctl show-session <ID>'")
+@argument('session', 'int', 1, 'Session ID to query')
+@source
+def info(self, session):
+    return show_session(session)
 
-    @property
-    def value(self):
-        value = super().value
-        return value['LockedHint'] == 'yes'
+
+
+@output('bool', "Tests if session <ID> is locked")
+@argument('session', 'int', 1, 'Session ID to query')
+@source
+def locked(self, session):
+    value = show_session(session)
+    return value['LockedHint'] == 'yes'
 
