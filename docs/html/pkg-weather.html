@@ -133,7 +133,64 @@
           </div>
 
           <span class='component-doc'>
-            
+            <div class='component-signature'>
+  
+  
+  
+  
+    <div class='component-signature-title'>Named Arguments</div>
+    <table class='component-signature-params'>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>lon=0.0</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Latitude for localisation</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>lat=0.0</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Latitude for localisation</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>days=3</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Number of days of forecasts to look at</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>high=None</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Threshold temperature for daily high</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>low=None</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Threshold temperature for daily low</td>
+      </tr>
+    
+    </table>
+  
+  
+  
+  
+    <div class='component-signature-title'>Operation</div>
+    <table class='component-signature-params'>
+      
+      
+        <tr class='component-signature-param'>
+          <td class='component-signature-param-name'>Output</td>
+          <td class='component-signature-param-type'>dict</td>
+          <td class='component-signature-param-desc'>Localised weather information</td>
+        </tr>
+      
+    </table>
+  
+  
+
+</div>
             <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -515,14 +572,7 @@ ul.auto-toc {
   <div class='code-snippet-python'>
     <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Fetch</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;{kind} received initial config {config}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)))</span>
-        <span class="n">coords</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;coords&#39;</span><span class="p">]</span>
-        <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">coords</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
-        <span class="n">lat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
-        <span class="n">lon</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_coords</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
-        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_coords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">lon</span><span class="p">)</span>
     
     <span class="k">def</span> <span class="nf">lookup_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">json</span>
@@ -561,7 +611,64 @@ ul.auto-toc {
           </div>
 
           <span class='component-doc'>
-            
+            <div class='component-signature'>
+  
+  
+  
+  
+    <div class='component-signature-title'>Named Arguments</div>
+    <table class='component-signature-params'>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>lon=0.0</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Latitude for localisation</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>lat=0.0</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Latitude for localisation</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>days=3</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Number of days of forecasts to look at</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>high=None</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Threshold temperature for daily high</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>low=None</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Threshold temperature for daily low</td>
+      </tr>
+    
+    </table>
+  
+  
+  
+  
+    <div class='component-signature-title'>Operation</div>
+    <table class='component-signature-params'>
+      
+      
+        <tr class='component-signature-param'>
+          <td class='component-signature-param-name'>Output</td>
+          <td class='component-signature-param-type'>dict</td>
+          <td class='component-signature-param-desc'>Localised weather information</td>
+        </tr>
+      
+    </table>
+  
+  
+
+</div>
             <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -941,19 +1048,25 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Above</span><span class="p">(</span><span class="n">Comparison</span><span class="p">):</span>
+    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Fetch</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_coords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">lon</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">lookup_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">json</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://www.metaweather.com/api/location/search/?lattlong={},{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;{} looking up weather data from {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">url</span><span class="p">))</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">get_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;{} received weather data: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;woeid&#39;</span><span class="p">])</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">high</span><span class="p">,</span> <span class="n">low</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_low</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_high</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">False</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_low</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_low</span> <span class="o">&gt;=</span> <span class="n">low</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_high</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_high</span> <span class="o">&gt;=</span> <span class="n">high</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
-
-        <span class="c1">#No failure conditions encountered</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="kn">import</span> <span class="nn">json</span>
+        <span class="n">document</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">get_url</span><span class="p">(</span><span class="s2">&quot;https://www.metaweather.com/api/location/{id}/&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">))</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">document</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
 </pre></div>
 
   </div>
@@ -976,7 +1089,64 @@ ul.auto-toc {
           </div>
 
           <span class='component-doc'>
-            
+            <div class='component-signature'>
+  
+  
+  
+  
+    <div class='component-signature-title'>Named Arguments</div>
+    <table class='component-signature-params'>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>lon=0.0</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Latitude for localisation</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>lat=0.0</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Latitude for localisation</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>days=3</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Number of days of forecasts to look at</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>high=None</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Threshold temperature for daily high</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>low=None</td>
+        <td class='component-signature-param-type'>real</td>
+        <td class='component-signature-param-desc'>Threshold temperature for daily low</td>
+      </tr>
+    
+    </table>
+  
+  
+  
+  
+    <div class='component-signature-title'>Operation</div>
+    <table class='component-signature-params'>
+      
+      
+        <tr class='component-signature-param'>
+          <td class='component-signature-param-name'>Output</td>
+          <td class='component-signature-param-type'>dict</td>
+          <td class='component-signature-param-desc'>Localised weather information</td>
+        </tr>
+      
+    </table>
+  
+  
+
+</div>
             <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -1356,19 +1526,25 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Below</span><span class="p">(</span><span class="n">Comparison</span><span class="p">):</span>
+    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Fetch</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_coords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">lon</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">lookup_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">json</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://www.metaweather.com/api/location/search/?lattlong={},{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;{} looking up weather data from {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">url</span><span class="p">))</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">get_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;{} received weather data: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;woeid&#39;</span><span class="p">])</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">high</span><span class="p">,</span> <span class="n">low</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_low</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_high</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">False</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_low</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_low</span> <span class="o">&lt;=</span> <span class="n">low</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_high</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_high</span> <span class="o">&lt;=</span> <span class="n">high</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
-        
-        <span class="c1">#No failure conditions encountered</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="kn">import</span> <span class="nn">json</span>
+        <span class="n">document</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">get_url</span><span class="p">(</span><span class="s2">&quot;https://www.metaweather.com/api/location/{id}/&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">))</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">document</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
 </pre></div>
 
   </div>
