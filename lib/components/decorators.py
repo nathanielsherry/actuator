@@ -96,6 +96,10 @@ def parameter(name, ptype, default=None, desc=None, parser=None):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 super()._add_parameter_hook(p)
+            @classmethod
+            def get_source(cls):
+                return cls.__bases__[0].get_source()
+                
         register(cls, p)
         return ParameterDecorator
     return inner
@@ -115,6 +119,10 @@ def allparameters(name):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 super()._add_parameter_hook(p)
+            @classmethod
+            def get_source(cls):
+                return cls.__bases__[0].get_source()
+                
         register(cls, p)
         return AllParametersDecorator
     return inner
@@ -164,6 +172,10 @@ def argument(name, ptype, default=None, desc=None, parser=None):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 super()._add_argument_hook(a)
+            @classmethod
+            def get_source(cls):
+                return cls.__bases__[0].get_source()
+                
         register(cls, a)
         return ArgumentDecorator
     return inner
@@ -183,6 +195,10 @@ def allarguments(name):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 super()._add_argument_hook(a)
+            @classmethod
+            def get_source(cls):
+                return cls.__bases__[0].get_source()
+                
         register(cls, a)
         return AllArgumentsDecorator
     return inner
@@ -211,6 +227,10 @@ def input(ptype, desc=None):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 super()._set_input_description(d)
+            @classmethod
+            def get_source(cls):
+                return cls.__bases__[0].get_source()
+                
         register(cls, d)
         return InputDecorator
     return inner
@@ -225,6 +245,10 @@ def output(ptype, desc=None):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 super()._set_output_description(d)
+            @classmethod
+            def get_source(cls):
+                return cls.__bases__[0].get_source()
+                
         register(cls, d)
         return OutputDecorator
     return inner
