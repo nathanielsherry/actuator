@@ -92,12 +92,12 @@ class ParameterHook(ConstructorHook):
 def parameter(name, ptype, default=None, desc=None, parser=None):
     p = ParameterHook(name, ptype, default, desc, parser)
     def inner(cls):
-        def constructor(*args, **kwargs):
-            instance = cls(*args, **kwargs)
-            instance._add_parameter_hook(p)
-            return instance
+        class ParameterDecorator(cls):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                super()._add_parameter_hook(p)
         register(cls, p)
-        return constructor
+        return ParameterDecorator
     return inner
 
 
@@ -111,12 +111,12 @@ class AllParametersHook(ParameterHook):
 def allparameters(name):
     p = AllParametersHook(name)
     def inner(cls):
-        def constructor(*args, **kwargs):
-            instance = cls(*args, **kwargs)
-            instance._add_parameter_hook(p)
-            return instance
+        class AllParametersDecorator(cls):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                super()._add_parameter_hook(p)
         register(cls, p)
-        return constructor
+        return AllParametersDecorator
     return inner
         
 
@@ -160,12 +160,12 @@ class ArgumentHook(ConstructorHook):
 def argument(name, ptype, default=None, desc=None, parser=None):
     a = ArgumentHook(name, ptype, default, desc, parser)
     def inner(cls):
-        def constructor(*args, **kwargs):
-            instance = cls(*args, **kwargs)
-            instance._add_argument_hook(a)
-            return instance
+        class ArgumentDecorator(cls):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                super()._add_argument_hook(a)
         register(cls, a)
-        return constructor
+        return ArgumentDecorator
     return inner
 
 
@@ -179,12 +179,12 @@ class AllArgumentsHook(ArgumentHook):
 def allarguments(name):
     a = AllArgumentsHook(name)
     def inner(cls):
-        def constructor(*args, **kwargs):
-            instance = cls(*args, **kwargs)
-            instance._add_argument_hook(a)
-            return instance
+        class AllArgumentsDecorator(cls):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                super()._add_argument_hook(a)
         register(cls, a)
-        return constructor
+        return AllArgumentsDecorator
     return inner
 
 
@@ -207,12 +207,12 @@ class InputDescription(IODescription):
 def input(ptype, desc=None):
     d = InputDescription(ptype, desc)
     def inner(cls):
-        def constructor(*args, **kwargs):
-            instance = cls(*args, **kwargs)
-            instance._set_input_description(d)
-            return instance
+        class InputDecorator(cls):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                super()._set_input_description(d)
         register(cls, d)
-        return constructor
+        return InputDecorator
     return inner
 
 class OutputDescription(IODescription):
@@ -221,12 +221,12 @@ class OutputDescription(IODescription):
 def output(ptype, desc=None):
     d = OutputDescription(ptype, desc)
     def inner(cls):
-        def constructor(*args, **kwargs):
-            instance = cls(*args, **kwargs)
-            instance._set_output_description(d)
-            return instance
+        class OutputDecorator(cls):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                super()._set_output_description(d)
         register(cls, d)
-        return constructor
+        return OutputDecorator
     return inner
 
 
