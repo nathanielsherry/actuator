@@ -136,7 +136,35 @@
           </div>
 
           <span class='component-doc'>
-            
+            <div class='component-signature'>
+  
+  
+  
+  
+  
+  
+  
+    <div class='component-signature-title'>Operation</div>
+    <table class='component-signature-params'>
+      
+        <tr class='component-signature-param'>
+          <td class='component-signature-param-name'>Input</td>
+          <td class='component-signature-param-type'>str</td>
+          <td class='component-signature-param-desc'>JSON String</td>
+        </tr>
+      
+      
+        <tr class='component-signature-param'>
+          <td class='component-signature-param-name'>Output</td>
+          <td class='component-signature-param-type'>any</td>
+          <td class='component-signature-param-desc'>Parsed payload</td>
+        </tr>
+      
+    </table>
+  
+  
+
+</div>
             <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -516,7 +544,7 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FromJson</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
+    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FromJson</span><span class="p">(</span><span class="n">Operator</span><span class="p">):</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">json</span>
@@ -546,7 +574,46 @@ ul.auto-toc {
           </div>
 
           <span class='component-doc'>
-            
+            <div class='component-signature'>
+  
+  
+  
+  
+    <div class='component-signature-title'>Named Arguments</div>
+    <table class='component-signature-params'>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>unsafe=False</td>
+        <td class='component-signature-param-type'>bool</td>
+        <td class='component-signature-param-desc'>Use unsafe PyYAML Dumper</td>
+      </tr>
+    
+    </table>
+  
+  
+  
+  
+    <div class='component-signature-title'>Operation</div>
+    <table class='component-signature-params'>
+      
+        <tr class='component-signature-param'>
+          <td class='component-signature-param-name'>Input</td>
+          <td class='component-signature-param-type'>str</td>
+          <td class='component-signature-param-desc'>YAML String</td>
+        </tr>
+      
+      
+        <tr class='component-signature-param'>
+          <td class='component-signature-param-name'>Output</td>
+          <td class='component-signature-param-type'>any</td>
+          <td class='component-signature-param-desc'>Any payload</td>
+        </tr>
+      
+    </table>
+  
+  
+
+</div>
             <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -926,13 +993,16 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FromYaml</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
+    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FromYaml</span><span class="p">(</span><span class="n">Operator</span><span class="p">):</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">yaml</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span>
-        <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">unsafe</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -955,7 +1025,46 @@ ul.auto-toc {
           </div>
 
           <span class='component-doc'>
-            
+            <div class='component-signature'>
+  
+  
+  
+  
+    <div class='component-signature-title'>Named Arguments</div>
+    <table class='component-signature-params'>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>pretty=False</td>
+        <td class='component-signature-param-type'>bool</td>
+        <td class='component-signature-param-desc'>Apply formatting to JSON output</td>
+      </tr>
+    
+    </table>
+  
+  
+  
+  
+    <div class='component-signature-title'>Operation</div>
+    <table class='component-signature-params'>
+      
+        <tr class='component-signature-param'>
+          <td class='component-signature-param-name'>Input</td>
+          <td class='component-signature-param-type'>any</td>
+          <td class='component-signature-param-desc'>Any payload</td>
+        </tr>
+      
+      
+        <tr class='component-signature-param'>
+          <td class='component-signature-param-name'>Output</td>
+          <td class='component-signature-param-type'>str</td>
+          <td class='component-signature-param-desc'>JSON String</td>
+        </tr>
+      
+    </table>
+  
+  
+
+</div>
             <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -1335,17 +1444,13 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ToJson</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pretty</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">parse_bool</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pretty&#39;</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">))</span>
-    
+    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ToJson</span><span class="p">(</span><span class="n">Operator</span><span class="p">):</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">json</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pretty</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">pretty</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -1371,7 +1476,58 @@ ul.auto-toc {
           </div>
 
           <span class='component-doc'>
-            
+            <div class='component-signature'>
+  
+  
+  
+  
+    <div class='component-signature-title'>Named Arguments</div>
+    <table class='component-signature-params'>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>default_flow_style=True</td>
+        <td class='component-signature-param-type'>bool</td>
+        <td class='component-signature-param-desc'>PyYAML's 'default_flow_style' argument</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>canonical=False</td>
+        <td class='component-signature-param-type'>bool</td>
+        <td class='component-signature-param-desc'>Dump YAML in canonical format with explicit types</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>unsafe=False</td>
+        <td class='component-signature-param-type'>bool</td>
+        <td class='component-signature-param-desc'>Use unsafe PyYAML Dumper</td>
+      </tr>
+    
+    </table>
+  
+  
+  
+  
+    <div class='component-signature-title'>Operation</div>
+    <table class='component-signature-params'>
+      
+        <tr class='component-signature-param'>
+          <td class='component-signature-param-name'>Input</td>
+          <td class='component-signature-param-type'>any</td>
+          <td class='component-signature-param-desc'>Any payload</td>
+        </tr>
+      
+      
+        <tr class='component-signature-param'>
+          <td class='component-signature-param-name'>Output</td>
+          <td class='component-signature-param-type'>str</td>
+          <td class='component-signature-param-desc'>YAML String</td>
+        </tr>
+      
+    </table>
+  
+  
+
+</div>
             <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -1751,20 +1907,16 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ToYaml</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pretty</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">parse_bool</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pretty&#39;</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">))</span>
-    
+    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ToYaml</span><span class="p">(</span><span class="n">Operator</span><span class="p">):</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">yaml</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pretty</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">unsafe</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_dump</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">canonical</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">canonical</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">canonical</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">canonical</span><span class="p">)</span>
 </pre></div>
 
   </div>

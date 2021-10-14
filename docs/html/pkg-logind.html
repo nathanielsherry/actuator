@@ -133,7 +133,41 @@
           </div>
 
           <span class='component-doc'>
-            
+            <div class='component-signature'>
+  
+  
+  
+    <div class='component-signature-title'>Positional Arguments</div>
+    <table class='component-signature-params'>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-index'>0</td>
+        <td class='component-signature-param-name'>session=1</td>
+        <td class='component-signature-param-type'>int</td>
+        <td class='component-signature-param-desc'>Session ID to query</td>
+      </tr>
+    
+    </table>
+  
+  
+  
+  
+  
+    <div class='component-signature-title'>Operation</div>
+    <table class='component-signature-params'>
+      
+      
+        <tr class='component-signature-param'>
+          <td class='component-signature-param-name'>Output</td>
+          <td class='component-signature-param-type'>dict</td>
+          <td class='component-signature-param-desc'>Dictionary of values returned by 'loginctl show-session <ID>'</td>
+        </tr>
+      
+    </table>
+  
+  
+
+</div>
             <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -513,25 +547,11 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Info</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;{kind} received initial config {config}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_session</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">import</span> <span class="nn">subprocess</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;loginctl&#39;</span><span class="p">,</span> <span class="s1">&#39;show-session&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="p">)],</span> <span class="n">capture_output</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot get status of service {}:</span><span class="se">\n</span><span class="s2">{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">()))</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
-            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span> <span class="k">continue</span>
-            <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">return</span> <span class="n">data</span>
+    <div class="highlight"><pre><span></span><span class="nd">@output</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">,</span> <span class="s2">&quot;Dictionary of values returned by &#39;loginctl show-session &lt;ID&gt;&#39;&quot;</span><span class="p">)</span>
+<span class="nd">@argument</span><span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Session ID to query&#39;</span><span class="p">)</span>
+<span class="nd">@source</span>
+<span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">show_session</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -554,7 +574,41 @@ ul.auto-toc {
           </div>
 
           <span class='component-doc'>
-            
+            <div class='component-signature'>
+  
+  
+  
+    <div class='component-signature-title'>Positional Arguments</div>
+    <table class='component-signature-params'>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-index'>0</td>
+        <td class='component-signature-param-name'>session=1</td>
+        <td class='component-signature-param-type'>int</td>
+        <td class='component-signature-param-desc'>Session ID to query</td>
+      </tr>
+    
+    </table>
+  
+  
+  
+  
+  
+    <div class='component-signature-title'>Operation</div>
+    <table class='component-signature-params'>
+      
+      
+        <tr class='component-signature-param'>
+          <td class='component-signature-param-name'>Output</td>
+          <td class='component-signature-param-type'>bool</td>
+          <td class='component-signature-param-desc'>Tests if session <ID> is locked</td>
+        </tr>
+      
+    </table>
+  
+  
+
+</div>
             <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -934,12 +988,12 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Locked</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;LockedHint&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;yes&#39;</span>
+    <div class="highlight"><pre><span></span><span class="nd">@output</span><span class="p">(</span><span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="s2">&quot;Tests if session &lt;ID&gt; is locked&quot;</span><span class="p">)</span>
+<span class="nd">@argument</span><span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Session ID to query&#39;</span><span class="p">)</span>
+<span class="nd">@source</span>
+<span class="k">def</span> <span class="nf">locked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">show_session</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;LockedHint&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;yes&#39;</span>
 </pre></div>
 
   </div>

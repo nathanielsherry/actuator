@@ -516,11 +516,8 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Avg</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">value</span><span class="p">))</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+    <div class="highlight"><pre><span></span><span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">avg</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span> <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
 </pre></div>
 
   </div>
@@ -923,11 +920,8 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Floats</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+    <div class="highlight"><pre><span></span><span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">floats</span><span class="p">(</span><span class="n">upstream</span><span class="p">):</span> <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">upstream</span><span class="p">]</span>
 </pre></div>
 
   </div>
@@ -1330,11 +1324,8 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Head</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <div class="highlight"><pre><span></span><span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">head</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span> <span class="k">return</span> <span class="n">payload</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>   
 </pre></div>
 
   </div>
@@ -1737,11 +1728,8 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Init</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="n">value</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    <div class="highlight"><pre><span></span><span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span> <span class="k">return</span> <span class="n">payload</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>   
 </pre></div>
 
   </div>
@@ -2144,11 +2132,8 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Ints</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+    <div class="highlight"><pre><span></span><span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">ints</span><span class="p">(</span><span class="n">upstream</span><span class="p">):</span> <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">upstream</span><span class="p">]</span>
 </pre></div>
 
   </div>
@@ -2171,7 +2156,28 @@ ul.auto-toc {
           </div>
 
           <span class='component-doc'>
-            
+            <div class='component-signature'>
+  
+  
+  
+  
+    <div class='component-signature-title'>Named Arguments</div>
+    <table class='component-signature-params'>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>delim=, </td>
+        <td class='component-signature-param-type'>str</td>
+        <td class='component-signature-param-desc'>Delimiter to join with</td>
+      </tr>
+    
+    </table>
+  
+  
+  
+  
+  
+
+</div>
             <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -2551,15 +2557,9 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Join</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_delim</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delim</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><span class="nd">@parameter</span><span class="p">(</span><span class="s1">&#39;delim&#39;</span><span class="p">,</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="p">,</span> <span class="s1">&#39;Delimiter to join with&#39;</span><span class="p">)</span>
+<span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">join</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">delim</span><span class="o">=</span><span class="s1">&#39;, &#39;</span><span class="p">):</span> <span class="k">return</span> <span class="n">delim</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -2962,11 +2962,8 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Last</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <div class="highlight"><pre><span></span><span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">last</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span> <span class="k">return</span> <span class="n">payload</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
 
   </div>
@@ -3369,11 +3366,8 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Length</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span> <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -3776,11 +3770,8 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Max</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">lst_max</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span> <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -4183,11 +4174,8 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Min</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">lst_min</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span> <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -4206,7 +4194,7 @@ ul.auto-toc {
              
           
           <div class='technical-name component-name'>
-            prod         
+            product         
           </div>
 
           <span class='component-doc'>
@@ -4590,14 +4578,12 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Prod</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="n">p</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-            <span class="n">p</span> <span class="o">*=</span> <span class="n">v</span>
-        <span class="k">return</span> <span class="n">p</span>
+    <div class="highlight"><pre><span></span><span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">product</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">*=</span> <span class="n">v</span>
+    <span class="k">return</span> <span class="n">p</span>
 </pre></div>
 
   </div>
@@ -4616,11 +4602,33 @@ ul.auto-toc {
              
           
           <div class='technical-name component-name'>
-            replicate         
+            repeat         
           </div>
 
           <span class='component-doc'>
-            
+            <div class='component-signature'>
+  
+  
+  
+    <div class='component-signature-title'>Positional Arguments</div>
+    <table class='component-signature-params'>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-index'>0</td>
+        <td class='component-signature-param-name'>count=1</td>
+        <td class='component-signature-param-type'>int</td>
+        <td class='component-signature-param-desc'>Number of repetitions</td>
+      </tr>
+    
+    </table>
+  
+  
+  
+  
+  
+  
+
+</div>
             <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -5000,11 +5008,9 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Min</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><span class="nd">@argument</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Number of repetitions&#39;</span><span class="p">,</span> <span class="n">parser</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+<span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">repeat</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span> <span class="k">return</span> <span class="p">[</span><span class="n">payload</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="p">)]</span>
 </pre></div>
 
   </div>
@@ -5407,12 +5413,11 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Reverse</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span><span class="p">[:]</span>
-        <span class="n">value</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">value</span>
+    <div class="highlight"><pre><span></span><span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[:]</span>
+    <span class="n">payload</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">payload</span>
 </pre></div>
 
   </div>
@@ -5435,7 +5440,36 @@ ul.auto-toc {
           </div>
 
           <span class='component-doc'>
-            
+            <div class='component-signature'>
+  
+  
+  
+    <div class='component-signature-title'>Positional Arguments</div>
+    <table class='component-signature-params'>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-index'>0</td>
+        <td class='component-signature-param-name'>end=-1</td>
+        <td class='component-signature-param-type'>int</td>
+        <td class='component-signature-param-desc'>Ending index for slice. Exclusive</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-index'>1</td>
+        <td class='component-signature-param-name'>start=0</td>
+        <td class='component-signature-param-type'>int</td>
+        <td class='component-signature-param-desc'>Starting index for slice. Inclusive</td>
+      </tr>
+    
+    </table>
+  
+  
+  
+  
+  
+  
+
+</div>
             <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -5815,16 +5849,11 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Slice</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_end</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_end</span><span class="p">]</span>
+    <div class="highlight"><pre><span></span><span class="nd">@argument</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;Starting index for slice. Inclusive&#39;</span><span class="p">)</span>
+<span class="nd">@argument</span><span class="p">(</span><span class="s1">&#39;end&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Ending index for slice. Exclusive&#39;</span><span class="p">)</span>
+<span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">slice</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">payload</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
 </pre></div>
 
   </div>
@@ -6227,11 +6256,8 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Sum</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">lst_sum</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span> <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -6634,11 +6660,8 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Tail</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstream</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <div class="highlight"><pre><span></span><span class="nd">@operator</span>
+<span class="k">def</span> <span class="nf">tail</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span> <span class="k">return</span> <span class="n">payload</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
 </pre></div>
 
   </div>
