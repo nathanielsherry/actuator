@@ -1,16 +1,14 @@
 from actuator.components.source import Source
 from actuator import log, util
 
+from actuator.components.decorators import parameter, argument, input, output, allarguments, source
+
+@parameter('lat', 'real', 0.0, 'Latitude for localisation', parser=float)
+@parameter('lon', 'real', 0.0, 'Latitude for localisation', parser=float)
+@output('dict', 'Localised weather information')
 class Fetch(Source):
     def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        log.debug("{kind} received initial config {config}".format(kind=self.kind, config=(args, kwargs)))
-        coords = kwargs['coords']
-        lat, lon = coords.split(',')
-        lat = float(lat)
-        lon = float(lon)
-        self._id = self.lookup_coords(lat, lon)
-        
+        self._id = self.lookup_coords(self.params.lat, self.params.lon)
     
     def lookup_coords(self, lat, lon):
         import json
@@ -29,51 +27,52 @@ class Fetch(Source):
         return data
 
 
-class Comparison(Fetch):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._days = int(kwargs.get('days', '3'))
-        self._low = kwargs.get('low', None)
-        self._high = kwargs.get('high', None)
-        if self._low: self._low = float(self._low)
-        if self._high: self._high = float(self._high)
-
+@parameter('low', 'real', None, 'Threshold temperature for daily low', parser=float)
+@parameter('high', 'real', None, 'Threshold temperature for daily high', parser=float)
+@parameter('days', 'real', 3, 'Number of days of forecasts to look at', parser=int)
+class Range(Fetch):
     @property
     def value(self):
         data = super().value
-        forecast = data['consolidated_weather'][:self._days]
+        forecast = data['consolidated_weather'][:self.params.days]
         high = max([day['max_temp'] for day in forecast])
         low = max([day['min_temp'] for day in forecast])
         log.debug("{kind} received weather data: high={high}, low={low}".format(kind=self.kind, low=low, high=high))
         
         return high, low
 
-class Below(Comparison):
+
+
+
+@output('bool', 'True if all given conditions are satisfied')
+class Below(Range):
     @property
     def value(self):
         high, low = super().value
-        if self._low == None and self._high == None:
+        
+        if self.params.low == None and self.params.high == None:
             return False
-        if self._low != None:
-            if self._low <= low: return False
-        if self._high != None:
-            if self._high <= high: return False
+        if self.params.low != None:
+            if self.params.low <= low: return False
+        if self.params.high != None:
+            if self.params.high <= high: return False
         
         #No failure conditions encountered
         return True
         
 
-
-class Above(Comparison):
+@output('bool', 'True if all given conditions are satisfied')
+class Above(Range):
     @property
     def value(self):
         high, low = super().value
-        if self._low == None and self._high == None:
+        
+        if self.params.low == None and self.params.high == None:
             return False
-        if self._low != None:
-            if self._low >= low: return False
-        if self._high != None:
-            if self._high >= high: return False
-
+        if self.params.low != None:
+            if self.params.low >= low: return False
+        if self.params.high != None:
+            if self.params.high >= high: return False
+        
         #No failure conditions encountered
         return True
