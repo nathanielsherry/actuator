@@ -75,7 +75,7 @@ class ComponentBlueprint(Construct):
             builder = REGISTRY.lookup_monitor(self.package.path)
         
         if not builder:
-            raise Exception("Could not build {name}".format(name=self.package.path))
+            raise Exception("Could not build {name} as '{role}'".format(name=self.package.path, role=role))
         
         args = self.parameters.args
         kwargs = self.parameters.kwargs
