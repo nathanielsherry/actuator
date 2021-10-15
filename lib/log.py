@@ -43,9 +43,9 @@ def for_component(c):
     import logging
     logger = logging.getLogger(c.name)
     logger = logging.LoggerAdapter(logger, extra={
-        'role': c.role,
-        'component': c.name,
-        'context': c.context.name,
+        'role': c.role or 'None',
+        'component': c.name or 'None',
+        'context': c.context.name if c.context else 'None',
     })
     return logger
 

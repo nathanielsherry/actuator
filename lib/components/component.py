@@ -20,18 +20,18 @@ class Component:
         self.__output_description = None
         
         
-        
         #Run mixin init methods if this is the first superclass 
         #and there are others after it
         supers = self.__class__.mro()
         supers = supers[supers.index(Component)+1:]
         while True:
             if supers[0] == object: break
+            self.logger.debug("Calling __init__ on mixin %s", str(supers[0]))
             supers[0].__init__(self, *args, **kwargs)
             supers = supers[1:]
         
         self._context = None
-        
+                
     
     #At creation time, args and kwargs are stashed until such time as 
     #they can be loaded and interpereted within the context in which 
@@ -59,8 +59,10 @@ class Component:
         for argument in self.__argumenthooks:
             args = argument.consume(self._arguments, *args)
 
+        self.logger.info("Processed stashed args and parameters: args=%s, params=%s", self.args.as_list, self.params.as_dict)
         
         #Call the standard initialise method
+        self.logger.info("Initialising")
         result = self.initialise(*args, **kwargs)
         
         if not result == False:
@@ -69,8 +71,11 @@ class Component:
             supers = supers[supers.index(Component)+1:]
             while True:
                 if supers[0] == object: break
+                self.logger.debug("Calling initialise on mixin %s", str(supers[0]))
                 supers[0].initialise(self, *args, **kwargs)
                 supers = supers[1:]
+        else:
+            self.logger.info("Initialisation returned False")
     
     def initialise(self, *args, **kwargs):
         return

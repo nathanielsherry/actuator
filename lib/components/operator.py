@@ -282,7 +282,7 @@ class Cached(Operator):
         #if it has been more than `delay` seconds since
         #the last poll of the upstream source, poll it now
         if time.time() > self._last_time + self.delay or self._last_value == None:
-            log.debug("{kind} checking upstream value".format(kind=self.kind))
+            self.logger.debug("Checking upstream value")
             self._last_time = time.time()
             self._last_value = self.upstream.value
             
@@ -374,7 +374,7 @@ class Try(Operator):
         try:
             return self.upstream.value
         except:
-            log.warn("{} threw an error, returning default value {}".format(self.upstream.kind, self._default))
+            self.logger.warn("Caught error, returning default value %s" self._default)
             return self._default
 
 class Hash(Operator):

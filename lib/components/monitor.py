@@ -117,7 +117,7 @@ class CountMonitor(Monitor):
                 if self._terminate: return
                 self.sink.perform(self.operator.value)
             except:
-                log.error(traceback.format_exc())
+                self.logger.error(traceback.format_exc())
                 
     def stop(self):
         self._terminate = True
@@ -133,7 +133,7 @@ class OnInputMonitor(Monitor):
                 if self._terminate: return
                 self.sink.perform(self.operator.value)
             except:
-                log.error(traceback.format_exc())
+                self.logger.error(traceback.format_exc())
     def stop(self):
         self._terminate = True
 
@@ -154,7 +154,7 @@ class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
                 #Pass the value to the sink
                 self.sink.perform(value)
             except:
-                log.error(traceback.format_exc())
+                self.logger.error(traceback.format_exc())
             
             #sleep for the specified interval
             if not self.sleep(): return
@@ -167,18 +167,18 @@ class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
 #when the value changes, passing the new state as the single argument.
 class ChangeMonitor(Monitor, MonitorSleepMixin):
     def start(self):
-        log.info("Starting {kind} with test {source} and sink {sink}".format(kind=self.kind, source=self.operator, sink=self.sink))
+        self.logger.info("Starting with source %s and sink %s", self.operator, self.sink)
         last_state = None
         new_state = None
         while True:
             try:
                 new_state = self.operator.value
                 if new_state != last_state:
-                    log.info("{kind} yields '{state}' ({result}), running sink.".format(kind=self.kind, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
+                    self.logger.info("State '%s' (%s), running sink", util.short_string(new_state), "changed" if new_state != last_state else "unchanged")
                     self.sink.perform(new_state)
                     last_state = new_state
             except:
-                log.error(traceback.format_exc())
+                self.logger.error(traceback.format_exc())
                 
             if not self.sleep(): return
             
@@ -193,7 +193,7 @@ class ChangeMonitor(Monitor, MonitorSleepMixin):
 @parameter('always', 'bool', False, 'Only fire on a state change')
 class OnValueMonitor(Monitor, MonitorSleepMixin):
     def start(self):
-        log.info("Starting {kind} with test {source} and sink {sink}".format(kind=self.kind, source=self.operator, sink=self.sink))
+        self.logger.info("Starting with source %s and sink %s", self.operator, self.sink)
         last_state = None
         new_state = None
         while True:
@@ -201,11 +201,11 @@ class OnValueMonitor(Monitor, MonitorSleepMixin):
                 changed = new_state != last_state
                 new_state = self.operator.value
                 if new_state == self.args.value and (changed or self.params.always):
-                    log.info("{kind} yields '{state}' ({result}), running sink.".format(kind=self.kind, result="changed" if new_state != last_state else "unchanged", state=util.short_string(new_state)))
+                    self.logger.info("State '%s' (%s), running sink", util.short_string(new_state), "changed" if new_state != last_state else "unchanged")
                     self.sink.perform(new_state)
                     last_state = new_state
             except:
-                log.error(traceback.format_exc())
+                self.logger.error(traceback.format_exc())
                 
             if not self.sleep(): return
             
@@ -236,7 +236,7 @@ class OnDemandMonitor(Monitor, MonitorSleepMixin):
         try:
             return self.operator.value
         except:
-            log.error(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
     
     @property
     def active_sinks(self):
@@ -281,7 +281,7 @@ class OnCallMonitor(Monitor):
             self.source.set_value(None)
             return result
         except:
-            log.error(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
 
     def suggest_source(self):
         return OnCallMonitor.OnCallSource()

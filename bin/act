@@ -17,8 +17,9 @@ def run(log_level, list_packages, show_package, debug, delay, expression):
 
     import logging
     logging.basicConfig(
-        format="[%(asctime)s][%(context)s][%(role)s][%(component)s] %(message)s",
-        level=logging.DEBUG if debug else logging.INFO
+        format="[{asctime:s}][{context:s}][{role:s}][{component:s}] {message:s}",
+        level=logging.DEBUG if debug else logging.INFO,
+        style='{'
     )
 
     from actuator import log
