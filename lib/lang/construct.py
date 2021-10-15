@@ -80,6 +80,7 @@ class ComponentBlueprint(Construct):
         args = self.parameters.args
         kwargs = self.parameters.kwargs
         component = builder(*args, **kwargs)
+        component.set_name(self.package.path)
         
         return component
 

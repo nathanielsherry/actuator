@@ -158,7 +158,9 @@ class Registry:
         
     def build_item(self, name, get_archive, *args, **kwargs):
         item = self.lookup_item(name, get_archive)
-        return item(*args, **kwargs)
+        component = item(*args, **kwargs)
+        component.set_name(name)
+        return component
         
         
     def build_source(self, name, *args, **kwargs):

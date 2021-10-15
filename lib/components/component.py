@@ -1,7 +1,10 @@
-
+from actuator import log
 
 class Component:
     def __init__(self, *args, **kwargs):
+        self._logger = None
+        self._name = None
+        
         self.__component_args = list(args)
         self.__component_kwargs = dict(kwargs)
         
@@ -28,6 +31,7 @@ class Component:
             supers = supers[1:]
         
         self._context = None
+        
     
     #At creation time, args and kwargs are stashed until such time as 
     #they can be loaded and interpereted within the context in which 
@@ -45,6 +49,8 @@ class Component:
         
         args = [deref(arg) for arg in args]
         kwargs = {k: deref(v) for k, v in kwargs.items()}
+        
+        self.logger.debug("Processing stashed args and parameters")
         
         #Process named arguments/parameters
         for parameter in self.__parameterhooks:
@@ -73,7 +79,9 @@ class Component:
     def stop(self): return
 
     @property
-    def name(self): return None
+    def name(self): return self._name
+    
+    def set_name(self, name): self._name = name
     
     #Returns information about the specific class this object belongs to
     @property
@@ -94,6 +102,12 @@ class Component:
     
     def set_context(self, context):
         self._context = context
+
+    @property
+    def logger(self):
+        if not self._logger:
+            self._logger = log.for_component(self) 
+        return self._logger
     
     @property
     def description_data(self):
@@ -147,6 +161,7 @@ class Component:
         docstring = inspect.getdoc(cls)
         if docstring: docstring = inspect.cleandoc(docstring)
         return docstring
+    
 
     
 class ComponentMixin:

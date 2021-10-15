@@ -10,9 +10,16 @@ import os
 @click.option("-l", "--log-level", default='info', help='Select log level from [error, warn, info, debug, trace]')
 @click.option("--list-packages", default=None, is_flag=True)
 @click.option("--show-package")
+@click.option("--debug", is_flag=True)
 @click.option("--delay", default=float(0))
 @click.argument("expression", default="")
-def run(log_level, list_packages, show_package, expression, delay):
+def run(log_level, list_packages, show_package, debug, delay, expression):
+
+    import logging
+    logging.basicConfig(
+        format="[%(asctime)s][%(context)s][%(role)s][%(component)s] %(message)s",
+        level=logging.DEBUG if debug else logging.INFO
+    )
 
     from actuator import log
     log.set_level(log_level)

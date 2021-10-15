@@ -37,3 +37,15 @@ def info(msg):
 def debug(msg):
     if __level < LEVEL_DEBUG: return
     print(msg, flush=True)
+    
+    
+def for_component(c):
+    import logging
+    logger = logging.getLogger(c.name)
+    logger = logging.LoggerAdapter(logger, extra={
+        'role': c.role,
+        'component': c.name,
+        'context': c.context.name,
+    })
+    return logger
+
