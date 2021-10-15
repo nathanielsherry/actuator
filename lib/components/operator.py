@@ -374,7 +374,7 @@ class Try(Operator):
         try:
             return self.upstream.value
         except:
-            self.logger.warn("Caught error, returning default value %s" self._default)
+            self.logger.warn("Caught error, returning default value %s", self._default)
             return self._default
 
 class Hash(Operator):

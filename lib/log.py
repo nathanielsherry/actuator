@@ -40,12 +40,23 @@ def debug(msg):
     
     
 def for_component(c):
+    
+    role = None
+    component = None
+    context = None
+    
+    if c:
+        role = c.role
+        component = c.name
+        if c.context:
+            context = c.context.name 
+    
     import logging
     logger = logging.getLogger(c.name)
     logger = logging.LoggerAdapter(logger, extra={
-        'role': c.role or 'None',
-        'component': c.name or 'None',
-        'context': c.context.name if c.context else 'None',
+        'role': role,
+        'component': component,
+        'context': context,
     })
     return logger
 
