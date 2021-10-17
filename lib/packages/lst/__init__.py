@@ -19,4 +19,5 @@ def load():
     pkg.operators.register_item('repeat', operators.repeat)
     pkg.operators.register_item('ints', operators.ints)
     pkg.operators.register_item('floats', operators.floats)
+    pkg.operators.register_item('feed', operators.Feed)
     return pkg

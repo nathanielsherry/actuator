@@ -57,16 +57,16 @@ class Monitor(component.Component):
     def role(self): return ROLE_MONITOR
     
 
-class MonitorSleepMixin(component.ComponentMixin):
+@parameter('sleep', 'int', 1, 'Interval between activations')
+class MonitorSleepMixin(component.Component):
     def initialise(self, *args, **kwargs):
         from threading import Event
-        self._sleep = float(kwargs.get('sleep', '1'))
         self._sleeper = Event()
         self._stopped = False
             
     def sleep(self):
         try:
-            self._sleeper.wait(self._sleep)
+            self._sleeper.wait(self.params.sleep)
         except:
             import traceback, sys
             sys.stderr.write(traceback.format_exc())
@@ -78,20 +78,14 @@ class MonitorSleepMixin(component.ComponentMixin):
         self._stopped = True
         self._sleeper.set()
     
-class ExitOnNoneMixin(component.ComponentMixin):
-    def initialise(self, *args, **kwargs):
-        self._exit_on_none = util.parse_bool(kwargs.get('exit', 'true'))
-        self._bool = util.parse_bool(kwargs.get('bool', 'false'))
-        self._blank = util.parse_bool(kwargs.get('blank', 'false'))
-            
-    @property
-    def exit_on_none(self): 
-        return self._exit_on_none
-    
-    def value_is_none(self, value):
-        if value == None: return True
-        if self._bool and value == False: return True
-        if self._blank and value == '': return True
+@parameter('exit_on_none', 'bool', True, 'Exit if the monitor receives a None value from its source')
+@parameter('exit_on_false', 'bool', False, 'Exit if the monitor receives a False value from its source')
+@parameter('exit_on_emptystr', 'bool', False, 'Exit if the monitor receives a "" (empty string) value from its source')
+class ExitOnValueMixin(component.Component):
+    def value_is_exit_condition(self, value):
+        if self.params.exit_on_none and value == None: return True
+        if self.params.exit_on_false and value == False: return True
+        if self.params.exit_on_emptystr and value == '': return True
         return False
 
 
@@ -140,15 +134,15 @@ class OnInputMonitor(Monitor):
 
 #The interval monitor runs repeatedly with a delay, optionally exiting on a 
 #None or, also optionally, False
-class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnNoneMixin):
+class IntervalMonitor(Monitor, MonitorSleepMixin, ExitOnValueMixin):
     def start(self):
         while True:
             try:
                 #Get the value from the source
                 value = self.operator.value
                             
-                #if we exit on a None value, and this is one, return
-                if self.value_is_none(value) and self.exit_on_none:
+                #if we exit on an exit condition value, and this is one, return
+                if self.value_is_exit_condition(value):
                     return
                 
                 #Pass the value to the sink

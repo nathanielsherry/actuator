@@ -67,3 +67,23 @@ def ints(upstream): return [int(s) for s in upstream]
     
 @operator
 def floats(upstream): return [float(s) for s in upstream]
+
+#Accepts a list and produces one item from that list until done, then repeats
+#TODO: expand this to cover iterables, dict kv pairs, etc
+class Feed(Operator):
+    def initialise(self, *args, **kwargs):
+        super().initialise(*args, **kwargs)
+        self._parts = []
+
+    @property
+    def value(self):
+        #If we're not working on a previous list, fetch the next one now
+        while not self._parts:
+            value = self.upstream.value
+            if value == None: return None
+            if not isinstance(value, list): value = list(value)
+            self._parts = value
+        #Return the next item in the list
+        value = self._parts[0]
+        self._parts = self._parts[1:]
+        return value

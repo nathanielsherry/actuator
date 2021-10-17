@@ -1,0 +1,9 @@
+#!/usr/local/bin/act
+
+flow interval
+  from '[1,2,3,4]'
+  via once
+  | fmt.fromjson
+  | lst.feed
+  on interval(sleep=1)
+
