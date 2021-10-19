@@ -1,13 +1,7 @@
 from actuator import log
 
-class Component:
-    def __init__(self, *args, **kwargs):
-        self._logger = None
-        self._name = None
-        
-        self.__component_args = list(args)
-        self.__component_kwargs = dict(kwargs)
-        
+class Parameterisable:
+    def __init__(self):
         self.__parameterhooks = []
         from actuator.components.decorators import ParameterSet
         self._parameters = ParameterSet()
@@ -15,17 +9,75 @@ class Component:
         self.__argumenthooks = []
         from actuator.components.decorators import ArgumentList
         self._arguments = ArgumentList()
+    
+    @property
+    def parameters(self): return self._parameters
+    
+    @property
+    def params(self): return self.parameters
+    
+    def _get_parameter_hooks(self): return self.__parameterhooks[:]
+    
+    def _add_parameter_hook(self, parameter):
+        if parameter.name in self.__parameterhooks:
+            raise Exception("Parameter {} already registered", parameter.name)
+        self.__parameterhooks.append(parameter)
         
-        self.__input_description = None
-        self.__output_description = None
-        
-        
+    @property
+    def arguments(self): return self._arguments
+    
+    @property
+    def args(self): return self.arguments
+    
+    def _get_argument_hooks(self): return self.__argumenthooks[:]
+    
+    def _add_argument_hook(self, argument):
+        #Arguments will be processed in reverse order due to 
+        #decorator processing order
+        self.__argumenthooks.insert(0, argument)
+
+class Initialisable:
+    def initialise(self, *args, **kwargs):
+        pass
+    
+    def _perform_init(self, *args, **kwargs):
         #Run mixin init methods if this is the first superclass 
         #and there are others after it
         supers = self.__class__.mro()
         supers = supers[supers.index(Component)+1:]
         while True:
             if supers[0] == object: break
+            if supers[0] == Initialisable:
+                supers = supers[1:]
+                continue
+            supers[0].__init__(self, *args, **kwargs)
+            supers = supers[1:]
+            
+    def _perform_initialise(self, *args, **kwargs):
+        pass
+
+class Component(Parameterisable, Initialisable):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self._logger = None
+        self._name = None
+        
+        self.__component_args = list(args)
+        self.__component_kwargs = dict(kwargs)
+               
+        self.__input_description = None
+        self.__output_description = None
+        
+        ### TODO: Replace with Initialisable._perform_init
+        #Run mixin init methods if this is the first superclass 
+        #and there are others after it
+        supers = self.__class__.mro()
+        supers = supers[supers.index(Component)+1:]
+        while True:
+            if supers[0] == object: break
+            if supers[0] in [Parameterisable, Initialisable]:
+                supers = supers[1:]
+                continue
             supers[0].__init__(self, *args, **kwargs)
             supers = supers[1:]
         
@@ -52,10 +104,10 @@ class Component:
         self.logger.debug("Processing stashed args and parameters")
         
         #Process named arguments/parameters
-        for parameter in self.__parameterhooks:
+        for parameter in self._get_parameter_hooks():
             kwargs = parameter.consume(self._parameters, **kwargs)     
         #Process positional arguments
-        for argument in self.__argumenthooks:
+        for argument in self._get_argument_hooks():
             args = argument.consume(self._arguments, *args)
 
         self.logger.info("Processed stashed args and parameters: args=%s, params=%s", self.args.as_list, self.params.as_dict)
@@ -65,11 +117,14 @@ class Component:
         result = self.initialise(*args, **kwargs)
         
         if not result == False:
+            ### TODO: Replace with Initialisable._perform_initialise
             #Call mixin initialise methods
             supers = self.__class__.mro()
             supers = supers[supers.index(Component)+1:]
             while True:
                 if supers[0] == object: break
+                if supers[0] == Parameterisable: break
+                if supers[0] == Initialisable: break
                 self.logger.debug("Calling initialise on mixin %s", str(supers[0]))
                 supers[0].initialise(self, *args, **kwargs)
                 supers = supers[1:]
@@ -127,27 +182,6 @@ class Component:
         import yaml
         return yaml.dump(self.description_data)
         
-    @property
-    def parameters(self): return self._parameters
-    
-    @property
-    def params(self): return self.parameters
-    
-    def _add_parameter_hook(self, parameter):
-        if parameter.name in self.__parameterhooks:
-            raise Exception("Parameter {} already registered", parameter.name)
-        self.__parameterhooks.append(parameter)
-        
-    @property
-    def arguments(self): return self._arguments
-    
-    @property
-    def args(self): return self.arguments
-                
-    def _add_argument_hook(self, argument):
-        #Arguments will be processed in reverse order due to 
-        #decorator processing order
-        self.__argumenthooks.insert(0, argument)
     
     def _set_input_description(self, d):
         self.__input_description = d
@@ -174,3 +208,6 @@ class ComponentMixin:
     
     def initialise(self, *args, **kwargs):
         pass
+    
+
+
