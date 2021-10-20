@@ -60,3 +60,12 @@ def for_component(c):
     })
     return logger
 
+def for_custom(name=None, role=None, component=None, context=None):
+    import logging
+    logger = logging.getLogger(name)
+    logger = logging.LoggerAdapter(logger, extra={
+        'role': role,
+        'component': component,
+        'context': context,
+    })
+    return logger

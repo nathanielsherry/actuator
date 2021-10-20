@@ -240,8 +240,7 @@ class OnDemandMonitor(Monitor, MonitorSleepMixin):
 class OnCallMonitor(Monitor):
 
     class OnCallSource(mod_source.Source):
-        def __init__(self):
-            super().__init__()
+        def construct(self):
             self._value = None
 
         @property
@@ -251,9 +250,7 @@ class OnCallMonitor(Monitor):
         def set_value(self, value): self._value = value
 
     class OnCallSink(mod_sink.Sink):
-        def __init__(self):
-            super().__init__()
-
+        pass
 
     def set_context(self, context):
         super().set_context(context)

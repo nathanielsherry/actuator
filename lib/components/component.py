@@ -1,7 +1,7 @@
 from actuator import log
 
 class Parameterisable:
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         self.__parameterhooks = []
         from actuator.components.decorators import ParameterSet
         self._parameters = ParameterSet()
@@ -40,34 +40,61 @@ class Initialisable:
     def initialise(self, *args, **kwargs):
         pass
     
-    def _perform_init(self, __base_class, *args, **kwargs):
+    def _perform_init(self, base_class, *args, **kwargs):
         #Run mixin init methods if this is the first superclass 
         #and there are others after it
         supers = self.__class__.mro()
-        supers = supers[supers.index(__base_class)+1:]
+        supers = supers[supers.index(base_class)+1:]
         while True:
             if supers[0] == object: break
             if supers[0] == Initialisable:
                 supers = supers[1:]
                 continue
             if '__init__' in vars(supers[0]):
+                log.for_custom().warn("DEPRECATED: subclass %s of %s should not define an __init__ method", supers[0], base_class)
                 supers[0].__init__(self, *args, **kwargs)
             supers = supers[1:]
-            
+    
+    def _perform_method(self, base_class, method_name, pass_args, *args, **kwargs):
         
-    def _perform_initialise(self, __base_class, *args, **kwargs):
-        #Call mixin initialise methods
         supers = self.__class__.mro()
-        supers = supers[supers.index(__base_class)+1:]
-        while True:
-            if supers[0] == object: break
-            self.logger.debug("Calling initialise on mixin %s", str(supers[0]))
-            if issubclass(supers[0], Initialisable) and 'initialise' in vars(supers[0]):
-                supers[0].initialise(self, *args, **kwargs)
-            supers = supers[1:]
+        if base_class:
+            supers = supers[supers.index(base_class)+1:]
+        for sc in supers:
+            #Only perform calls for subclasses of Initialisable
+            if not issubclass(sc, Initialisable): continue
 
-class Component(Initialisable, Parameterisable):
+            #See if this superclass has a method we can call
+            has_method = method_name in vars(sc).keys()
+            if not has_method: continue
+            method = sc.__dict__[method_name]
+            if not callable(method): continue
+
+            log.for_custom().debug("Calling %s for specific class %s", method_name, sc)
+            if pass_args:
+                method(self, *args, **kwargs)
+            else:
+                method(self)
+    
+    def _perform_construct(self):
+        self._perform_method(None, 'construct', False) 
+    
+        
+    def _perform_initialise(self, base_class, *args, **kwargs):
+        #supers = self.__class__.mro()
+        #supers = supers[supers.index(base_class)+1:]
+        #while True:
+        #    if supers[0] == object: break
+        #    self.logger.debug("Calling initialise on mixin %s", str(supers[0]))
+        #    if issubclass(supers[0], Initialisable) and 'initialise' in vars(supers[0]):
+        #        supers[0].initialise(self, *args, **kwargs)
+        #    supers = supers[1:]
+        self._perform_method(base_class, 'initialise', True, *args, **kwargs)
+            
+
+class Component(Parameterisable, Initialisable):
     def __init__(self, *args, **kwargs):
+        super().__init__()
         self._logger = None
         self._name = None
         
@@ -79,7 +106,8 @@ class Component(Initialisable, Parameterisable):
         
         #Run mixin init methods if this is the first superclass 
         #and there are others after it
-        self._perform_init(Component, *args, **kwargs)
+        #self._perform_init(Component, *args, **kwargs)
+        self._perform_construct()
         
         self._context = None
                 
@@ -195,4 +223,5 @@ class Component(Initialisable, Parameterisable):
 
 
 
-
+class ComponentMixin(Component):
+    pass

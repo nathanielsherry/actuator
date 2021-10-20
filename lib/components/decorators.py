@@ -93,8 +93,7 @@ def parameter(name, ptype, default=None, desc=None, parser=None):
     p = ParameterHook(name, ptype, default, desc, parser)
     def inner(cls):
         class ParameterDecorator(cls):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
+            def construct(self):
                 super()._add_parameter_hook(p)
             @classmethod
             def get_source(cls):
@@ -116,8 +115,7 @@ def allparameters(name):
     p = AllParametersHook(name)
     def inner(cls):
         class AllParametersDecorator(cls):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
+            def construct(self):
                 super()._add_parameter_hook(p)
             @classmethod
             def get_source(cls):
@@ -169,8 +167,7 @@ def argument(name, ptype, default=None, desc=None, parser=None):
     a = ArgumentHook(name, ptype, default, desc, parser)
     def inner(cls):
         class ArgumentDecorator(cls):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
+            def construct(self):
                 super()._add_argument_hook(a)
             @classmethod
             def get_source(cls):
@@ -192,8 +189,7 @@ def allarguments(name):
     a = AllArgumentsHook(name)
     def inner(cls):
         class AllArgumentsDecorator(cls):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
+            def construct(self):
                 super()._add_argument_hook(a)
             @classmethod
             def get_source(cls):
@@ -224,8 +220,7 @@ def input(ptype, desc=None):
     d = InputDescription(ptype, desc)
     def inner(cls):
         class InputDecorator(cls):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
+            def construct(self):
                 super()._set_input_description(d)
             @classmethod
             def get_source(cls):
@@ -242,8 +237,7 @@ def output(ptype, desc=None):
     d = OutputDescription(ptype, desc)
     def inner(cls):
         class OutputDecorator(cls):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
+            def construct(self):
                 super()._set_output_description(d)
             @classmethod
             def get_source(cls):

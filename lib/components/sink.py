@@ -43,8 +43,7 @@ class Sink(component.Component):
 
 
 class OnDemandMixin(component.ComponentMixin):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def construct(self):
         self._monitor = None
     
     def initialise(self, *args, **kwargs):
@@ -163,8 +162,7 @@ class DedicatedThreadSink(Sink):
 
 
 class DedicatedThread(threading.Thread):
-    def __init__(self, *args, **kwargs):
-        super().__init__()
+    def construct(self):
         self._terminated = threading.Event()
     
     #Called when the thread starts by the thread itself

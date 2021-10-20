@@ -34,8 +34,7 @@ def instructions():
 #interface
 class Operator(component.Component):
     #upstream needs to be defined at creation time
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def construct(self):
         self._upstream = None
     
     def set_upstream(self, upstream):
