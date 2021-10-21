@@ -200,7 +200,9 @@ class LocalPackageLoader(Loader):
         import os
         from actuator import packages
         spec = packages.__spec__
-        path = spec.submodule_search_locations[0]
+        # Earlier versions of python (like 3.6) can't index the 
+        # spec.submodule_search_locations directly
+        path = list(spec.submodule_search_locations)[0]
         for entry in os.scandir(path):
             if not entry.is_dir(): continue
             try:
