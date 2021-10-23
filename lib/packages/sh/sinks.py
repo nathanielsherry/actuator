@@ -1,13 +1,13 @@
-from actuator.components import sink
+from actuator.components import sink as mod_sink
 from actuator import util
 
 import subprocess, threading
 
+from actuator.components.decorators import parameter, argument, input, output, allarguments, sink
 
 #Runs an arbitrary shell command on activation
-class Shell(sink.Sink):
+class Shell(mod_sink.Sink):
     def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
         self._args = args
         self._shell = False
         if len(self._args) == 1 and ' ' in self._args[0]:
@@ -18,56 +18,30 @@ class Shell(sink.Sink):
         payload = str(payload)
         subprocess.run(self._args, text=True, input=payload, shell=self._shell)
 
-#Runs an arbitrary shell command on activation
-class ShellRunner(sink.RunnerSink):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._args = args
-        self._shell = False
-        if len(self._args) == 1 and ' ' in self._args[0]:
-            self._shell = True
-            
-    def run(self):
-        import subprocess
-        subprocess.run(self._args, shell=self._shell)
+@sink
+def stdout(payload):          
+    if isinstance(payload, str):
+        print(payload, flush=True)
+    else:
+        import pprint
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(payload)
 
-class Stdout(sink.Sink):
-    def perform(self, payload):          
-        if isinstance(payload, str):
-            print(payload, flush=True)
-        else:
-            import pprint
-            pp = pprint.PrettyPrinter(indent=4)
-            pp.pprint(payload)
-
-class StdoutIf(sink.ToggleSink):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._true_msg = kwargs['true']
-        self._false_msg = kwargs['false']
-        
-    def toggle(self, state):
-        msg = self._true_msg if state else self._false_msg
-        if msg: print(msg, flush=True)
+@parameter('true_msg', 'str', 'True', 'Output on True or truthy payload')
+@parameter('false_msg', 'str', 'False', 'Output on False or falsy payload')
+@sink      
+def stdout_print_if(payload, true_msg='True', false_msg='False'):
+    msg = true_msg if payload else false_msg
+    if msg: print(msg, flush=True)
       
-     
-class StdoutMsg(sink.RunnerSink):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._msg = kwargs.get('msg', 'message')
-    def run(self):
-        print(self._msg, flush=True)
+@parameter('message', 'str', '', 'Message to print')
+@sink
+def stdout_print(payload, message=''):
+    print(message, flush=True)
 
 
-class JsonSink(sink.Sink):
-    def perform(self, payload):
-        import json
-        print(json.dumps(payload), flush=True)
-
-
-class Curses(sink.DedicatedThreadSink):   
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+class Curses(mod_sink.DedicatedThreadSink):   
+    def construct(self):
         self._monitor = None
    
     def make_dedicated(self): 
@@ -82,7 +56,7 @@ class Curses(sink.DedicatedThreadSink):
             self._monitor = monitor.IntervalMonitor({}) 
         return self._monitor
     
-    class ScreenThread(sink.DedicatedThread):
+    class ScreenThread(mod_sink.DedicatedThread):
         def __init__(self):
             super().__init__()
             self._buffer = ""
