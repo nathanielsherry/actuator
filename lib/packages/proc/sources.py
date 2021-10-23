@@ -53,7 +53,7 @@ def do_search(search, keys):
     return data
 
 @output('list[str]', 'Information for matching processes')
-@argument('keys', 'list[str]', ['pid', 'name', 'username', 'cmdline', 'cpu_percent', 'uids', 'gids', 'nice', 'status', 'cwd'], 'Properties to access, returns all properties by default.')
+@argument('keys', 'list[str]', ['pid', 'name', 'username', 'cmdline', 'cpu_percent', 'uids', 'gids', 'nice', 'status', 'cwd'], 'Properties to access.')
 @allparameters('search')
 @source
 def search(keys, search):
