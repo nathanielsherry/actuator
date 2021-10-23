@@ -1,13 +1,12 @@
-from actuator.components import sink, monitor
+from actuator.components import sink as mod_sink, monitor
 import socketserver
 import http.server
 
-class WebServerSink(sink.DedicatedThreadSink, sink.OnDemandMixin):
-    
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._port = int(kwargs.get('port', '8080'))
-        self._address = kwargs.get('address', '')
+from actuator.components.decorators import parameter, argument, input, output, allarguments, sink
+
+@parameter('address', 'str', '', 'Address to listen on')
+@parameter('port', 'int', 8080, 'Port to listen on')
+class WebServerSink(mod_sink.DedicatedThreadSink, mod_sink.OnDemandMixin):
 
     def make_dedicated(self): 
         return WebServerSink.HTTPServerThread(self)
@@ -18,7 +17,7 @@ class WebServerSink(sink.DedicatedThreadSink, sink.OnDemandMixin):
     def suggest_monitor(self):
         return self.ondemand_monitor
             
-    class HTTPServerThread(sink.DedicatedThread):
+    class HTTPServerThread(mod_sink.DedicatedThread):
         def __init__(self, sink):
             super().__init__()
             self._sink = sink
@@ -27,7 +26,7 @@ class WebServerSink(sink.DedicatedThreadSink, sink.OnDemandMixin):
         #Called when the thread starts, by the thread itself
         def run(self):
             import socketserver
-            self._server = WebServerSink.SinkRequestServer((self._sink._address, self._sink._port), WebServerSink.SinkRequestHandler)
+            self._server = WebServerSink.SinkRequestServer((self._sink.params.address, self._sink.params.port), WebServerSink.SinkRequestHandler)
             self._server.set_sink(self._sink)
             self._server.serve_forever(poll_interval=0.25)
             self._server.server_close()
