@@ -273,7 +273,6 @@ def source(fn):
 def sink(fn):
     from actuator.components.sink import Sink
     class FunctionSink(Sink):
-        @property
         def perform(self, payload):
             args = self.args.as_list
             params = self.params.as_dict

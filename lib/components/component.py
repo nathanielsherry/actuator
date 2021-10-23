@@ -40,6 +40,9 @@ class Initialisable:
     def initialise(self, *args, **kwargs):
         pass
     
+    def construct(self):
+        pass
+    
     def _perform_init(self, base_class, *args, **kwargs):
         #Run mixin init methods if this is the first superclass 
         #and there are others after it
