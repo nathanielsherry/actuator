@@ -1,20 +1,20 @@
 from actuator import util
 from actuator.components import component
-from actuator.components.decorators import parameter, argument, input, output, allarguments
+from actuator.components.decorators import parameter, argument, input, output, allarguments, operator
 
 ROLE_OPERATOR = "operator"
 
 
 def instructions():
     return {
-        'hash': Hash,
+        'hash': do_hash,
         'change': Change,
         'cached': Cached,
         'try': Try,
         'forever': Forever,
         'once': Once,
-        'split': Split,
-        'noop': Noop,
+        'split': split,
+        'noop': noop,
         'eq': Equals,
         'not': Not,
         'get': Get,
@@ -66,20 +66,20 @@ class Operator(component.Component):
 
 @input('any', 'Accepts any input payload')
 @output('any', 'Emits the given payload without modification')
-class Noop(Operator):
-    @property
-    def value(self):
-        return self.upstream.value
+@operator
+def noop(payload):
+    return payload
 
 @input('any', 'Accepts any input payload')
 @output('any', 'Emits the given payload without modification')
 @argument('value', 'any', None, 'Value for comparison')
+@operator
 class Equals(Operator):
-    """
-    Compares the payload to a given value and emits the result
-    """
     @property
     def value(self):
+        """
+        Compares the payload to a given value and emits the result
+        """
         value = self.upstream.value
         compare = self.args.value
         if isinstance(compare, (list, tuple)):
@@ -289,8 +289,7 @@ class Cached(Operator):
 
 
 class Forever(Operator):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
+    def construct(self):
         self._value = None
 
     @property
@@ -301,8 +300,7 @@ class Forever(Operator):
 
 
 class Once(Operator):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
+    def construct(self):
         self._done = False
 
     @property
@@ -313,8 +311,7 @@ class Once(Operator):
 
 
 class Change(Operator):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
+    def construct(self):
         self._state = None
 
     @property
@@ -325,50 +322,37 @@ class Change(Operator):
         self._state = new_state
         return change
 
-
-class Split(Operator):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._delim = args[0]
-        self._parts = []
-
-    @property
-    def value(self):
-        value = self.upstream.value
-        if value == None: return None
-        if not isinstance(value, str): value = str(value)
-        
-        return value.split(self._delim)
+@input('any', 'String to be split, converted to string if other')
+@output('list[str]', 'List of split string segments')
+@argument('delim', 'str', '\n', 'Delimiter by which to split the payload')
+@operator
+def split(payload, delim):
+    if payload == None: return None
+    if not isinstance(payload, str): 
+        payload = str(payload)
+    return payload.split(delim)
                 
 
-        
+@input('any', 'Accepts any payload')
+@output('any', 'Outputs any payload, or the given default if an exception was thrown')
+@parameter('default', 'any', False, 'Default value to return on failure')
 class Try(Operator):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._default = kwargs.get('default', 'false')
-
     @property
     def value(self):
         try:
             return self.upstream.value
         except:
-            self.logger.warn("Caught error, returning default value %s", self._default)
-            return self._default
+            self.logger.warn("Caught error, returning default value %s", self.params.default)
+            return self.params.default
 
-class Hash(Operator):
-    def initialise(self, *args, **kwargs):
-        super().initialise(*args, **kwargs)
-        self._algo = kwargs.get('algo', 'md5')
-        
-    @property
-    def value(self):
-        import hashlib
-        m = hashlib.md5()
-        value = self.upstream.value
-        if isinstance(value, dict):
-            value = value['state']
-        m.update(str(value).encode())
-        return m.hexdigest()
-        
+@input('any', 'Any payload will be converted to a string')
+@output('str', 'md5 hex digest of the payload')
+@operator
+def do_hash(payload):
+    import hashlib
+    m = hashlib.md5()
+    m.update(str(payload).encode())
+    return m.hexdigest()
+    
 
 
