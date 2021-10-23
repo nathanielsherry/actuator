@@ -535,7 +535,7 @@ ul.auto-toc {
 <div class="document">
 
 
-<p>Tests if an address is pingable. Emits boolean True if it is, and False otherwise.</p>
+
 </div>
 </body>
 </html>
@@ -549,15 +549,13 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Pingable</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">Source</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Tests if an address is pingable. Emits boolean True if it is, and False otherwise.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">import</span> <span class="nn">subprocess</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;ping&#39;</span><span class="p">,</span> <span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">address</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
+    <div class="highlight"><pre><span></span><span class="nd">@output</span><span class="p">(</span><span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="s1">&#39;True if-and-only-if pingable&#39;</span><span class="p">)</span>
+<span class="nd">@argument</span><span class="p">(</span><span class="s1">&#39;address&#39;</span><span class="p">,</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="s1">&#39;8.8.8.8&#39;</span><span class="p">,</span> <span class="s1">&#39;Address to ping&#39;</span><span class="p">)</span>
+<span class="nd">@source</span>
+<span class="k">def</span> <span class="nf">pingable</span><span class="p">(</span><span class="n">address</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">subprocess</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;ping&#39;</span><span class="p">,</span> <span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="n">address</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
 </pre></div>
 
   </div>
@@ -580,7 +578,40 @@ ul.auto-toc {
           </div>
 
           <span class='component-doc'>
-            
+            <div class='component-signature'>
+  
+  
+  
+    <div class='component-signature-title'>Positional Arguments</div>
+    <table class='component-signature-params'>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-index'>0</td>
+        <td class='component-signature-param-name'>url=None</td>
+        <td class='component-signature-param-type'>str</td>
+        <td class='component-signature-param-desc'>URL to fetch</td>
+      </tr>
+    
+    </table>
+  
+  
+    <div class='component-signature-title'>Named Arguments</div>
+    <table class='component-signature-params'>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>text=False</td>
+        <td class='component-signature-param-type'>bool</td>
+        <td class='component-signature-param-desc'>Try to convert the document from HTML to Text</td>
+      </tr>
+    
+    </table>
+  
+  
+  
+  
+  
+
+</div>
             <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -960,19 +991,15 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">URLSource</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">Source</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_url</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_text_only</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">parse_bool</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;html-to-text&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">))</span>
-        
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">get_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_url</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_text_only</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">html2text</span> <span class="kn">import</span> <span class="n">html2text</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="n">html2text</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span>
+    <div class="highlight"><pre><span></span><span class="nd">@argument</span><span class="p">(</span><span class="s1">&#39;url&#39;</span><span class="p">,</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;URL to fetch&#39;</span><span class="p">)</span>
+<span class="nd">@parameter</span><span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;Try to convert the document from HTML to Text&#39;</span><span class="p">)</span>
+<span class="nd">@source</span>
+<span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">get_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">text</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">html2text</span> <span class="kn">import</span> <span class="n">html2text</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">html2text</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
 </pre></div>
 
   </div>
@@ -1014,7 +1041,34 @@ ul.auto-toc {
           </div>
 
           <span class='component-doc'>
-            
+            <div class='component-signature'>
+  
+  
+  
+  
+    <div class='component-signature-title'>Named Arguments</div>
+    <table class='component-signature-params'>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>port=8080</td>
+        <td class='component-signature-param-type'>int</td>
+        <td class='component-signature-param-desc'>Port to listen on</td>
+      </tr>
+    
+      <tr class='component-signature-param'>
+        <td class='component-signature-param-name'>address=</td>
+        <td class='component-signature-param-type'>str</td>
+        <td class='component-signature-param-desc'>Address to listen on</td>
+      </tr>
+    
+    </table>
+  
+  
+  
+  
+  
+
+</div>
             <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -1394,12 +1448,7 @@ ul.auto-toc {
     <div class='expander-target'>
       
   <div class='code-snippet-python'>
-    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">WebServerSink</span><span class="p">(</span><span class="n">sink</span><span class="o">.</span><span class="n">DedicatedThreadSink</span><span class="p">,</span> <span class="n">sink</span><span class="o">.</span><span class="n">OnDemandMixin</span><span class="p">):</span>
-    
-    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;port&#39;</span><span class="p">,</span> <span class="s1">&#39;8080&#39;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_address</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;address&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">WebServerSink</span><span class="p">(</span><span class="n">mod_sink</span><span class="o">.</span><span class="n">DedicatedThreadSink</span><span class="p">,</span> <span class="n">mod_sink</span><span class="o">.</span><span class="n">OnDemandMixin</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">make_dedicated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
         <span class="k">return</span> <span class="n">WebServerSink</span><span class="o">.</span><span class="n">HTTPServerThread</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -1410,7 +1459,7 @@ ul.auto-toc {
     <span class="k">def</span> <span class="nf">suggest_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ondemand_monitor</span>
             
-    <span class="k">class</span> <span class="nc">HTTPServerThread</span><span class="p">(</span><span class="n">sink</span><span class="o">.</span><span class="n">DedicatedThread</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">HTTPServerThread</span><span class="p">(</span><span class="n">mod_sink</span><span class="o">.</span><span class="n">DedicatedThread</span><span class="p">):</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sink</span><span class="p">):</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_sink</span> <span class="o">=</span> <span class="n">sink</span>
@@ -1419,7 +1468,7 @@ ul.auto-toc {
         <span class="c1">#Called when the thread starts, by the thread itself</span>
         <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="kn">import</span> <span class="nn">socketserver</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_server</span> <span class="o">=</span> <span class="n">WebServerSink</span><span class="o">.</span><span class="n">SinkRequestServer</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_sink</span><span class="o">.</span><span class="n">_address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sink</span><span class="o">.</span><span class="n">_port</span><span class="p">),</span> <span class="n">WebServerSink</span><span class="o">.</span><span class="n">SinkRequestHandler</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_server</span> <span class="o">=</span> <span class="n">WebServerSink</span><span class="o">.</span><span class="n">SinkRequestServer</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_sink</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sink</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">port</span><span class="p">),</span> <span class="n">WebServerSink</span><span class="o">.</span><span class="n">SinkRequestHandler</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_server</span><span class="o">.</span><span class="n">set_sink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sink</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_server</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">(</span><span class="n">poll_interval</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_server</span><span class="o">.</span><span class="n">server_close</span><span class="p">()</span>

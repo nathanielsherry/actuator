@@ -548,9 +548,9 @@ ul.auto-toc {
       
   <div class='code-snippet-python'>
     <div class="highlight"><pre><span></span><span class="nd">@output</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">,</span> <span class="s2">&quot;Dictionary of values returned by &#39;loginctl show-session &lt;ID&gt;&#39;&quot;</span><span class="p">)</span>
-<span class="nd">@argument</span><span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Session ID to query&#39;</span><span class="p">)</span>
+<span class="nd">@argument</span><span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Session ID to query&#39;</span><span class="p">,</span> <span class="n">parser</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 <span class="nd">@source</span>
-<span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">show_session</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
 </pre></div>
 
@@ -989,9 +989,9 @@ ul.auto-toc {
       
   <div class='code-snippet-python'>
     <div class="highlight"><pre><span></span><span class="nd">@output</span><span class="p">(</span><span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="s2">&quot;Tests if session &lt;ID&gt; is locked&quot;</span><span class="p">)</span>
-<span class="nd">@argument</span><span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Session ID to query&#39;</span><span class="p">)</span>
+<span class="nd">@argument</span><span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Session ID to query&#39;</span><span class="p">,</span> <span class="n">parser</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 <span class="nd">@source</span>
-<span class="k">def</span> <span class="nf">locked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">locked</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
     <span class="n">value</span> <span class="o">=</span> <span class="n">show_session</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;LockedHint&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;yes&#39;</span>
 </pre></div>
