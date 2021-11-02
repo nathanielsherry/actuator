@@ -16,7 +16,7 @@ class Shell(mod_sink.Sink):
     def perform(self, payload):
         import subprocess
         payload = str(payload)
-        subprocess.run(self._args, text=True, input=payload, shell=self._shell)
+        subprocess.run(self._args, universal_newlines=True, input=payload, shell=self._shell)
 
 @sink
 def stdout(payload):          
